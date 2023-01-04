@@ -1,0 +1,18 @@
+---
+title: "Home"
+author: "Karl Tayeb"
+date: 2020-12-01T21:13:14-05:00
+categories: ["R"]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+# Hello
+
+I'm Karl Tayeb, a 3rd year PhD student in the Committee of Genetics, Genomics, and Systems biology and the University of Chicago. I have the privilege of being advised by Matthew Stephens and Yoav Gilad.
+
+This is my personal/research website. I've started this site with the goal of ["working with the garage door open"](https://notes.andymatuschak.org/About_these_notes?stackedNotes=z21cgR9K3UcQ5a7yPsj2RUim3oM2TzdBByZu). While the exact scope of what I post is still up in the air I aim for this site to contain a mix of research notes, teaching materials, and references posts.
+
+I often find the notes that I take are helpful in the process of writing them (to organize my thinking, figure it out) but not after the fact. I hope that having an audience, if only imaginary, will encourage me to polish and organize my writing to a point where it can stand on it's own.
