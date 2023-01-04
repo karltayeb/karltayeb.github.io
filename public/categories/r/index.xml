@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R on Karl Tayeb</title>
+    <link>/categories/r/</link>
+    <description>Recent content in R on Karl Tayeb</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Home</title>
+      <link>/2020/12/01/home/</link>
+      <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
+      
+      <guid>/2020/12/01/home/</guid>
+      <description>Hello I’m Karl Tayeb, a 3rd year PhD student in the Committee of Genetics, Genomics, and Systems biology and the University of Chicago. I have the privilege of being advised by Matthew Stephens and Yoav Gilad.
+This is my personal/research website. I’ve started this site with the goal of “working with the garage door open”. While the exact scope of what I post is still up in the air I aim for this site to contain a mix of research notes, teaching materials, and references posts.</description>
+    </item>
+    
+  </channel>
+</rss>
