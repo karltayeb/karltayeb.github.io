@@ -208,7 +208,7 @@ div.csl-indent {
 <p>We propose approximating Bayesian linear regression problems by replacing the conditional likelihood of each observation with a polynomial approximation designed to be close to the true likelihood on an interval, and a lower bound for values far outside the interval. If the log density of our prior distribution can also be expressed (or approximated) as a polynomial the exact posterior of this polynomial approximation is also a polynomial– i.e.&nbsp;conjugate.</p>
 <p>This is the main benefit of our approach: inference boils down to simple manipulations of the polynomial coefficients, which can be performed in parallel and with a set of simple linear algebra operations (matrix multiplication, solving a triangular system, etc). There may exist more computationally efficient algorithms for carrying out these operations, which we should explore further.</p>
 <p>This approach can be generalized to many likelihood (e.g.&nbsp;Binomial, Poisson) with various choices of link function (which relate the regression predictions to the distribution parameters)– at least to the extent that we can develop a good polynomial approximation for each combination of likelihood and link.</p>
-<p>Take a look at this <a href="posts/polynomial_regression_vb/index.qmd">rough implimentation</a>.</p>
+<p>Take a look at this <a href="../../research/polynomial_regression_vb/index.html">rough implimentation</a>.</p>
 </section>
 <section id="global-polynomial-approximations" class="level2">
 <h2 class="anchored" data-anchor-id="global-polynomial-approximations">Global polynomial approximations</h2>
