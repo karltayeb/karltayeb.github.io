@@ -23,6 +23,8 @@ This is the main benefit of our approach: inference boils down to simple manipul
 
 This approach can be generalized to many likelihood (e.g. Binomial, Poisson) with various choices of link function (which relate the regression predictions to the distribution parameters)-- at least to the extent that we can develop a good polynomial approximation for each combination of likelihood and link. 
 
+Take a look at this [rough implimentation](../polynomial_regression_vb).
+
 ## Global polynomial approximations
 
 ### Local approximations, and trouble with SuSiE

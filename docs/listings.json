@@ -1,9 +1,9 @@
 [
   {
-    "listing": "/posts.html",
+    "listing": "/research.html",
     "items": [
-      "/posts/polynomial_regression_vb/index.html",
-      "/posts/polynomial_approximation/index.html"
+      "/research/polynomial_regression_vb/index.html",
+      "/research/polynomial_approximation/index.html"
     ]
   }
 ]
