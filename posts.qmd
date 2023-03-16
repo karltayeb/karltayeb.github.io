@@ -1,0 +1,5 @@
+---
+title: "My Blog"
+listing: 
+  contents: posts # all Quarto docs in the `posts` directory
+---

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Karl Tayeb">
+<meta name="dcterms.date" content="2023-03-15">
+<meta name="description" content="Using polynomial approximations to perform Bayesian regression">
+
+<title>Karl’s Website - Polynomial approximation for variational Bayes</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Karl’s Website</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html">
+ <span class="menu-text">Posts</span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#global-polynomial-approximations" id="toc-global-polynomial-approximations" class="nav-link" data-scroll-target="#global-polynomial-approximations">Global polynomial approximations</a>
+  <ul class="collapse">
+  <li><a href="#local-approximations-and-trouble-with-susie" id="toc-local-approximations-and-trouble-with-susie" class="nav-link" data-scroll-target="#local-approximations-and-trouble-with-susie">Local approximations, and trouble with SuSiE</a></li>
+  <li><a href="#global-approximations" id="toc-global-approximations" class="nav-link" data-scroll-target="#global-approximations">Global approximations</a></li>
+  </ul></li>
+  <li><a href="#polynomial-representation" id="toc-polynomial-representation" class="nav-link" data-scroll-target="#polynomial-representation">Polynomial representation</a>
+  <ul class="collapse">
+  <li><a href="#representing-functions-with-polynomial-series" id="toc-representing-functions-with-polynomial-series" class="nav-link" data-scroll-target="#representing-functions-with-polynomial-series">Representing functions with polynomial series</a></li>
+  <li><a href="#chebyshev-polynomials" id="toc-chebyshev-polynomials" class="nav-link" data-scroll-target="#chebyshev-polynomials">Chebyshev polynomials</a></li>
+  <li><a href="#conversion-between-polynomial-basis" id="toc-conversion-between-polynomial-basis" class="nav-link" data-scroll-target="#conversion-between-polynomial-basis">Conversion between polynomial basis</a></li>
+  <li><a href="#shifting-and-scaling" id="toc-shifting-and-scaling" class="nav-link" data-scroll-target="#shifting-and-scaling">Shifting and scaling</a></li>
+  <li><a href="#things-to-look-into" id="toc-things-to-look-into" class="nav-link" data-scroll-target="#things-to-look-into">Things to look into</a></li>
+  </ul></li>
+  <li><a href="#variational-approximation" id="toc-variational-approximation" class="nav-link" data-scroll-target="#variational-approximation">Variational approximation</a>
+  <ul class="collapse">
+  <li><a href="#evidence-lower-bound-and-a-polynomial-approximation" id="toc-evidence-lower-bound-and-a-polynomial-approximation" class="nav-link" data-scroll-target="#evidence-lower-bound-and-a-polynomial-approximation">Evidence lower bound, and a polynomial approximation</a></li>
+  <li><a href="#susie-variational-approximation" id="toc-susie-variational-approximation" class="nav-link" data-scroll-target="#susie-variational-approximation">SuSiE variational approximation</a></li>
+  <li><a href="#coordinate-ascent" id="toc-coordinate-ascent" class="nav-link" data-scroll-target="#coordinate-ascent">Coordinate ascent</a></li>
+  <li><a href="#unconstrained-variational-posterior" id="toc-unconstrained-variational-posterior" class="nav-link" data-scroll-target="#unconstrained-variational-posterior">Unconstrained variational posterior</a></li>
+  <li><a href="#best-gaussian-approximation" id="toc-best-gaussian-approximation" class="nav-link" data-scroll-target="#best-gaussian-approximation">Best gaussian approximation</a></li>
+  </ul></li>
+  <li><a href="#more-scattered-notes-on-polynomial-approximation-for-susie" id="toc-more-scattered-notes-on-polynomial-approximation-for-susie" class="nav-link" data-scroll-target="#more-scattered-notes-on-polynomial-approximation-for-susie">More scattered notes on polynomial approximation for SuSiE</a>
+  <ul class="collapse">
+  <li><a href="#shift" id="toc-shift" class="nav-link" data-scroll-target="#shift">Shift</a></li>
+  <li><a href="#updating-q_l" id="toc-updating-q_l" class="nav-link" data-scroll-target="#updating-q_l">Updating <span class="math inline">\(q_l\)</span></a></li>
+  <li><a href="#computing-moments-of-q_l" id="toc-computing-moments-of-q_l" class="nav-link" data-scroll-target="#computing-moments-of-q_l">Computing moments of <span class="math inline">\(q_l\)</span></a></li>
+  </ul></li>
+  <li><a href="#glossary" id="toc-glossary" class="nav-link" data-scroll-target="#glossary">Glossary</a></li>
+  <li><a href="#related-work" id="toc-related-work" class="nav-link" data-scroll-target="#related-work">Related work</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Polynomial approximation for variational Bayes</h1>
+</div>
+
+<div>
+  <div class="description">
+    Using polynomial approximations to perform Bayesian regression
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Karl Tayeb </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 15, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="hiden">
+
+</div>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>We propose approximating Bayesian linear regression problems by replacing the conditional likelihood of each observation with a polynomial approximation designed to be close to the true likelihood on an interval, and a lower bound for values far outside the interval. If the log density of our prior distribution can also be expressed (or approximated) as a polynomial the exact posterior of this polynomial approximation is also a polynomial– i.e.&nbsp;conjugate.</p>
+<p>This is the main benefit of our approach: inference boils down to simple manipulations of the polynomial coefficients, which can be performed in parallel and with a set of simple linear algebra operations (matrix multiplication, solving a triangular system, etc). There may exist more computationally efficient algorithms for carrying out these operations, which we should explore further.</p>
+<p>This approach can be generalized to many likelihood (e.g.&nbsp;Binomial, Poisson) with various choices of link function (which relate the regression predictions to the distribution parameters)– at least to the extent that we can develop a good polynomial approximation for each combination of likelihood and link.</p>
+</section>
+<section id="global-polynomial-approximations" class="level2">
+<h2 class="anchored" data-anchor-id="global-polynomial-approximations">Global polynomial approximations</h2>
+<section id="local-approximations-and-trouble-with-susie" class="level3">
+<h3 class="anchored" data-anchor-id="local-approximations-and-trouble-with-susie">Local approximations, and trouble with SuSiE</h3>
+<p>This approach was motivated by our work to develop a good variational approximation for logistic SuSiE, that is a logistic regression with the sum of single effects (SuSiE) [<span class="citation" data-cites="susie">(<a href="#ref-susie" role="doc-biblioref"><strong>susie?</strong></a>)</span>]. For Gaussian linear models, using a variational approximation that factorizes over single effects produces a lightning fast Bayesian variable selection method. Rather than exploring each configuration of non-zero effect variables, this approximation allows us to update our approximating distribution for one effect while marginalizing over all other effects. Inference in the (Gaussian, linear) SuSiE model reduces to a sequence of embarrassingly parallel univariate linear regression problems.</p>
+<p>In the case of Gaussian model with identify link (linear regression), the variational approximation is sufficient for computation to simplify, because the log likelihood is quadratic in the regression coefficients <span class="math inline">\(\beta\)</span>. However, the Bernoulli likelihood with a logistic link function (logistic regression), and indeed for many other likelihood-link combinations of interest, do not enjoy the algebraic simplicity of a Gaussian model with identity link (linear regression). The main issue is that it is difficult to marginalize over the other effects. Even if the approximate posterior factorizes, the likelihood computation can combine single effects in a way that complicates the marginalization step.</p>
+<p>We’ve attempted using local quadratic approximations to the likelihood. The idea is to construct a quadratic lower bound to the likelihood that is “good” in a neighborhood that we care about (contains most of the posterior mass). This is a popular technique for applying variational Bayes to logistic regression (see Jaakkola and Jordan, Polya-Gamma augmentation), and indeed these sorts of “local” approximation schemes can be generalized to super-Gaussian likelihoods [<span class="citation" data-cites="galy-fajouAutomatedAugmentedConjugate2020">(<a href="#ref-galy-fajouAutomatedAugmentedConjugate2020" role="doc-biblioref">Galy-Fajou, Wenzel, and Opper 2020</a>)</span>].</p>
+<p>However, we find that the local approximation techniques are not well suited to variable selection techniques like SuSiE. In order to use the local approximation techniques, we must optimize a set of variational parameters that essentially dictate where the approximation is good. You only get to select one local approximation per observation. Holding these variational parameters fixed, our inference will systematically favor posterior distributions that place more mass in a neighborhood of these variational parameters. The strong coupling between the local variational parameters and optimal variational approximation make it difficult to navigate the optimization surface via coordinate ascent.</p>
+<p>Additionally, uncertainty quantification is an important output to SuSiE and other Bayesian variable selection methods. Due to the nature of the local variational approximations we may tend to see a “winner take all” scenario. Assuming we find a good local optimum, the local variational parameters will be tuned to be consistent with the most likely variable configurations. In turn, the objective function will be a tighter lower bound in these regions, and the approximating distribution will place more probability mass on these configurations.</p>
+<p>Note: the Laplace approximation is also a “local” approximation, since we construct a quadratic approximation of the joint log likelihood around the MAP estimate. It is also closely related Gaussian variational approximations.</p>
+</section>
+<section id="global-approximations" class="level3">
+<h3 class="anchored" data-anchor-id="global-approximations">Global approximations</h3>
+<p>Rather than find a “local” approximation which has variational parameters that must be tuned at each iteration, we propose finding a global approximation to the likelihood which is easier to work with.</p>
+<p>“Easier to work with”, in the context of SuSiE means that we can write <span class="math inline">\(f(\psi_l) =\mathbb E_{q_{-l}}[\log p(y | \psi_l + \psi_{-l})]\)</span>, where <span class="math inline">\(f(\psi_l; q_{-l})\)</span> is easy to evaluate/optimize over. Notice that if we approximate <span class="math inline">\(\log p(y | \psi) \approx f(\psi) = \sum_k c_k \psi^k\)</span> then taking the expectation of <span class="math inline">\(f\)</span> over <span class="math inline">\(q_{-l}\)</span> results in a polynomial in <span class="math inline">\(\psi_l\)</span>.</p>
+<p><span class="math display">\[
+E_{q_{-l}}[f(\psi_l + \psi_{-l})] = \hat f(\psi_l; q_{-l}) = \sum \hat c_k(q_{-l}) \psi_l^k.
+\]</span></p>
+<p>Here <span class="math inline">\(\hat c_k(q_{-l})\)</span> are a transformation of the original coefficients <span class="math inline">\(c_k\)</span> that are achieved by (1) expanding the original polynomial in terms of <span class="math inline">\(\psi_l\)</span> and <span class="math inline">\(\psi_{-l}\)</span>, (2) marginalizing over <span class="math inline">\(\psi_{-l}\)</span> w.r.t <span class="math inline">\(q_{-l}\)</span> and then (3) regrouping terms to get coefficients of a polynomial in <span class="math inline">\(\psi_l\)</span>.</p>
+<p>While the local variational approximations are only good around a point specified by the variational parameter, we can construct a “global” polynomial approximation that is good on any interval if we allow the degree of the polynomial to be sufficiently high. While we sidestep the issue of needing to tune the local variational parameters, we replace it with the need to select an interval that we care to approximate. There is a trade off here– for a fixed error tolerance, wider intervals will require higher degree approximations to bound the error.</p>
+</section>
+</section>
+<section id="polynomial-representation" class="level2">
+<h2 class="anchored" data-anchor-id="polynomial-representation">Polynomial representation</h2>
+<section id="representing-functions-with-polynomial-series" class="level3">
+<h3 class="anchored" data-anchor-id="representing-functions-with-polynomial-series">Representing functions with polynomial series</h3>
+<p>Let <span class="math inline">\(\left\{ P_k \right\}_{k=1}^{\infty}\)</span> be a sequence of polynomials that form a basis for continuous functions on an interval, e.g.&nbsp;<span class="math inline">\([-1, 1]\)</span> (note: that through a change of variable we can stretch this interval to any interval we want). So that for any <span class="math inline">\(f: [-1,1] \\rightarrow \mathbb R\)</span> there are <span class="math inline">\(\left\{ c_k \right\}\)</span> such that</p>
+<p>We’ll assume that <span class="math inline">\(P_k\)</span> are ordered by increasing degree, and that <span class="math inline">\(deg(P_k) \leq k\)</span>.</p>
+</section>
+<section id="chebyshev-polynomials" class="level3">
+<h3 class="anchored" data-anchor-id="chebyshev-polynomials">Chebyshev polynomials</h3>
+<p>These are a family of polynomials on <span class="math inline">\([-1, 1]\)</span> defined by</p>
+<p><span class="math display">\[T_n(\cos(\theta)) = \cos(n \theta)\]</span></p>
+<p>They can also be obtained by the reccurrence</p>
+<p><span class="math display">\[
+\begin{aligned}
+  T_0(x) &amp;= 1 \\
+  T_1(x) &amp;= x \\
+  T_{n+1}(x) &amp;= 2x T_n(x) - T_{n-1}(x)
+\end{aligned}
+\]</span> The Chebyshev polynomials are orthogonal to eachother, and form a basis for ~a certain family of function~ on the interval <span class="math inline">\([-1, 1]\)</span>, so that <span class="math inline">\(f(x) = \sum_{k=0}^\infty c_k T_k(x)\)</span>. This means that we can get the coefficients by evaluating an inner product</p>
+<p><span class="math display">\[
+\langle f, T_k \rangle = c_k ||T_k||^2
+\]</span> Through a change of variable, we can approximate functions on any interval. We can obtain a <span class="math inline">\(K+1\)</span> degree polynomial approximation by computing the first <span class="math inline">\(K\)</span> coefficients <span class="math inline">\((c_k)_{k=0}^K\)</span>. Each coefficient <span class="math inline">\(c_k\)</span> is effectively computed via a <span class="math inline">\(k+1\)</span> point quadrature (Note: it looks like there is a simple rule for computing the coefficients as linear combinations of <span class="math inline">\(f\)</span> evauated at a set of “nodes”, this looks very closely related to the quadrature rule, but I want to figure this out in more detail)</p>
+</section>
+<section id="conversion-between-polynomial-basis" class="level3">
+<h3 class="anchored" data-anchor-id="conversion-between-polynomial-basis">Conversion between polynomial basis</h3>
+<p>Suppose we have a polynomial basis <span class="math inline">\(\{A_k\}\)</span> and <span class="math inline">\(\{B_k\}\)</span>. Let <span class="math inline">\(M_k(x) = x^k\)</span>, <span class="math inline">\(\{M_k\}\)</span> is the “monomial basis”, so that we can write <span class="math inline">\(A_k(x) = \sum_{j=0}^k \alpha_{kj} M_j(x)\)</span>. We can arrange these coefficients for the first <span class="math inline">\(K\)</span> polynomials into the upper triangular matrix:</p>
+<p><span class="math display">\[
+A^{(k)} =
+\begin{bmatrix}
+\alpha_{00} &amp; 0 &amp; 0 &amp;\dots &amp; 0 \\\\
+\alpha_{10} &amp; \alpha_{11} &amp; 0 &amp; \dots &amp; 0 \\\\
+\alpha_{20} &amp; \alpha_{21} &amp; \alpha_{22} &amp;\dots &amp; 0 \\\\
+\dots\\\\
+\alpha_{K0} &amp; \alpha_{K1} &amp; \alpha_{K2} &amp;\dots &amp; \alpha_{KK}
+\end{bmatrix}
+^T
+\]</span></p>
+<p>Now we can see that for <span class="math inline">\(f(x) = \sum_{k=0}^K a_k A_k(x)\)</span>. We can take the vector of coefficients <span class="math inline">\(\vec a = (a_0, \dots, a_K)\)</span> and convert back to coefficients in the monomial basis with a simple matrix multiplication</p>
+<p>To convert from the monomial basis to the basis <span class="math inline">\(A\)</span> invovles solving the triangular system</p>
+<p>To convert from the monomial basis to the basis <span class="math inline">\(A\)</span> to the basis <span class="math inline">\(B\)</span> involves (1) expanding to the monomial basis and (2) solving for the coefficients in basis <span class="math inline">\(B\)</span>.</p>
+<p>Apparently there are <span class="math inline">\(O(K\log(K))\)</span> algorithms for changing basis, it may be worth understanding these. But it’s very easy to see how we can move between different bases for polynomials of degree <span class="math inline">\(K\)</span> by matrix multiplication.</p>
+</section>
+<section id="shifting-and-scaling" class="level3">
+<h3 class="anchored" data-anchor-id="shifting-and-scaling">Shifting and scaling</h3>
+<p>We can “shift” the polynomial basis too, that is we rewrite <span class="math inline">\(f(x + y) = g(x; y)\)</span> there <span class="math inline">\(g\)</span> is a polynomial in <span class="math inline">\(x\)</span>. This has the effect of moving fixed information <span class="math inline">\(y\)</span> out of the functions argument and into the polynomial coefficients.</p>
+<p>Here <span class="math inline">\(\tilde M_k(x_1; x_2)\)</span> is a <span class="math inline">\(k\)</span> degree polynomial in <span class="math inline">\(x_1\)</span>. <span class="math inline">\(x_2\)</span> is treated as a parameter that is absorbed into the coefficients. Next we’d like to do the same for general polynomials. So we’d like to find <span class="math inline">\(\tilde a\)</span> such that <span class="math inline">\(f(x_1 + x_2) = \sum a_k A_k(x_1 + x_2) = \sum_k \tilde a(x_2) A_k(x_1)\)</span>.</p>
+<p>Let <span class="math inline">\(m_{kj} = 0 \; \forall k &lt; j\)</span>, and <span class="math inline">\(M(x_2)\)</span> be the upper triangular matrix <span class="math inline">\(M(x_2) = \begin{bmatrix} m_{kj}(x_2)\end{bmatrix}_{k=0, \dots K,\\; j=0,\dots,K}\)</span></p>
+<p>Then we can find the coordinates</p>
+<p><span class="math display">\[
+\tilde a(x_2) = (A^{(k)})^{-1}M(x_2)A^{(k)} a
+\]</span></p>
+<p>and</p>
+<p><span class="math display">\[
+\mathbb E_{q(x_2)}\left[ \tilde a(x_2) \right] =  (A^{(k)})^{-1}\mathbb E_{q(x_2)}\left[ M(x_2) \right]A^{(k)} a
+\]</span></p>
+</section>
+<section id="things-to-look-into" class="level3">
+<h3 class="anchored" data-anchor-id="things-to-look-into">Things to look into</h3>
+<p>Clenshaw algorithm and Horner’s method. these are recursive methods for evaluating polynomials in the Chebyshev and monomial basis respectively.</p>
+<p>Hamming and Salzer develop algorithms for converting polynomials between different basis representations.</p>
+<p>We may not be able to use these techniques, unless we can get an expression for each coefficient, because we need to evaluate the expected value of the terms.</p>
+</section>
+</section>
+<section id="variational-approximation" class="level2">
+<h2 class="anchored" data-anchor-id="variational-approximation">Variational approximation</h2>
+<p>Here we present the variational approximation for SuSiE and explore how to perform coordinate ascent variational inference with this approximation and our polynomial likelihoods.</p>
+<section id="evidence-lower-bound-and-a-polynomial-approximation" class="level3">
+<h3 class="anchored" data-anchor-id="evidence-lower-bound-and-a-polynomial-approximation">Evidence lower bound, and a polynomial approximation</h3>
+<p>We can write the log likelihood for a single observation as a function <span class="math inline">\(y_i\)</span> of a function of the linear predictor <span class="math inline">\(\psi_i = \sum_{l} \psi_{li}\)</span>.</p>
+<p><span class="math display">\[
+\log p (y_i | \psi_i) = l_i(\psi_i) \approx \sum_{k=0}^K a_{yk} A_k(\psi)
+\]</span></p>
+<p>We will take a polynomial approximation to <span class="math inline">\(l(y_i; \psi_i) \approx \sum_k c_{ik} P_k(\psi_i) = f_i(\psi_i)\)</span>. Then we can approximate the ELBO</p>
+<p>We perform inference by selecting <span class="math inline">\(q \in \mathcal Q\)</span> to optimize <span class="math inline">\(F_2\)</span>, where <span class="math inline">\(\mathcal Q\)</span> is a family of distributions.</p>
+<p><span class="math display">\[
+q^* = \arg\max_{q \in \mathcal Q} F_2(q)
+\]</span></p>
+</section>
+<section id="susie-variational-approximation" class="level3">
+<h3 class="anchored" data-anchor-id="susie-variational-approximation">SuSiE variational approximation</h3>
+<p>For SuSiE our latent variables consist of the effect sizes <span class="math inline">\(\left\{ b_l \right\}\_{l=1}^L\)</span> and a set of indicators that select <span class="math inline">\(L\)</span> non-zero effect variables <span class="math inline">\(\left\{ \gamma_l \right\}\_{l=1}^L\)</span>. We select <span class="math inline">\(\mathcal Q\)</span> to be the family of distributions that factorize over the <span class="math inline">\(L\)</span> single effects, that is</p>
+<p><span class="math display">\[
+q(\left\{ b_l \right\}, \left\{ \gamma_l \right\}) = \prod_l q(b_l | \gamma_l)q(\gamma_l).
+\]</span></p>
+</section>
+<section id="coordinate-ascent" class="level3">
+<h3 class="anchored" data-anchor-id="coordinate-ascent">Coordinate ascent</h3>
+<p>To update <span class="math inline">\(q_l\)</span> we need to maximize</p>
+<p>Dropping the subscript <span class="math inline">\(i\)</span>, for each term in the sum we need to compute</p>
+<p>We can do this by applying the “expected” shift operator. We can do this by computing the moments of <span class="math inline">\(\psi_{-l}\)</span> and applying the shift operation once, or by computing the moments of <span class="math inline">\(\psi_m, \;\; m\neq l\)</span> and performing the shift operation sequentially.</p>
+<p>(TODO: update notation here)</p>
+<p><span class="math display">\[
+\tilde a(q_{-l})
+= (A^{(k)})^{-1} \left(\prod_{m \neq l} \mathbb E_{q_m}\left[ M(\psi_m) \right] \right) A^{(k)} a
+\]</span></p>
+<p>A nice feature of the sequential approach is it gives us an easy way of converting between polynomial representations. Let <span class="math inline">\(\Gamma_l = \mathbb E_{q_l}\left[ M(\psi_l) \right]\)</span> be the matrix for applying the “shifted expectation” operation to the polynomial coefficients for <span class="math inline">\(f(\psi_l)\)</span>, <span class="math inline">\({\bf m}\)</span>. That is <span class="math inline">\(\Gamma_l {\bf m}\)</span> gives the coefficients of <span class="math inline">\(f(\psi_{-l}; q_l)\)</span>, which is a polynomial in <span class="math inline">\(\psi_{-l}\)</span>.</p>
+<p>Let <span class="math inline">\(\Gamma = \prod_l \Gamma_l\)</span>. Notice that the polynomial with coefficients <span class="math inline">\(\Gamma {\bf m}\)</span> evalutated at <span class="math inline">\(0\)</span> give <span class="math inline">\(\mathbb E_{q}\left[ f(x) \right]\)</span>. Furthermore we can quickly move from <span class="math inline">\(f(\psi_{l}; q_{-l})\)</span> to <span class="math inline">\(f(\psi_{l+1}; q_{-(l+1)})\)</span>.</p>
+<p>Starting with <span class="math inline">\(f(\psi_{1}; q_{-1})\)</span> we want the coefficients <span class="math inline">\(\Gamma_{-1} {\bf m}\)</span>, where <span class="math inline">\(\Gamma_{-1} = \Gamma_1^{-1} \Gamma\)</span>. Then, to get <span class="math inline">\(f(\psi_{1}; q_{-1})\)</span> we need <span class="math inline">\(\Gamma_{-2} {\bf m}\)</span>, where we can compute <span class="math inline">\(\Gamma_{-2}\)</span> by</p>
+<p><span class="math display">\[
+\Gamma_{-2} = \Gamma_2^{-1} \Gamma_{-1} \Gamma_1.
+\]</span> We can continue iterating over all <span class="math inline">\(L\)</span> single effects. We note that it is easier to compute the moments of the single effects <span class="math inline">\(\psi_m\)</span> rather than the moments of all “other” single effects <span class="math inline">\(\psi_{-l}\)</span>. Carrying out the iterated expectations as matrix-vector products in the polynomial coefficients seems like an appealing approach to implementation.</p>
+<p>This is useful in a coordinate ascent update scheme where we can remove one of the single effect from <span class="math inline">\(\Gamma\)</span> by a triangular system. Update <span class="math inline">\(q_l\)</span>, and then add back the update <span class="math inline">\(\Gamma_l\)</span> to <span class="math inline">\(\Gamma\)</span> by a right matrix multiplication.</p>
+</section>
+<section id="unconstrained-variational-posterior" class="level3">
+<h3 class="anchored" data-anchor-id="unconstrained-variational-posterior">Unconstrained variational posterior</h3>
+<p>The optimal variational approximation looks like</p>
+<p><span class="math display">\[
+q^*\_l(b_l | \gamma_l = j) \propto e^{f(b_l; q_{-l}, {\bf x}\_j)}.
+\]</span> Where <span class="math inline">\(f(b_l; q_{-l}, {\bf x}\_j) = \sum_k \eta_k b_l^k\)</span> is a polynomial of degree <span class="math inline">\(K\)</span>. Notice that this is an exponential family with sufficient statistics <span class="math inline">\(T(b_l) = (b_l^k)\_{k=0}^K\)</span> and natural parameters <span class="math inline">\({\bf \eta}\)</span>. It has a normalizing constant <span class="math inline">\(A(\eta) = \log \int \exp\{\langle T(x), \eta \rangle\} dx\)</span>, and <span class="math inline">\(\nabla_{\eta} A(\eta) = \mathbb E_{q}\left[ T(x) \right]\)</span>. Thus if we can compute (or approximate to satisfactory precision) <span class="math inline">\(\nabla_{\eta} A(\eta)\)</span> we could compute the moments we need for CAVI.</p>
+<p>To date, I am not really sure how to handle this integral of an exponentiation polynomial. By designing our polynomial approximation correctly, we can ensure that the the exponentiation function will decay and the <span class="math inline">\(A\)</span> will be finite (recall also that <span class="math inline">\(\left\{ \eta: A(\eta) &lt; \infty \right\}\)</span> is the natural parameter space).</p>
+<p>One option is to approximate <span class="math inline">\(A(\eta)\)</span> by a quadrature rule. We can use automatic differentiation to compute it’s gradient.</p>
+</section>
+<section id="best-gaussian-approximation" class="level3">
+<h3 class="anchored" data-anchor-id="best-gaussian-approximation">Best gaussian approximation</h3>
+<p>Maybe we don’t know how to compute <span class="math inline">\(A(\eta) = \log \int \exp\{\langle T(x), \eta \rangle\} dx\)</span> Which involves evaluate the integral of an exponentiated polynomial. But perhaps we want to use a Gaussian variational approximation.</p>
+<p><span class="math display">\[
+q_{l}^*(x) \propto e^{f(x)}
+\approx e^{f(\mu) + f'(\mu)(x-\mu) + \frac{1}{2}f''(\mu)(x - \mu)^2}
+\]</span></p>
+<p>For <span class="math inline">\(\mu\)</span> such that <span class="math inline">\(f'(\mu) = 0\)</span></p>
+<p><span class="math display">\[
+e^{f(\mu) + f'(\mu)(x-\mu) + \frac{1}{2}f''(\mu)(x - \mu)^2} \propto e^{\frac{1}{2}f''(\mu)(x - \mu)^2} \propto \mathcal N (x; \mu, -\frac{1}{f''(\mu)})
+\]</span></p>
+<p>In our case <span class="math inline">\(f\)</span> is a polynomial. Finding <span class="math inline">\(\mu\)</span> can be achieved by searching over the roots of <span class="math inline">\(f'\)</span> and then <span class="math inline">\(f''(\mu)\)</span> is computed easily. This is a Laplace approximation to the optimal posterior <span class="math inline">\(q_l\)</span></p>
+</section>
+</section>
+<section id="more-scattered-notes-on-polynomial-approximation-for-susie" class="level2">
+<h2 class="anchored" data-anchor-id="more-scattered-notes-on-polynomial-approximation-for-susie">More scattered notes on polynomial approximation for SuSiE</h2>
+<p>Abusing notation a bit, <span class="math inline">\(\phi_l = x_{\gamma_l} b_l\)</span>.</p>
+<p><span class="math display">\[
+\begin{aligned}
+f(\psi_l)
+&amp;= \sum \tilde m(q_{-l}) M_k(\psi_l) \\\\
+&amp;= \sum \tilde m(q_{-l}) A_k(x_jb_l) \\\\
+&amp;= \sum \hat m_k(q_{-l}, x_j) M_k(b_l) \\quad \hat m_k(q_{-l}, x_j) := \tilde m_k(q_{-l})x_j^k
+\end{aligned}
+\]</span></p>
+<p><span class="math display">\[
+\mathbb E_{q_{-l}}\left[ f(\psi) \right]
+= \mathbb E_{q_{-l}}\left[ f(\psi_l, \psi_{-l})) \right]
+= \sum \mathbb E_{q_{-l}}\left[ \tilde {\bf m}(\psi_{-l}) \right] M_k(\psi_l)
+= \sum \left(\prod_{m \neq l}\mathbb E_{q_m}\left[ M(\psi_m)) \right]\right){\bf m}
+\]</span></p>
+<p>We can write</p>
+<p><span class="math display">\[
+\Gamma_l = \mathbb E_{q_l}\left[ M(\psi_l) \right]
+\]</span> <span class="math display">\[
+\Psi^{(l)} = \Gamma_{l+1} \dots \Gamma_L \Gamma_1 \dots \Gamma_{l-1}
+\]</span> Then we can compute the coefficients of <span class="math inline">\(f(\psi_l)\)</span> by a triangular matrix multiplication</p>
+<p><span class="math display">\[
+\tilde{\bf m}\_l = \Psi^{(l)}{\bf m} = \mathbb E_{q_{-l}}\left[ M(\psi_{-l}) \right]{\bf m}
+\]</span></p>
+<p>And we can compute the next <span class="math inline">\(\Psi\)</span> by a triangular matrix inversion and two matrix multiplications.</p>
+<p><span class="math display">\[
+\Psi^{(l+1)} = \Gamma_{l+1}^{-1} \Psi^{(l)} \Gamma_l
+\]</span> ### Rescal polynomial</p>
+<p><span class="math display">\[
+f(bx) = \sum m_k (bx)^k = \sum m_k b^kx^k = \sum (m_k b^k) x^k
+\]</span></p>
+<section id="shift" class="level3">
+<h3 class="anchored" data-anchor-id="shift">Shift</h3>
+<p><span class="math display">\[
+f(x - c)
+= \sum m_k (x -c)^k
+= \sum_k m_k \sum_{j \leq k} {k \choose j} x^j c^{k-j}
+= \sum_j \left(\sum_{k \geq j} {k \choose j} c^{k-j}\right) x^j
+\]</span></p>
+</section>
+<section id="updating-q_l" class="level3">
+<h3 class="anchored" data-anchor-id="updating-q_l">Updating <span class="math inline">\(q_l\)</span></h3>
+<p>We’ve written the natural parameters</p>
+<p>For each observation we can compute</p>
+<p><span class="math display">\[
+\hat{{\bf m}}\_{li} = \tilde{\bf m}(q_{-l}) \circ (x_i^0, \dots, x_i^K)
+\]</span></p>
+<p>These are the coefficients in the monomial basis for each observation conditional on effect <span class="math inline">\(b_l\)</span> for covariate <span class="math inline">\(x_i\)</span>. <span class="math inline">\(f_i(b_l) = \sum \tilde {\bf m}\_k b_l^k\)</span>. That is, this is the data likelihood as a function of <span class="math inline">\(b_l\)</span>, conditional on data <span class="math inline">\(x\)</span>, and marginalizing over <span class="math inline">\(\psi_{-l}\)</span>.</p>
+<p>We can express or approximate our prior with the same polynomial expansion. Suppose we can write our prior</p>
+<p><span class="math display">\[
+\log p(b_l) = \sum \rho_{kl} b_l^k
+\]</span></p>
+<p>Then the posterior distribution is trivially computed with a conjugate computation</p>
+<p><span class="math display">\[
+{\bf \eta}\_l =\sum_i \hat {\bf m}_{li} + {\bf \rho}_l
+\]</span></p>
+<p>The posterior distribution is an exponential family with sufficient statistics <span class="math inline">\(T(b_l) = (b_l^0, \dots, b_l^K)\)</span> and natural parameters <span class="math inline">\(\eta_l\)</span>.</p>
+<p>If our original polynomial approximation “goes down” outside the range we care to ensure it is a good approximation, then we should always get a finite log-normalizer/cumulant <span class="math inline">\(A(\eta) = \log \int \exp\{\eta^T T(\psi)\} d\psi &lt; \infty\)</span>. It may be important to ensure that our approximation is good over the range of values of <span class="math inline">\(\psi\)</span> with high posterior probability. Supposing we have an even degree polynomial assumption, make sure the last coefficient is <span class="math inline">\(&lt; 0\)</span> so that the function is very negative for arguments that are large in absolute value, but the approximation is good for values of small absolute value. Intuitivley, taking expectations over <span class="math inline">\(\psi_{-l}\)</span> won’t change t</p>
+<p>Additionally, we ideally want to make sure that our likelihood approximation does not have bad behavior. If our polynomial approximation wildly overestimates the likelihood in some regions that could seriously mess up our inference. There is probably a tradeoff. We can approximate <span class="math inline">\(l_i\)</span> on the interval <span class="math inline">\([a, b]\)</span> with lower error with a polynomial of degree <span class="math inline">\(K\)</span>. To approximate <span class="math inline">\(l_i\)</span> on the wider interval <span class="math inline">\([a, b] \subset [A, B]\)</span> with the same error we need a higher degree <span class="math inline">\(K\)</span>.</p>
+</section>
+<section id="computing-moments-of-q_l" class="level3">
+<h3 class="anchored" data-anchor-id="computing-moments-of-q_l">Computing moments of <span class="math inline">\(q_l\)</span></h3>
+<p>An algorithm would look like this</p>
+<ol type="1">
+<li>Compute <span class="math inline">\(\Psi_1\)</span></li>
+<li>Update update <span class="math inline">\(q_1\)</span></li>
+<li>Compute <span class="math inline">\(\mathbb E_{q_1}\left[ M(\psi_1) \right]\)</span></li>
+<li>Compute <span class="math inline">\(\Psi_2\)</span> …</li>
+</ol>
+<p>Note that <span class="math inline">\(\Psi_l\)</span> is constructed by taking expectations is a particular order, or multiplying matrices in a particular order. But I think order should not matter. Is it the case that triangular matrix multiplication commutes?</p>
+</section>
+</section>
+<section id="glossary" class="level2">
+<h2 class="anchored" data-anchor-id="glossary">Glossary</h2>
+<table class="table">
+<colgroup>
+<col style="width: 41%">
+<col style="width: 58%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Symbol</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\({\bf a}_i\)</span></td>
+<td>coefficients for <span class="math inline">\(f_i\)</span> in basis <span class="math inline">\(\mathcal A\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\tilde {\bf a}_i(\psi_2)\)</span></td>
+<td>coefficients for <span class="math inline">\(f_i(\psi_1; \psi_2)\)</span> in the basis <span class="math inline">\(\mathcal A\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat {\bf a}_i(\psi_2, x_j)\)</span></td>
+<td>coefficients for <span class="math inline">\(f_i(b_1; x_j, \psi_2)\)</span> in the basis <span class="math inline">\(\mathcal A\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(M(\psi_2)\)</span></td>
+<td>triangular matrix shifts monomial basis, <span class="math inline">\(\tilde {\bf m} (\psi_2) = M(\psi_2) {\bf m}\)</span>. Gives coefficients of <span class="math inline">\(f_i(\psi_1; \psi_2)\)</span> in <span class="math inline">\(\mathcal M\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(A\)</span></td>
+<td>triangular matrix maps to coordinates in monomial basis, <span class="math inline">\({\bf m} = A {\bf a}\)</span>. Gives coefficients of <span class="math inline">\(f_i(\psi_1; \psi_2)\)</span> in <span class="math inline">\(\mathcal M\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(f_i(\psi_1; \psi_2)\)</span></td>
+<td>A polynomial is <span class="math inline">\(\psi_1\)</span> such that <span class="math inline">\(f_i(\psi_1; \psi_2) = f_i(\psi_1 + \psi_2); \\;\\; \tilde {\bf m}(\psi_2) = M(\psi_2){\bf m}\)</span> gives the coordinates in the monomial basis</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="related-work" class="level2">
+<h2 class="anchored" data-anchor-id="related-work">Related work</h2>
+<p><span class="citation" data-cites="hugginsPASSGLMPolynomialApproximate2017">(<a href="#ref-hugginsPASSGLMPolynomialApproximate2017" role="doc-biblioref">Huggins, Adams, and Broderick 2017</a>)</span> <span class="citation" data-cites="wongOrthogonalPolynomialsQuadrature">(<a href="#ref-wongOrthogonalPolynomialsQuadrature" role="doc-biblioref">Wong, n.d.</a>)</span></p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-galy-fajouAutomatedAugmentedConjugate2020" class="csl-entry" role="doc-biblioentry">
+Galy-Fajou, Theo, Florian Wenzel, and Manfred Opper. 2020. <span>“Automated <span>Augmented Conjugate Inference</span> for <span class="nocase">Non-conjugate Gaussian Process Models</span>.”</span> In <em>Proceedings of the <span>Twenty Third International Conference</span> on <span>Artificial Intelligence</span> and <span>Statistics</span></em>, 3025–35. <span>PMLR</span>. <a href="https://proceedings.mlr.press/v108/galy-fajou20a.html">https://proceedings.mlr.press/v108/galy-fajou20a.html</a>.
+</div>
+<div id="ref-hugginsPASSGLMPolynomialApproximate2017" class="csl-entry" role="doc-biblioentry">
+Huggins, Jonathan, Ryan P Adams, and Tamara Broderick. 2017. <span>“<span>PASS-GLM</span>: Polynomial Approximate Sufficient Statistics for Scalable <span>Bayesian GLM</span> Inference.”</span> In <em>Advances in <span>Neural Information Processing Systems</span></em>. Vol. 30. <span>Curran Associates, Inc.</span> <a href="https://proceedings.neurips.cc/paper/2017/hash/07811dc6c422334ce36a09ff5cd6fe71-Abstract.html">https://proceedings.neurips.cc/paper/2017/hash/07811dc6c422334ce36a09ff5cd6fe71-Abstract.html</a>.
+</div>
+<div id="ref-wongOrthogonalPolynomialsQuadrature" class="csl-entry" role="doc-biblioentry">
+Wong, Lilian. n.d. <span>“Orthogonal <span>Polynomials</span>–<span>Quadrature Algorithm</span> (<span>OPQA</span>): <span>A Functional Analytical Approach</span> to <span>Bayesian Inference</span>.”</span> <em>Orthogonal Polynomials</em>.
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

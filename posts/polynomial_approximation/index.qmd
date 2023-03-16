@@ -1,0 +1,408 @@
+---
+title: "Polynomial approximation for variational Bayes"
+description: "Using polynomial approximations to perform Bayesian regression"
+author: "Karl Tayeb"
+date: "3/15/23"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+:::{.hiden}
+\newcommand{\bracket}[1]{\left[ #1 \right]}
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\newcommand{\E}[2]{\mathbb E_{#1}\bracket{#2}}
+:::
+
+## Overview
+
+We propose approximating Bayesian linear regression problems by replacing the conditional likelihood of each observation with a polynomial approximation designed to be close to the true likelihood on an interval, and a lower bound for values far outside the interval. If the log density of our prior distribution can also be expressed (or approximated) as a polynomial the exact posterior of this polynomial approximation is also a polynomial-- i.e. conjugate.
+
+This is the main benefit of our approach: inference boils down to simple manipulations of the polynomial coefficients, which can be performed in parallel and with a set of simple linear algebra operations (matrix multiplication, solving a triangular system, etc). There may exist more computationally efficient algorithms for carrying out these operations, which we should explore further.
+
+This approach can be generalized to many likelihood (e.g. Binomial, Poisson) with various choices of link function (which relate the regression predictions to the distribution parameters)-- at least to the extent that we can develop a good polynomial approximation for each combination of likelihood and link. 
+
+## Global polynomial approximations
+
+### Local approximations, and trouble with SuSiE
+
+This approach was motivated by our work to develop a good variational approximation for logistic SuSiE, that is a logistic regression with the sum of single effects (SuSiE) [[@susie]]. For Gaussian linear models, using a variational approximation that factorizes over single effects produces a lightning fast Bayesian variable selection method. Rather than exploring each configuration of non-zero effect variables, this approximation allows us to update our approximating distribution for one effect while marginalizing over all other effects. Inference in the (Gaussian, linear) SuSiE model reduces to a sequence of embarrassingly parallel univariate linear regression problems.
+
+In the case of Gaussian model with identify link (linear regression), the variational approximation is sufficient for computation to simplify, because the log likelihood is quadratic in the regression coefficients $\beta$. However, the Bernoulli likelihood with a logistic link function (logistic regression), and indeed for many other likelihood-link combinations of interest, do not enjoy the algebraic simplicity of a Gaussian model with identity link (linear regression). The main issue is that it is difficult to marginalize over the other effects. Even if the approximate posterior factorizes, the likelihood computation can combine single effects in a way that complicates the marginalization step.
+
+We've attempted using local quadratic approximations to the likelihood. The idea is to construct a quadratic lower bound to the likelihood that is "good" in a neighborhood that we care about (contains most of the posterior mass). This is a popular technique for applying variational Bayes to logistic regression (see Jaakkola and Jordan, Polya-Gamma augmentation), and indeed these sorts of "local" approximation schemes can be generalized to super-Gaussian likelihoods [[@galy-fajouAutomatedAugmentedConjugate2020]].
+
+However, we find that the local approximation techniques are not well suited to variable selection techniques like SuSiE. In order to use the local approximation techniques, we must optimize a set of variational parameters that essentially dictate where the approximation is good. You only get to select one local approximation per observation. Holding these variational parameters fixed, our inference will systematically favor posterior distributions that place more mass in a neighborhood of these variational parameters. The strong coupling between the local variational parameters and optimal variational approximation make it difficult to navigate the optimization surface via coordinate ascent.
+
+Additionally, uncertainty quantification is an important output to SuSiE and other Bayesian variable selection methods. Due to the nature of the local variational approximations we may tend to see a "winner take all" scenario. Assuming we find a good local optimum, the local variational parameters will be tuned to be consistent with the most likely variable configurations. In turn, the objective function will be a tighter lower bound in these regions, and the approximating distribution will place more probability mass on these configurations.
+
+Note: the Laplace approximation is also a "local" approximation, since we construct a quadratic approximation of the joint log likelihood around the MAP estimate. It is also closely related Gaussian variational approximations.
+
+
+### Global approximations
+
+Rather than find a "local" approximation which has variational parameters that must be tuned at each iteration, we propose finding a global approximation to the likelihood which is easier to work with.
+
+"Easier to work with", in the context of SuSiE means that we can write $f(\psi_l) =\mathbb E_{q_{-l}}[\log p(y | \psi_l + \psi_{-l})]$, where $f(\psi_l; q_{-l})$ is easy to evaluate/optimize over. Notice that if we approximate 
+$\log p(y | \psi) \approx f(\psi) = \sum_k c_k \psi^k$ then taking the expectation of $f$ over $q_{-l}$ results in a polynomial in $\psi_l$. 
+
+$$
+E_{q_{-l}}[f(\psi_l + \psi_{-l})] = \hat f(\psi_l; q_{-l}) = \sum \hat c_k(q_{-l}) \psi_l^k.
+$$
+
+Here $\hat c_k(q_{-l})$ are a transformation of the original coefficients $c_k$ that are achieved by (1) expanding the original polynomial in terms of $\psi_l$ and $\psi_{-l}$, (2) marginalizing over $\psi_{-l}$ w.r.t $q_{-l}$ and then (3) regrouping terms to get coefficients of a polynomial in $\psi_l$.
+
+While the local variational approximations are only good around a point specified by the variational parameter, we can construct a "global" polynomial approximation that is good on any interval if we allow the degree of the polynomial to be sufficiently high. While we sidestep the issue of needing to tune the local variational parameters, we replace it with the need to select an interval that we care to approximate. There is a trade off here-- for a fixed error tolerance, wider intervals will require higher degree approximations to bound the error.
+
+
+## Polynomial representation
+
+### Representing functions with polynomial series
+
+Let $\set{P_k}_{k=1}^{\infty}$ be a sequence of polynomials that form a basis for continuous functions on an interval, e.g. $[-1, 1]$ (note: that through a change of variable we can stretch this interval to any interval we want). So that for any $f: [-1,1] \\rightarrow \mathbb R$ there are $\set{c_k}$ such that
+
+
+```{=markdown}
+\begin{align}
+\lim_{K \rightarrow \infty} \sum_{k=0}^K c_k P_k(x) = f(x)
+\end{align}
+```
+
+
+We'll assume that $P_k$ are ordered by increasing degree, and that $deg(P_k) \leq k$.
+
+### Chebyshev polynomials
+
+These are a family of polynomials on $[-1, 1]$ defined by
+
+$$T_n(\cos(\theta)) = \cos(n \theta)$$
+
+They can also be obtained by the reccurrence
+
+$$
+\begin{aligned}
+  T_0(x) &= 1 \\
+  T_1(x) &= x \\
+  T_{n+1}(x) &= 2x T_n(x) - T_{n-1}(x)
+\end{aligned}
+$$
+The Chebyshev polynomials are orthogonal to eachother, and form a basis for ~a certain family of function~ on the interval $[-1, 1]$, so that $f(x) = \sum_{k=0}^\infty c_k T_k(x)$. This means that we can get the coefficients by evaluating an inner product
+
+$$
+\langle f, T_k \rangle = c_k ||T_k||^2
+$$
+Through a change of variable, we can approximate functions on any interval. We can obtain a $K+1$ degree polynomial approximation by computing the first $K$ coefficients $(c_k)_{k=0}^K$. Each coefficient $c_k$ is effectively computed via a $k+1$ point quadrature (Note: it looks like there is a simple rule for computing the coefficients as linear combinations of $f$ evauated at a set of "nodes", this looks very closely related to the quadrature rule, but I want to figure this out in more detail)
+
+### Conversion between polynomial basis
+
+Suppose we have a polynomial basis $\{A_k\}$ and $\{B_k\}$. Let $M_k(x) = x^k$, $\{M_k\}$ is the "monomial basis", so that we can write $A_k(x) = \sum_{j=0}^k \alpha_{kj} M_j(x)$. We can arrange these coefficients for the first $K$ polynomials into the upper triangular matrix:
+
+$$
+A^{(k)} = 
+\begin{bmatrix}
+\alpha_{00} & 0 & 0 &\dots & 0 \\\\
+\alpha_{10} & \alpha_{11} & 0 & \dots & 0 \\\\
+\alpha_{20} & \alpha_{21} & \alpha_{22} &\dots & 0 \\\\
+\dots\\\\
+\alpha_{K0} & \alpha_{K1} & \alpha_{K2} &\dots & \alpha_{KK}
+\end{bmatrix}
+^T
+$$
+
+
+Now we can see that for $f(x) = \sum_{k=0}^K a_k A_k(x)$. We can take the vector of coefficients $\vec a = (a_0, \dots, a_K)$ and convert back to coefficients in the monomial basis with a simple matrix multiplication
+
+```{=markdown}
+\begin{align}
+\vec m = A^{(k)} \vec a
+\end{align}
+```
+
+To convert from the monomial basis to the basis $A$ invovles solving the triangular system
+
+```{=markdown}
+\begin{align}
+\vec a = (A^{(k)})^{-1} \vec m
+\end{align}
+```
+
+To convert from the monomial basis to the basis $A$ to the basis $B$ involves (1) expanding to the monomial basis and (2) solving for the coefficients in basis $B$.
+
+```{=markdown}
+\begin{align}
+\vec b = (B^{(k)})^{-1} A^{(k)} \vec a
+\end{align}
+```
+
+Apparently there are $O(K\log(K))$ algorithms for changing basis, it may be worth understanding these. But it's very easy to see how we can move between different bases for polynomials of degree $K$ by matrix multiplication.
+
+### Shifting and scaling
+
+We can "shift" the polynomial basis too, that is we rewrite $f(x + y) = g(x; y)$ there $g$ is a polynomial in $x$. This has the effect of moving fixed information $y$ out of the functions argument and into the polynomial coefficients.
+
+```{=markdown}
+\begin{align}
+M_k(x_1 + x_2) = \sum_{j=0}^k \left({k \choose j} x_2^{k-j} \right) x_1^j  = \sum_{j=0}^k m_{kj}(x_2) M_j(x_1) = \tilde M_k(x_1; x_2)
+\end{align}
+```
+
+Here $\tilde M_k(x_1; x_2)$ is a $k$ degree polynomial in $x_1$. $x_2$ is treated as a parameter that is absorbed into the coefficients. Next we'd like to do the same for general polynomials. So we'd like to find $\tilde a$ such that $f(x_1 + x_2) = \sum a_k A_k(x_1 + x_2) = \sum_k \tilde a(x_2) A_k(x_1)$.
+
+Let $m_{kj} = 0 \; \forall k < j$, and $M(x_2)$ be the upper triangular matrix $M(x_2) = \begin{bmatrix} m_{kj}(x_2)\end{bmatrix}_{k=0, \dots K,\\; j=0,\dots,K}$
+
+Then we can find the coordinates
+
+$$
+\tilde a(x_2) = (A^{(k)})^{-1}M(x_2)A^{(k)} a
+$$
+
+and
+
+$$
+\E{q(x_2)}{\tilde a(x_2)} =  (A^{(k)})^{-1}\E{q(x_2)}{M(x_2)}A^{(k)} a
+$$
+
+### Things to look into
+
+Clenshaw algorithm and Horner's method. these are recursive methods for evaluating polynomials in the Chebyshev and monomial basis respectively.
+
+Hamming and Salzer develop algorithms for converting polynomials between different basis representations. 
+
+We may not be able to use these techniques, unless we can get an expression for each coefficient, because we need to evaluate the expected value of the terms.
+
+## Variational approximation
+
+Here we present the variational approximation for SuSiE and explore how to perform coordinate ascent variational inference with this approximation and our polynomial likelihoods.
+
+### Evidence lower bound, and a polynomial approximation
+We can write the log likelihood for a single observation as a function $y_i$ of a function of the linear predictor $\psi_i = \sum_{l} \psi_{li}$.
+
+$$
+\log p (y_i | \psi_i) = l_i(\psi_i) \approx \sum_{k=0}^K a_{yk} A_k(\psi)
+$$
+
+We will take a polynomial approximation to $l(y_i; \psi_i) \approx \sum_k c_{ik} P_k(\psi_i) = f_i(\psi_i)$.
+Then we can approximate the ELBO
+
+
+```{=markdown}
+\begin{align}
+  F_1(q) &= \E{q}{\sum l_i(\psi_i)\} - KL(q || p) \\\\
+         &\approx \E{q}{\sum f_i(\psi_i)\} - KL(q || p) = F_2(q)
+\end{align}
+```
+
+We perform inference by selecting $q \in \mathcal Q$ to optimize $F_2$, where $\mathcal Q$ is a family of distributions.
+
+$$
+q^* = \arg\max_{q \in \mathcal Q} F_2(q)
+$$
+
+### SuSiE variational approximation
+
+For SuSiE our latent variables consist of the effect sizes $\set{b_l}\_{l=1}^L$ and a set of indicators that select $L$ non-zero effect variables $\set{\gamma_l}\_{l=1}^L$. We select $\mathcal Q$ to be the family of distributions that factorize over the $L$ single effects, that is 
+
+$$
+q(\set{b_l}, \set{\gamma_l}) = \prod_l q(b_l | \gamma_l)q(\gamma_l).
+$$
+
+
+### Coordinate ascent
+
+To update $q_l$ we need to maximize
+
+```{=markdown}
+\begin{align}
+  F_2(q_l; q_{-l}) &= \sum_k \E{q_{-l}}{f_i(\psi_i)\} - KL(q_l || p_l)
+\end{align}
+```
+
+
+Dropping the subscript $i$, for each term in the sum we need to compute
+
+```{=markdown}
+\begin{align}
+\E{q_{-l}}{f(\psi_l + \psi_{-l})} = \E{q_{-l}}{\sum a_k A(\psi_l + \psi_{-l})} = \sum_k \E{q_{-l}}{\tilde a_k(\psi_{-l})} A(\psi_l)
+\end{align}
+```
+
+
+We can do this by applying the "expected" shift operator. We can do this by computing the moments of $\psi_{-l}$ and applying the shift operation once, or by computing the moments of $\psi_m, \;\; m\neq l$ and performing the shift operation sequentially.
+
+(TODO: update notation here)
+
+$$
+\tilde a(q_{-l}) 
+= (A^{(k)})^{-1} \left(\prod_{m \neq l} \E{q_m}{M(\psi_m)} \right) A^{(k)} a
+$$
+
+A nice feature of the sequential approach is it gives us an easy way of converting between polynomial representations. Let $\Gamma_l = \E{q_l}{M(\psi_l)}$ be the matrix for applying the "shifted expectation" operation to the polynomial coefficients for $f(\psi_l)$, ${\bf m}$. That is $\Gamma_l {\bf m}$ gives the coefficients of $f(\psi_{-l}; q_l)$, which is a polynomial in $\psi_{-l}$. 
+
+Let $\Gamma = \prod_l \Gamma_l$. Notice that the polynomial with coefficients $\Gamma {\bf m}$ evalutated at $0$ give $\E{q}{f(x)}$. Furthermore we can quickly move from $f(\psi_{l}; q_{-l})$ to $f(\psi_{l+1}; q_{-(l+1)})$. 
+
+
+
+Starting with $f(\psi_{1}; q_{-1})$ we want the coefficients $\Gamma_{-1} {\bf m}$, where $\Gamma_{-1} = \Gamma_1^{-1} \Gamma$. Then, to get $f(\psi_{1}; q_{-1})$ we need $\Gamma_{-2} {\bf m}$, where we can compute $\Gamma_{-2}$ by 
+
+$$
+\Gamma_{-2} = \Gamma_2^{-1} \Gamma_{-1} \Gamma_1.
+$$
+We can continue iterating over all $L$ single effects. We note that it is easier to compute the moments of the single effects $\psi_m$ rather than the moments of all "other" single effects $\psi_{-l}$. Carrying out the iterated expectations as matrix-vector products in the polynomial coefficients seems like an appealing approach to implementation.
+
+This is useful in a coordinate ascent update scheme where we can remove one of the single effect from $\Gamma$ by a triangular system. Update $q_l$, and then add back the update $\Gamma_l$ to $\Gamma$ by a right matrix multiplication.
+
+### Unconstrained variational posterior
+
+The optimal variational approximation looks like
+
+$$
+q^*\_l(b_l | \gamma_l = j) \propto e^{f(b_l; q_{-l}, {\bf x}\_j)}.
+$$
+Where $f(b_l; q_{-l}, {\bf x}\_j) = \sum_k \eta_k b_l^k$ is a polynomial of degree $K$. Notice that this is an exponential family with sufficient statistics $T(b_l) = (b_l^k)\_{k=0}^K$ and natural parameters ${\bf \eta}$. It has a normalizing constant $A(\eta) = \log \int \exp\{\langle T(x), \eta \rangle\} dx$, and $\nabla_{\eta} A(\eta) = \E{q}{T(x)}$. Thus if we can compute (or approximate to satisfactory precision) $\nabla_{\eta} A(\eta)$ we could compute the moments we need for CAVI.
+
+To date, I am not really sure how to handle this integral of an exponentiation polynomial. By designing our polynomial approximation correctly, we can ensure that the the exponentiation function will decay and the $A$ will be finite (recall also that $\set{\eta: A(\eta) < \infty}$ is the natural parameter space).
+
+One option is to approximate $A(\eta)$ by a quadrature rule. We can use automatic differentiation to compute it's gradient.
+
+### Best gaussian approximation
+
+Maybe we don't know how to compute $A(\eta) = \log \int \exp\{\langle T(x), \eta \rangle\} dx$ Which involves evaluate the integral of an exponentiated polynomial. But perhaps we want to use a Gaussian variational approximation.
+
+$$
+q_{l}^*(x) \propto e^{f(x)} 
+\approx e^{f(\mu) + f'(\mu)(x-\mu) + \frac{1}{2}f''(\mu)(x - \mu)^2}
+$$
+
+For $\mu$ such that $f'(\mu) = 0$
+
+$$
+e^{f(\mu) + f'(\mu)(x-\mu) + \frac{1}{2}f''(\mu)(x - \mu)^2} \propto e^{\frac{1}{2}f''(\mu)(x - \mu)^2} \propto \mathcal N (x; \mu, -\frac{1}{f''(\mu)})
+$$
+
+In our case $f$ is a polynomial. Finding $\mu$ can be achieved by searching over the roots of $f'$ and then $f''(\mu)$ is computed easily. This is a Laplace approximation to the optimal posterior $q_l$
+
+
+## More scattered notes on polynomial approximation for SuSiE
+
+Abusing notation a bit, $\phi_l  = x_{\gamma_l} b_l$.
+
+$$
+\begin{aligned}
+f(\psi_l) 
+&= \sum \tilde m(q_{-l}) M_k(\psi_l) \\\\
+&= \sum \tilde m(q_{-l}) A_k(x_jb_l) \\\\
+&= \sum \hat m_k(q_{-l}, x_j) M_k(b_l) \\quad \hat m_k(q_{-l}, x_j) := \tilde m_k(q_{-l})x_j^k
+\end{aligned}
+$$
+
+$$
+\E{q_{-l}}{f(\psi)} 
+= \E{q_{-l}}{f(\psi_l, \psi_{-l}))} 
+= \sum \E{q_{-l}}{\tilde {\bf m}(\psi_{-l})} M_k(\psi_l)
+= \sum \left(\prod_{m \neq l}\E{q_m}{M(\psi_m))}\right){\bf m}
+$$
+
+We can write
+
+$$
+\Gamma_l = \E{q_l}{M(\psi_l)}
+$$
+$$
+\Psi^{(l)} = \Gamma_{l+1} \dots \Gamma_L \Gamma_1 \dots \Gamma_{l-1}
+$$
+Then we can compute the coefficients of $f(\psi_l)$ by a triangular matrix multiplication
+
+$$
+\tilde{\bf m}\_l = \Psi^{(l)}{\bf m} = \E{q_{-l}}{M(\psi_{-l})}{\bf m}
+$$
+
+
+And we can compute the next $\Psi$ by a triangular matrix inversion and two matrix multiplications.
+
+
+$$
+\Psi^{(l+1)} = \Gamma_{l+1}^{-1} \Psi^{(l)} \Gamma_l
+$$
+### Rescal polynomial
+
+$$
+f(bx) = \sum m_k (bx)^k = \sum m_k b^kx^k = \sum (m_k b^k) x^k
+$$
+
+### Shift
+
+$$
+f(x - c) 
+= \sum m_k (x -c)^k 
+= \sum_k m_k \sum_{j \leq k} {k \choose j} x^j c^{k-j}
+= \sum_j \left(\sum_{k \geq j} {k \choose j} c^{k-j}\right) x^j
+$$
+
+### Updating $q_l$
+
+We've written the natural parameters
+
+For each observation we can compute 
+
+$$
+\hat{{\bf m}}\_{li} = \tilde{\bf m}(q_{-l}) \circ (x_i^0, \dots, x_i^K)
+$$ 
+
+These are the coefficients in the monomial basis for each observation conditional on effect $b_l$ for covariate $x_i$.
+$f_i(b_l) = \sum \tilde {\bf m}\_k b_l^k$. That is, this is the data likelihood as a function of $b_l$, conditional on data $x$, and marginalizing over $\psi_{-l}$.
+
+We can express or approximate our prior with the same polynomial expansion. Suppose we can write our prior
+
+$$
+\log p(b_l) = \sum \rho_{kl} b_l^k
+$$
+
+Then the posterior distribution is trivially computed with a conjugate computation
+
+$$
+{\bf \eta}\_l =\sum_i \hat {\bf m}_{li} + {\bf \rho}_l
+$$
+
+The posterior distribution is an exponential family with sufficient statistics $T(b_l) = (b_l^0, \dots, b_l^K)$ and natural parameters $\eta_l$.
+
+If our original polynomial approximation "goes down" outside the range we care to ensure it is a good approximation, then we should always get a finite log-normalizer/cumulant $A(\eta) = \log \int \exp\{\eta^T T(\psi)\} d\psi < \infty$. It may be important to ensure that our approximation is good over the range of values of $\psi$ with high posterior probability. Supposing we have an even degree polynomial assumption, make sure the last coefficient is $< 0$ so that the function is very negative for arguments that are large in absolute value, but the approximation is good for values of small absolute value. Intuitivley, taking expectations over $\psi_{-l}$ won't change t
+
+Additionally, we ideally want to make sure that our likelihood approximation does not have bad behavior. If our polynomial approximation wildly overestimates the likelihood in some regions that could seriously mess up our inference. There is probably a tradeoff. We can approximate $l_i$ on the interval $[a, b]$ with lower error with a polynomial of degree $K$. To approximate $l_i$ on the wider interval $[a, b] \subset [A, B]$ with the same error we need a higher degree $K$.
+
+
+### Computing moments of $q_l$
+
+An algorithm would look like this
+
+1. Compute $\Psi_1$
+1. Update update $q_1$
+1. Compute $\E{q_1}{M(\psi_1)}$
+1. Compute $\Psi_2$ ...
+
+Note that $\Psi_l$ is constructed by taking expectations is a particular order, or multiplying matrices in a particular order. But I think order should not matter. Is it the case that triangular matrix multiplication commutes?
+
+## Glossary
+
+| **Symbol** | **Description** |
+|------------|-----------------|
+|  ${\bf a}_i$ |  coefficients for $f_i$ in basis $\mathcal A$ |
+|  $\tilde {\bf a}_i(\psi_2)$ |  coefficients for $f_i(\psi_1; \psi_2)$ in the basis $\mathcal A$ |
+|  $\hat {\bf a}_i(\psi_2, x_j)$ |  coefficients for $f_i(b_1; x_j, \psi_2)$ in the basis $\mathcal A$ |
+|  $M(\psi_2)$ |  triangular matrix shifts monomial basis, $\tilde {\bf m} (\psi_2) = M(\psi_2) {\bf m}$. Gives coefficients of $f_i(\psi_1; \psi_2)$ in $\mathcal M$| 
+|  $A$ |  triangular matrix maps to coordinates in monomial basis, ${\bf m} = A {\bf a}$. Gives coefficients of $f_i(\psi_1; \psi_2)$ in $\mathcal M$| 
+|  $f_i(\psi_1; \psi_2)$ |  A polynomial is $\psi_1$ such that $f_i(\psi_1; \psi_2) = f_i(\psi_1 + \psi_2); \\;\\; \tilde {\bf m}(\psi_2) = M(\psi_2){\bf m}$ gives the coordinates in the monomial basis|
+
+
+
+
+## Related work
+
+[@hugginsPASSGLMPolynomialApproximate2017]
+[@wongOrthogonalPolynomialsQuadrature]
+
+
+## References
+
+::: {#refs}
+:::
