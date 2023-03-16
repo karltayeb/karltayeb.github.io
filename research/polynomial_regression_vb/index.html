@@ -196,6 +196,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#approximation-with-k2" id="toc-approximation-with-k2" class="nav-link" data-scroll-target="#approximation-with-k2">Approximation with <span class="math inline">\(k=2\)</span></a></li>
   <li><a href="#higher-degree-approximations" id="toc-higher-degree-approximations" class="nav-link" data-scroll-target="#higher-degree-approximations">Higher degree approximations</a></li>
   <li><a href="#compare-implimentations" id="toc-compare-implimentations" class="nav-link" data-scroll-target="#compare-implimentations">Compare implimentations</a></li>
+  <li><a href="#how-does-the-posterior-approximation-change-as-we-increase-degree" id="toc-how-does-the-posterior-approximation-change-as-we-increase-degree" class="nav-link" data-scroll-target="#how-does-the-posterior-approximation-change-as-we-increase-degree">How does the posterior approximation change as we increase degree?</a></li>
   </ul></li>
   <li><a href="#poisson-regression-example" id="toc-poisson-regression-example" class="nav-link" data-scroll-target="#poisson-regression-example">Poisson regression example</a>
   <ul class="collapse">
@@ -204,10 +205,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#simulate-poisson-regression" id="toc-simulate-poisson-regression" class="nav-link" data-scroll-target="#simulate-poisson-regression">Simulate poisson regression</a></li>
   <li><a href="#example-1" id="toc-example-1" class="nav-link" data-scroll-target="#example-1">Example</a></li>
   </ul></li>
-  <li><a href="#higher-degree-polynomial-posterior-q" id="toc-higher-degree-polynomial-posterior-q" class="nav-link" data-scroll-target="#higher-degree-polynomial-posterior-q">Higher degree polynomial posterior <span class="math inline">\(q\)</span></a>
-  <ul class="collapse">
-  <li><a href="#quick-note-on-laplace-approximation" id="toc-quick-note-on-laplace-approximation" class="nav-link" data-scroll-target="#quick-note-on-laplace-approximation">Quick note on Laplace approximation</a></li>
-  </ul></li>
+  <li><a href="#higher-degree-polynomial-posterior-q" id="toc-higher-degree-polynomial-posterior-q" class="nav-link" data-scroll-target="#higher-degree-polynomial-posterior-q">Higher degree polynomial posterior <span class="math inline">\(q\)</span></a></li>
   </ul>
 </nav>
     </div>
@@ -627,7 +625,9 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 <p><span class="math display">\[
 \log p(y | \psi) = y\psi + \log \sigma(-\psi)
 \]</span></p>
-<div class="cell" data-hash="index_cache/html/approximate-conditional-likelihood-logistic-regression_bb4efdf1b5d60f2291dea753cadf5473">
+<p>Here we plot the <span class="math inline">\(\log p(y=0 | \psi)\)</span> and it’s polynomial approximations of degree <span class="math inline">\(k=2,4,6,8\)</span>.</p>
+<p>These polynomial approximations are generated using <code>pracma::polyApprox</code> which use the Chebyshev coefficients of an appropriately rescaled version of the function, to generate a polynomial approximation on the interval <span class="math inline">\([a, b]\)</span>. We generate approximations on the interval <span class="math inline">\([-R, R]\)</span> where <span class="math inline">\(R = 3\)</span>.</p>
+<div class="cell" data-hash="index_cache/html/approximate-conditional-likelihood-logistic-regression_b99c3662903f8a34d532fe48b879c922">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># loglike functions for y=1 and y=0</span></span>
@@ -650,25 +650,19 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 <span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>ll1_p2 <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyApprox</span>(loglik1, <span class="sc">-</span>R, R, <span class="at">n =</span> <span class="dv">2</span>)<span class="sc">$</span>p)</span>
 <span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>ll1_p4 <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyApprox</span>(loglik1, <span class="sc">-</span>R, R, <span class="at">n =</span> <span class="dv">4</span>)<span class="sc">$</span>p)</span>
 <span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>ll1_p6 <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyApprox</span>(loglik1, <span class="sc">-</span>R, R, <span class="at">n =</span> <span class="dv">6</span>)<span class="sc">$</span>p)</span>
-<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>ll1_p8 <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyApprox</span>(loglik1, <span class="sc">-</span>R, R, <span class="at">n =</span> <span class="dv">8</span>)<span class="sc">$</span>p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<p>Here we plot the <span class="math inline">\(\log p(y=0 | \psi)\)</span> and it’s polynomial approximations of degree <span class="math inline">\(k=2,4,6,8\)</span>.</p>
-<p>These polynomial approximations are generated using <code>pracma::polyApprox</code> which use the Chebyshev coefficients of an appropriately rescaled version of the function, to generate a polynomial approximation on the interval <span class="math inline">\([a, b]\)</span>. We generate approximations on the interval <span class="math inline">\([-R, R]\)</span> where <span class="math inline">\(R = 3\)</span>.</p>
-<div class="cell" data-hash="index_cache/html/plot-approximate-likelihood-logistic-regression_2ec32e04e8ceccba814d75aaac34f396">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> R <span class="sc">+</span> <span class="dv">2</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span>S, S, <span class="at">by=</span><span class="fl">0.1</span>)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(loglik0, <span class="sc">-</span>S, S)</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(ll0_p2, x), <span class="at">col=</span><span class="st">'red'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(ll0_p4, x), <span class="at">col=</span><span class="st">'blue'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(ll0_p6, x), <span class="at">col=</span><span class="st">'green'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(ll0_p8, x), <span class="at">col=</span><span class="st">'orange'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span>R); <span class="fu">abline</span>(<span class="at">v=</span><span class="sc">-</span>R)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>ll1_p8 <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyApprox</span>(loglik1, <span class="sc">-</span>R, R, <span class="at">n =</span> <span class="dv">8</span>)<span class="sc">$</span>p)</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> R <span class="sc">+</span> <span class="dv">2</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span>S, S, <span class="at">by=</span><span class="fl">0.1</span>)</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(loglik0, <span class="sc">-</span>S, S)</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(ll0_p2, x), <span class="at">col=</span><span class="st">'red'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(ll0_p4, x), <span class="at">col=</span><span class="st">'blue'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(ll0_p6, x), <span class="at">col=</span><span class="st">'green'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(ll0_p8, x), <span class="at">col=</span><span class="st">'orange'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span>R); <span class="fu">abline</span>(<span class="at">v=</span><span class="sc">-</span>R)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/plot-approximate-likelihood-logistic-regression-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/approximate-conditional-likelihood-logistic-regression-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -678,25 +672,25 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 <div class="cell" data-hash="index_cache/html/compute-coefficients-logistic-regression_e2383c2e05de018fdde65d06590d582d">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' get approximate polynomial representation of the data y</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>bernoulli_poly_approx <span class="ot">&lt;-</span> <span class="cf">function</span>(y, R, k){</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  p0 <span class="ot">&lt;-</span> <span class="fu">make_approximation</span>(loglik0, R, k)</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># for y=1 flip the sign of odd coefficients (note: 0 indexing)</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  p1 <span class="ot">&lt;-</span> p0</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  p1[<span class="fu">seq</span>(<span class="dv">2</span>, <span class="fu">length</span>(p0), <span class="at">by=</span><span class="dv">2</span>)] <span class="ot">&lt;-</span> p1[<span class="fu">seq</span>(<span class="dv">2</span>, <span class="fu">length</span>(p0), <span class="at">by=</span><span class="dv">2</span>)] <span class="sc">*</span> <span class="sc">-</span><span class="dv">1</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow =</span> n, <span class="at">ncol =</span> k <span class="sc">+</span> <span class="dv">1</span>)</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y)){</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(y[i] <span class="sc">==</span> <span class="dv">0</span>){</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>      m[i,] <span class="ot">&lt;-</span> p0</span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span>{</span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>      m[i,] <span class="ot">&lt;-</span> p1</span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(m)</span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' get approximate polynomial representation of the data y</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>bernoulli_poly_approx <span class="ot">&lt;-</span> <span class="cf">function</span>(y, R, k){</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  p0 <span class="ot">&lt;-</span> <span class="fu">make_approximation</span>(loglik0, R, k)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># for y=1 flip the sign of odd coefficients (note: 0 indexing)</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  p1 <span class="ot">&lt;-</span> p0</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  p1[<span class="fu">seq</span>(<span class="dv">2</span>, <span class="fu">length</span>(p0), <span class="at">by=</span><span class="dv">2</span>)] <span class="ot">&lt;-</span> p1[<span class="fu">seq</span>(<span class="dv">2</span>, <span class="fu">length</span>(p0), <span class="at">by=</span><span class="dv">2</span>)] <span class="sc">*</span> <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow =</span> n, <span class="at">ncol =</span> k <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y)){</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(y[i] <span class="sc">==</span> <span class="dv">0</span>){</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>      m[i,] <span class="ot">&lt;-</span> p0</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span>{</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>      m[i,] <span class="ot">&lt;-</span> p1</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(m)</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -705,16 +699,16 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 <div class="cell" data-hash="index_cache/html/simulate-logistic-regression_62050d945578c6b15db1f2e1b4282a67">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>simulate_lr <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n=</span><span class="dv">500</span>, <span class="at">p=</span><span class="dv">2</span>, <span class="at">lenghtscale =</span> <span class="fl">0.8</span>, <span class="at">prior_variance=</span><span class="dv">5</span>){</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>p), <span class="at">nrow=</span>n)</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  K <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>(<span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">'-'</span>)<span class="sc">/</span>lenghtscale)<span class="sc">**</span><span class="dv">2</span>)</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> Z <span class="sc">%*%</span> K</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(p) <span class="sc">*</span> <span class="fu">sqrt</span>(prior_variance)</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  logits <span class="ot">&lt;-</span> (X <span class="sc">%*%</span> b)[, <span class="dv">1</span>]</span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">length</span>(logits), <span class="dv">1</span>, <span class="fu">sigmoid</span>(logits))</span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">X=</span>X, <span class="at">b=</span>b, <span class="at">logits=</span>logits))</span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>simulate_lr <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n=</span><span class="dv">500</span>, <span class="at">p=</span><span class="dv">2</span>, <span class="at">lenghtscale =</span> <span class="fl">0.8</span>, <span class="at">prior_variance=</span><span class="dv">5</span>){</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>p), <span class="at">nrow=</span>n)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  K <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>(<span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">'-'</span>)<span class="sc">/</span>lenghtscale)<span class="sc">**</span><span class="dv">2</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> Z <span class="sc">%*%</span> K</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(p) <span class="sc">*</span> <span class="fu">sqrt</span>(prior_variance)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  logits <span class="ot">&lt;-</span> (X <span class="sc">%*%</span> b)[, <span class="dv">1</span>]</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">length</span>(logits), <span class="dv">1</span>, <span class="fu">sigmoid</span>(logits))</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">X=</span>X, <span class="at">b=</span>b, <span class="at">logits=</span>logits))</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -724,65 +718,66 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 <div class="cell" data-hash="index_cache/html/fit-logistic-k2-approximation_2f605e148c7a2727564448e76b3423b8">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>logistic_polynomial_approximation_k2 <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, R){</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># observations in polynomial coeeficients</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">bernoulli_poly_approx</span>(y, R, <span class="at">k=</span><span class="dv">2</span>)</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X)</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># initialize prior and q</span></span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  prior_p <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>p){</span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    prior_p[[j]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.5</span>)</span>
-<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    q[[j]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">mu =</span> <span class="dv">0</span>, <span class="at">var=</span><span class="dv">1</span>)</span>
-<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># iteratively update</span></span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>  param_history <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>  param_history[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
-<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>){</span>
-<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    q <span class="ot">&lt;-</span> <span class="fu">polynomial_update2</span>(m, X, prior_p, q)</span>
-<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>    param_history[[i<span class="sc">+</span><span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
-<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(param_history)</span>
-<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>logistic_polynomial_approximation_k2 <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, R){</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># observations in polynomial coeeficients</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">bernoulli_poly_approx</span>(y, R, <span class="at">k=</span><span class="dv">2</span>)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># initialize prior and q</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  prior_p <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>p){</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    prior_p[[j]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.5</span>)</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    q[[j]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">mu =</span> <span class="dv">0</span>, <span class="at">var=</span><span class="dv">1</span>)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># iteratively update</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  param_history <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  param_history[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>){</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>    q <span class="ot">&lt;-</span> <span class="fu">polynomial_update2</span>(m, X, prior_p, q)</span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>    param_history[[i<span class="sc">+</span><span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(param_history)</span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>A 2d approximation does not seem to perform very well here.</p>
-<div class="cell" data-hash="index_cache/html/fit-logistic-regression-k2_bbd5bb4f530a5b5098e191a0a1c91fd0">
+<div class="cell" data-hash="index_cache/html/fit-logistic-regression-k2_edee14b81ef6e39f287d6767d793139e">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>lenghtscale <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>prior_variance <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>p), <span class="at">nrow=</span>n)</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>(<span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">'-'</span>)<span class="sc">/</span>lenghtscale)<span class="sc">**</span><span class="dv">2</span>)</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> Z <span class="sc">%*%</span> K</span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(p) <span class="sc">*</span> <span class="fu">sqrt</span>(prior_variance)</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>logits <span class="ot">&lt;-</span> (X <span class="sc">%*%</span> b)[, <span class="dv">1</span>]</span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">length</span>(logits), <span class="dv">1</span>, <span class="fu">sigmoid</span>(logits))</span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>lenghtscale <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>prior_variance <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>p), <span class="at">nrow=</span>n)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>(<span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">'-'</span>)<span class="sc">/</span>lenghtscale)<span class="sc">**</span><span class="dv">2</span>)</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> Z <span class="sc">%*%</span> K</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(p) <span class="sc">*</span> <span class="fu">sqrt</span>(prior_variance)</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>logits <span class="ot">&lt;-</span> (X <span class="sc">%*%</span> b)[, <span class="dv">1</span>]</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">length</span>(logits), <span class="dv">1</span>, <span class="fu">sigmoid</span>(logits))</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] -1.2803961  0.6987738 -1.5818567</code></pre>
+<pre><code>[1] 3.3319418 0.3807557 5.4429687</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>qs <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation_k2</span>(y, X, <span class="at">R=</span><span class="dv">5</span>)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">tail</span>(qs, <span class="dv">1</span>)[[<span class="dv">1</span>]]</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>mu_post <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(q, <span class="sc">~</span>purrr<span class="sc">::</span><span class="fu">pluck</span>(.x, <span class="st">'mu'</span>))</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>var_post <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(q, <span class="sc">~</span>purrr<span class="sc">::</span><span class="fu">pluck</span>(.x, <span class="st">'var'</span>))</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>plotrix<span class="sc">::</span><span class="fu">plotCI</span>(</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> b,</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> mu_post,</span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">li =</span>  mu_post <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(var_post),</span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">ui =</span>  mu_post <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(var_post)</span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>qs <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation_k2</span>(y, X, <span class="at">R=</span><span class="dv">5</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">tail</span>(qs, <span class="dv">1</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>mu_post <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(q, <span class="sc">~</span>purrr<span class="sc">::</span><span class="fu">pluck</span>(.x, <span class="st">'mu'</span>))</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>var_post <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(q, <span class="sc">~</span>purrr<span class="sc">::</span><span class="fu">pluck</span>(.x, <span class="st">'var'</span>))</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>plotrix<span class="sc">::</span><span class="fu">plotCI</span>(</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> b,</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> mu_post,</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">li =</span>  mu_post <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(var_post),</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">ui =</span>  mu_post <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(var_post)</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/fit-logistic-regression-k2-1.png" class="img-fluid" width="672"></p>
@@ -797,10 +792,10 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 <div class="cell" data-hash="index_cache/html/plot-logistic-vary-R-k2_6b2eedf61504c2bf9cb9ea83f3bf95d4">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(q_R3, b, <span class="at">main=</span><span class="st">'R=3'</span>)</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(q_R5, b, <span class="at">main=</span><span class="st">'R=5'</span>)</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(q_R7, b, <span class="at">main=</span><span class="st">'R=7'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(q_R3, b, <span class="at">main=</span><span class="st">'R=3'</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(q_R5, b, <span class="at">main=</span><span class="st">'R=5'</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(q_R7, b, <span class="at">main=</span><span class="st">'R=7'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/plot-logistic-vary-R-k2-1.png" class="img-fluid" width="672"></p>
@@ -814,165 +809,146 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 <div class="cell" data-hash="index_cache/html/polynomial-logistic-regression_f066e18f2e029c981b1de94a6562604e">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' Make shift matrix</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co">#' </span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' Generate matrix that maps coefficients of a polynomial</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co">#' f(x + y) (represented by coefficients p) to coefficients of</span></span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="co">#' f2(x) = E_{p(y)}[f(x+y)]</span></span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param moments moments of y</span></span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>make_shift_matrix <span class="ot">&lt;-</span> <span class="cf">function</span>(moments){</span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># construct map</span></span>
-<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>  K <span class="ot">&lt;-</span> <span class="fu">length</span>(moments) <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  M <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow=</span> K<span class="sc">+</span><span class="dv">1</span>, <span class="at">ncol=</span>K<span class="sc">+</span><span class="dv">1</span>)</span>
-<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">0</span><span class="sc">:</span>K){</span>
-<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">0</span><span class="sc">:</span>K){</span>
-<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>      M[j<span class="sc">+</span><span class="dv">1</span>, k<span class="sc">+</span><span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">choose</span>(k, j) <span class="sc">*</span> moments[[<span class="fu">max</span>(k<span class="sc">-</span>j<span class="sc">+</span><span class="dv">1</span>, <span class="dv">1</span>)]]</span>
-<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(M)</span>
-<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a><span class="co">#' Transform coefficients of a polynomial f(x + y) (represented by coefficients p)</span></span>
-<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a><span class="co">#' to coefficients of f2(x) = E_{p(y)}[f(x+y)]</span></span>
-<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param p K+1 coefficients of a degree-k polynomial</span></span>
-<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param moments moments of y (including E[y^0] = 1)</span></span>
-<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>shift_polynomial3 <span class="ot">&lt;-</span> <span class="cf">function</span>(p, moments){</span>
-<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>  M <span class="ot">&lt;-</span> <span class="fu">make_shift_matrix</span>(moments)</span>
-<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>  p_new <span class="ot">&lt;-</span> (M <span class="sc">%*%</span> p)[, <span class="dv">1</span>]</span>
-<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(p_new)</span>
-<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a>compute_normal_moments <span class="ot">&lt;-</span> <span class="cf">function</span>(mu, var, k){</span>
-<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(purrr<span class="sc">::</span><span class="fu">map_dbl</span>(<span class="dv">0</span><span class="sc">:</span>k, <span class="sc">~</span>actuar<span class="sc">::</span><span class="fu">mnorm</span>(.x, mu, <span class="fu">sqrt</span>(var))))</span>
-<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a><span class="co">#' compute k moments for psi = xb, b ~ N(mu, var)</span></span>
-<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a>compute_psi_moments <span class="ot">&lt;-</span> <span class="cf">function</span>(x, mu, var, k){</span>
-<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a>  normal_moments <span class="ot">&lt;-</span> <span class="fu">compute_normal_moments</span>(mu, var, k)</span>
-<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a>  psi_moments <span class="ot">&lt;-</span> <span class="fu">do.call</span>(cbind, purrr<span class="sc">::</span><span class="fu">map</span>(<span class="dv">0</span><span class="sc">:</span>k, <span class="sc">~</span> (x<span class="sc">**</span>.x) <span class="sc">*</span> normal_moments[.x <span class="sc">+</span> <span class="dv">1</span>]))</span>
-<span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb33-38"><a href="#cb33-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-39"><a href="#cb33-39" aria-hidden="true" tabindex="-1"></a><span class="co">#' update q with polynomial approximation of arbitrary degree</span></span>
-<span id="cb33-40"><a href="#cb33-40" aria-hidden="true" tabindex="-1"></a>polynomial_update3 <span class="ot">&lt;-</span> <span class="cf">function</span>(m, X, prior_p, q){</span>
-<span id="cb33-41"><a href="#cb33-41" aria-hidden="true" tabindex="-1"></a>  K <span class="ot">&lt;-</span> <span class="fu">ncol</span>(m) <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb33-42"><a href="#cb33-42" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X)</span>
-<span id="cb33-43"><a href="#cb33-43" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X)</span>
-<span id="cb33-44"><a href="#cb33-44" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>p){</span>
-<span id="cb33-45"><a href="#cb33-45" aria-hidden="true" tabindex="-1"></a>    m_tilde <span class="ot">&lt;-</span> m</span>
-<span id="cb33-46"><a href="#cb33-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(k <span class="cf">in</span> (<span class="dv">1</span><span class="sc">:</span>p)[<span class="sc">-</span>j]){</span>
-<span id="cb33-47"><a href="#cb33-47" aria-hidden="true" tabindex="-1"></a>      moments <span class="ot">&lt;-</span> <span class="fu">compute_psi_moments</span>(X[, k], q[[k]]<span class="sc">$</span>mu, q[[k]]<span class="sc">$</span>var, K)</span>
-<span id="cb33-48"><a href="#cb33-48" aria-hidden="true" tabindex="-1"></a>      m_tilde <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="cf">function</span>(i) <span class="fu">shift_polynomial3</span>(</span>
-<span id="cb33-49"><a href="#cb33-49" aria-hidden="true" tabindex="-1"></a>        m_tilde[i,], moments[i,])))</span>
-<span id="cb33-50"><a href="#cb33-50" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb33-51"><a href="#cb33-51" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb33-52"><a href="#cb33-52" aria-hidden="true" tabindex="-1"></a>    <span class="co"># scale-- new polynomial in terms of b_j</span></span>
-<span id="cb33-53"><a href="#cb33-53" aria-hidden="true" tabindex="-1"></a>    m_hat <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="cf">function</span>(i) <span class="fu">scale_polynomial</span>(</span>
-<span id="cb33-54"><a href="#cb33-54" aria-hidden="true" tabindex="-1"></a>      m_tilde[i,], X[i, j])))</span>
-<span id="cb33-55"><a href="#cb33-55" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb33-56"><a href="#cb33-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># compute posterior polynomial</span></span>
-<span id="cb33-57"><a href="#cb33-57" aria-hidden="true" tabindex="-1"></a>    m_post <span class="ot">&lt;-</span> <span class="fu">colSums</span>(m_hat) <span class="sc">+</span> prior_p[[j]]</span>
-<span id="cb33-58"><a href="#cb33-58" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb33-59"><a href="#cb33-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># find gaussian approximation</span></span>
-<span id="cb33-60"><a href="#cb33-60" aria-hidden="true" tabindex="-1"></a>    q[[j]] <span class="ot">&lt;-</span> <span class="fu">poly_to_gaussian</span>(m_post)</span>
-<span id="cb33-61"><a href="#cb33-61" aria-hidden="true" tabindex="-1"></a>    q[[j]]<span class="sc">$</span>m_post <span class="ot">&lt;-</span> m_post</span>
-<span id="cb33-62"><a href="#cb33-62" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb33-63"><a href="#cb33-63" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb33-64"><a href="#cb33-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(q)</span>
-<span id="cb33-65"><a href="#cb33-65" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb33-66"><a href="#cb33-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-67"><a href="#cb33-67" aria-hidden="true" tabindex="-1"></a>logistic_polynomial_approximation <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, R, <span class="at">K=</span><span class="dv">2</span>){</span>
-<span id="cb33-68"><a href="#cb33-68" aria-hidden="true" tabindex="-1"></a>  <span class="co"># observations in polynomial coeeficients</span></span>
-<span id="cb33-69"><a href="#cb33-69" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">bernoulli_poly_approx</span>(y, R, K)</span>
-<span id="cb33-70"><a href="#cb33-70" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb33-71"><a href="#cb33-71" aria-hidden="true" tabindex="-1"></a>  prior_p <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb33-72"><a href="#cb33-72" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>p){</span>
-<span id="cb33-73"><a href="#cb33-73" aria-hidden="true" tabindex="-1"></a>    prior_p[[j]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.5</span>), <span class="fu">rep</span>(<span class="dv">0</span>, K<span class="dv">-2</span>)) <span class="co"># extend polynomial to agree with m</span></span>
-<span id="cb33-74"><a href="#cb33-74" aria-hidden="true" tabindex="-1"></a>    q[[j]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">mu =</span> <span class="dv">0</span>, <span class="at">var=</span><span class="dv">1</span>) <span class="co"># initialize normal posterior</span></span>
-<span id="cb33-75"><a href="#cb33-75" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb33-76"><a href="#cb33-76" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb33-77"><a href="#cb33-77" aria-hidden="true" tabindex="-1"></a>  <span class="co"># iteratively update</span></span>
-<span id="cb33-78"><a href="#cb33-78" aria-hidden="true" tabindex="-1"></a>  param_history <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb33-79"><a href="#cb33-79" aria-hidden="true" tabindex="-1"></a>  param_history[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
-<span id="cb33-80"><a href="#cb33-80" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>){</span>
-<span id="cb33-81"><a href="#cb33-81" aria-hidden="true" tabindex="-1"></a>    q <span class="ot">&lt;-</span> <span class="fu">polynomial_update3</span>(m, X, prior_p, q)</span>
-<span id="cb33-82"><a href="#cb33-82" aria-hidden="true" tabindex="-1"></a>    param_history[[i<span class="sc">+</span><span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
-<span id="cb33-83"><a href="#cb33-83" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb33-84"><a href="#cb33-84" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(param_history)</span>
-<span id="cb33-85"><a href="#cb33-85" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' Make shift matrix</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="co">#' </span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' Generate matrix that maps coefficients of a polynomial</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co">#' f(x + y) (represented by coefficients p) to coefficients of</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co">#' f2(x) = E_{p(y)}[f(x+y)]</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param moments moments of y</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>make_shift_matrix <span class="ot">&lt;-</span> <span class="cf">function</span>(moments){</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># construct map</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  K <span class="ot">&lt;-</span> <span class="fu">length</span>(moments) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  M <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow=</span> K<span class="sc">+</span><span class="dv">1</span>, <span class="at">ncol=</span>K<span class="sc">+</span><span class="dv">1</span>)</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">0</span><span class="sc">:</span>K){</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">0</span><span class="sc">:</span>K){</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>      M[j<span class="sc">+</span><span class="dv">1</span>, k<span class="sc">+</span><span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">choose</span>(k, j) <span class="sc">*</span> moments[[<span class="fu">max</span>(k<span class="sc">-</span>j<span class="sc">+</span><span class="dv">1</span>, <span class="dv">1</span>)]]</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(M)</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a><span class="co">#' Transform coefficients of a polynomial f(x + y) (represented by coefficients p)</span></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a><span class="co">#' to coefficients of f2(x) = E_{p(y)}[f(x+y)]</span></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param p K+1 coefficients of a degree-k polynomial</span></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param moments moments of y (including E[y^0] = 1)</span></span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>shift_polynomial3 <span class="ot">&lt;-</span> <span class="cf">function</span>(p, moments){</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>  M <span class="ot">&lt;-</span> <span class="fu">make_shift_matrix</span>(moments)</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>  p_new <span class="ot">&lt;-</span> (M <span class="sc">%*%</span> p)[, <span class="dv">1</span>]</span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(p_new)</span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>compute_normal_moments <span class="ot">&lt;-</span> <span class="cf">function</span>(mu, var, k){</span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(purrr<span class="sc">::</span><span class="fu">map_dbl</span>(<span class="dv">0</span><span class="sc">:</span>k, <span class="sc">~</span>actuar<span class="sc">::</span><span class="fu">mnorm</span>(.x, mu, <span class="fu">sqrt</span>(var))))</span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a><span class="co">#' compute k moments for psi = xb, b ~ N(mu, var)</span></span>
+<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a>compute_psi_moments <span class="ot">&lt;-</span> <span class="cf">function</span>(x, mu, var, k){</span>
+<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a>  normal_moments <span class="ot">&lt;-</span> <span class="fu">compute_normal_moments</span>(mu, var, k)</span>
+<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a>  psi_moments <span class="ot">&lt;-</span> <span class="fu">do.call</span>(cbind, purrr<span class="sc">::</span><span class="fu">map</span>(<span class="dv">0</span><span class="sc">:</span>k, <span class="sc">~</span> (x<span class="sc">**</span>.x) <span class="sc">*</span> normal_moments[.x <span class="sc">+</span> <span class="dv">1</span>]))</span>
+<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a><span class="co">#' update q with polynomial approximation of arbitrary degree</span></span>
+<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a>polynomial_update3 <span class="ot">&lt;-</span> <span class="cf">function</span>(m, X, prior_p, q){</span>
+<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a>  K <span class="ot">&lt;-</span> <span class="fu">ncol</span>(m) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X)</span>
+<span id="cb32-43"><a href="#cb32-43" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X)</span>
+<span id="cb32-44"><a href="#cb32-44" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>p){</span>
+<span id="cb32-45"><a href="#cb32-45" aria-hidden="true" tabindex="-1"></a>    m_tilde <span class="ot">&lt;-</span> m</span>
+<span id="cb32-46"><a href="#cb32-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(k <span class="cf">in</span> (<span class="dv">1</span><span class="sc">:</span>p)[<span class="sc">-</span>j]){</span>
+<span id="cb32-47"><a href="#cb32-47" aria-hidden="true" tabindex="-1"></a>      moments <span class="ot">&lt;-</span> <span class="fu">compute_psi_moments</span>(X[, k], q[[k]]<span class="sc">$</span>mu, q[[k]]<span class="sc">$</span>var, K)</span>
+<span id="cb32-48"><a href="#cb32-48" aria-hidden="true" tabindex="-1"></a>      m_tilde <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="cf">function</span>(i) <span class="fu">shift_polynomial3</span>(</span>
+<span id="cb32-49"><a href="#cb32-49" aria-hidden="true" tabindex="-1"></a>        m_tilde[i,], moments[i,])))</span>
+<span id="cb32-50"><a href="#cb32-50" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb32-51"><a href="#cb32-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-52"><a href="#cb32-52" aria-hidden="true" tabindex="-1"></a>    <span class="co"># scale-- new polynomial in terms of b_j</span></span>
+<span id="cb32-53"><a href="#cb32-53" aria-hidden="true" tabindex="-1"></a>    m_hat <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="cf">function</span>(i) <span class="fu">scale_polynomial</span>(</span>
+<span id="cb32-54"><a href="#cb32-54" aria-hidden="true" tabindex="-1"></a>      m_tilde[i,], X[i, j])))</span>
+<span id="cb32-55"><a href="#cb32-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-56"><a href="#cb32-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># compute posterior polynomial</span></span>
+<span id="cb32-57"><a href="#cb32-57" aria-hidden="true" tabindex="-1"></a>    m_post <span class="ot">&lt;-</span> <span class="fu">colSums</span>(m_hat) <span class="sc">+</span> prior_p[[j]]</span>
+<span id="cb32-58"><a href="#cb32-58" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-59"><a href="#cb32-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># find gaussian approximation</span></span>
+<span id="cb32-60"><a href="#cb32-60" aria-hidden="true" tabindex="-1"></a>    q[[j]] <span class="ot">&lt;-</span> <span class="fu">poly_to_gaussian</span>(m_post)</span>
+<span id="cb32-61"><a href="#cb32-61" aria-hidden="true" tabindex="-1"></a>    q[[j]]<span class="sc">$</span>m_post <span class="ot">&lt;-</span> m_post</span>
+<span id="cb32-62"><a href="#cb32-62" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb32-63"><a href="#cb32-63" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb32-64"><a href="#cb32-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(q)</span>
+<span id="cb32-65"><a href="#cb32-65" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-66"><a href="#cb32-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-67"><a href="#cb32-67" aria-hidden="true" tabindex="-1"></a>logistic_polynomial_approximation <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, R, <span class="at">K=</span><span class="dv">2</span>){</span>
+<span id="cb32-68"><a href="#cb32-68" aria-hidden="true" tabindex="-1"></a>  <span class="co"># observations in polynomial coeeficients</span></span>
+<span id="cb32-69"><a href="#cb32-69" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">bernoulli_poly_approx</span>(y, R, K)</span>
+<span id="cb32-70"><a href="#cb32-70" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb32-71"><a href="#cb32-71" aria-hidden="true" tabindex="-1"></a>  prior_p <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb32-72"><a href="#cb32-72" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>p){</span>
+<span id="cb32-73"><a href="#cb32-73" aria-hidden="true" tabindex="-1"></a>    prior_p[[j]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.5</span>), <span class="fu">rep</span>(<span class="dv">0</span>, K<span class="dv">-2</span>)) <span class="co"># extend polynomial to agree with m</span></span>
+<span id="cb32-74"><a href="#cb32-74" aria-hidden="true" tabindex="-1"></a>    q[[j]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">mu =</span> <span class="dv">0</span>, <span class="at">var=</span><span class="dv">1</span>) <span class="co"># initialize normal posterior</span></span>
+<span id="cb32-75"><a href="#cb32-75" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb32-76"><a href="#cb32-76" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb32-77"><a href="#cb32-77" aria-hidden="true" tabindex="-1"></a>  <span class="co"># iteratively update</span></span>
+<span id="cb32-78"><a href="#cb32-78" aria-hidden="true" tabindex="-1"></a>  param_history <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb32-79"><a href="#cb32-79" aria-hidden="true" tabindex="-1"></a>  param_history[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
+<span id="cb32-80"><a href="#cb32-80" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>){</span>
+<span id="cb32-81"><a href="#cb32-81" aria-hidden="true" tabindex="-1"></a>    q <span class="ot">&lt;-</span> <span class="fu">polynomial_update3</span>(m, X, prior_p, q)</span>
+<span id="cb32-82"><a href="#cb32-82" aria-hidden="true" tabindex="-1"></a>    param_history[[i<span class="sc">+</span><span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
+<span id="cb32-83"><a href="#cb32-83" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb32-84"><a href="#cb32-84" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(param_history)</span>
+<span id="cb32-85"><a href="#cb32-85" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="compare-implimentations" class="level3">
 <h3 class="anchored" data-anchor-id="compare-implimentations">Compare implimentations</h3>
 <p>The two implimentations agree!</p>
-<div class="cell" data-hash="index_cache/html/compare-k2-and-any-k-implimentations_de4a3e830d2f205c9af3ea53c1c9cb55">
+<div class="cell" data-hash="index_cache/html/compare-k2-and-any-k-implimentations_92b9da36835d6d5f19e780a4268f4cd9">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate_lr</span>(<span class="at">p=</span><span class="dv">3</span>)</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> sim<span class="sc">$</span>y</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> sim<span class="sc">$</span>X</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> sim<span class="sc">$</span>b</span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>qs_2 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation_k2</span>(y, X, <span class="at">R=</span><span class="dv">10</span>)</span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>qs_k2 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">10</span>, <span class="at">K=</span><span class="dv">2</span>)</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_2[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'A'</span>)</span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_k2[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'B'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate_lr</span>(<span class="at">p=</span><span class="dv">3</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> sim<span class="sc">$</span>y</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> sim<span class="sc">$</span>X</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> sim<span class="sc">$</span>b</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>qs_2 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation_k2</span>(y, X, <span class="at">R=</span><span class="dv">10</span>)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>qs_k2 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">10</span>, <span class="at">K=</span><span class="dv">2</span>)</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_2[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'A'</span>)</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_k2[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'B'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/compare-k2-and-any-k-implimentations-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<section id="vary-degree-of-approximation" class="level4">
-<h4 class="anchored" data-anchor-id="vary-degree-of-approximation">Vary degree of approximation</h4>
+</section>
+<section id="how-does-the-posterior-approximation-change-as-we-increase-degree" class="level3">
+<h3 class="anchored" data-anchor-id="how-does-the-posterior-approximation-change-as-we-increase-degree">How does the posterior approximation change as we increase degree?</h3>
 <p>We approximate the likelihood on <span class="math inline">\([-10, 10]\)</span> with <span class="math inline">\(K=2,6,10,14\)</span>. Note the polynomial approximation cannot be e.g.&nbsp;degree <span class="math inline">\(4\)</span> because these polynomials are unbounded above (<span class="math inline">\(c_4 &gt;0\)</span>), so <span class="math inline">\(e^ \hat f(x)\)</span> is not integrable over the real line. But <span class="math inline">\(c_K &lt; 0\)</span> for approximations of degree <span class="math inline">\(K = 2z + 2\)</span> for <span class="math inline">\(z \in \mathbb N\)</span>.</p>
-<div class="cell" data-hash="index_cache/html/fit-logistic-vary-k_07b810090036793d09e02d0b40ba3ff2">
+<p>In this example it seems that with <span class="math inline">\(K=2\)</span> we tend to over-estimate the effect size, but this is resolved in the higher degree approximations.</p>
+<div class="cell" data-hash="index_cache/html/fit-logistic-vary-k_ee6911c651648556b7f65cf9c3f429e9">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>qs_k2 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">10</span>, <span class="at">K=</span><span class="dv">2</span>)</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>qs_k6 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">10</span>, <span class="at">K=</span><span class="dv">6</span>)</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>qs_k10 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">10</span>, <span class="at">K=</span><span class="dv">10</span>)</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co">#qs_k14 &lt;- logistic_polynomial_approximation(y, X, R=10, K=14)</span></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>purrr<span class="sc">::</span><span class="fu">map_dbl</span>(qs_k2[[<span class="dv">51</span>]], <span class="sc">~</span>purrr<span class="sc">::</span><span class="fu">pluck</span>(.x, <span class="st">'mu'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] -1.315997 -2.000712 -1.991923</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>purrr<span class="sc">::</span><span class="fu">map_dbl</span>(qs_k6[[<span class="dv">51</span>]], <span class="sc">~</span>purrr<span class="sc">::</span><span class="fu">pluck</span>(.x, <span class="st">'mu'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] -1.274430 -1.811244 -1.693130</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>purrr<span class="sc">::</span><span class="fu">map_dbl</span>(qs_k10[[<span class="dv">51</span>]], <span class="sc">~</span>purrr<span class="sc">::</span><span class="fu">pluck</span>(.x, <span class="st">'mu'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] -1.202289 -1.793740 -1.652252</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co">#purrr::map_dbl(qs_k14[[51]], ~purrr::pluck(.x, 'mu'))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell" data-hash="index_cache/html/plot-logistic-vary-k_7ea7c9a7b6a6b3e114895ea0171d452d">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_k2[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=2'</span>)</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_k6[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=6'</span>)</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_k10[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=10'</span>)</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="co">#plot_effect_posterior(qs_k14[[51]], b, main='K=14')</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate_lr</span>(<span class="at">p=</span><span class="dv">3</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> sim<span class="sc">$</span>y</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> sim<span class="sc">$</span>X</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> sim<span class="sc">$</span>b</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>qs_k2 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">10</span>, <span class="at">K=</span><span class="dv">2</span>)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>qs_k6 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">10</span>, <span class="at">K=</span><span class="dv">6</span>)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>qs_k10 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">10</span>, <span class="at">K=</span><span class="dv">10</span>)</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>qs_k14 <span class="ot">&lt;-</span> <span class="fu">logistic_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">10</span>, <span class="at">K=</span><span class="dv">14</span>)</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_k2[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=2'</span>)</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_k6[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=6'</span>)</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_k10[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=10'</span>)</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(qs_k14[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=14'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/plot-logistic-vary-k-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/fit-logistic-vary-k-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-</section>
 </section>
 </section>
 <section id="poisson-regression-example" class="level2">
@@ -982,74 +958,86 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 <div class="cell" data-hash="index_cache/html/unnamed-chunk-1_bb3230c1642b04b7eeba9377560ff2b2">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>poisson_ll <span class="ot">&lt;-</span> <span class="cf">function</span>(y){</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="cf">function</span>(psi) <span class="fu">dpois</span>(y, <span class="fu">exp</span>(psi), <span class="at">log =</span> T)</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(f)</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>poisson_approx <span class="ot">&lt;-</span> <span class="cf">function</span>(y, R, k, <span class="at">as_function=</span>F){</span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">poisson_ll</span>(y)</span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">make_approximation</span>(f, R, k, <span class="at">plot =</span> F)</span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(as_function){</span>
-<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>    p2 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">polyval2</span>(p, x)</span>
-<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(p2)</span>
-<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(p)</span>
-<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>poisson_poly_approx <span class="ot">&lt;-</span> <span class="cf">function</span>(y, R, k){</span>
-<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>  unique_counts <span class="ot">&lt;-</span> <span class="fu">unique</span>(y)</span>
-<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>  polynomials <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(yy <span class="cf">in</span> unique_counts){</span>
-<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>    polynomials[[yy <span class="sc">+</span> <span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">poisson_approx</span>(yy, R, k)</span>
-<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, purrr<span class="sc">::</span><span class="fu">map</span>(y, <span class="sc">~</span>polynomials[[.x <span class="sc">+</span> <span class="dv">1</span>]]))</span>
-<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(m)</span>
-<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb43-28"><a href="#cb43-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-29"><a href="#cb43-29" aria-hidden="true" tabindex="-1"></a>poisson_regression_polynomial_approximation <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, R, <span class="at">K=</span><span class="dv">2</span>){</span>
-<span id="cb43-30"><a href="#cb43-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># observations in polynomial coeeficients</span></span>
-<span id="cb43-31"><a href="#cb43-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tic</span>()</span>
-<span id="cb43-32"><a href="#cb43-32" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">poisson_poly_approx</span>(y, R, K)</span>
-<span id="cb43-33"><a href="#cb43-33" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X)</span>
-<span id="cb43-34"><a href="#cb43-34" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb43-35"><a href="#cb43-35" aria-hidden="true" tabindex="-1"></a>  prior_p <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb43-36"><a href="#cb43-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>p){</span>
-<span id="cb43-37"><a href="#cb43-37" aria-hidden="true" tabindex="-1"></a>    prior_p[[j]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.5</span>), <span class="fu">rep</span>(<span class="dv">0</span>, K<span class="dv">-2</span>)) <span class="co"># extend polynomial to agree with m</span></span>
-<span id="cb43-38"><a href="#cb43-38" aria-hidden="true" tabindex="-1"></a>    q[[j]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">mu =</span> <span class="dv">0</span>, <span class="at">var=</span><span class="dv">1</span>) <span class="co"># initialize normal posterior</span></span>
-<span id="cb43-39"><a href="#cb43-39" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb43-40"><a href="#cb43-40" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb43-41"><a href="#cb43-41" aria-hidden="true" tabindex="-1"></a>  <span class="co"># iteratively update</span></span>
-<span id="cb43-42"><a href="#cb43-42" aria-hidden="true" tabindex="-1"></a>  param_history <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb43-43"><a href="#cb43-43" aria-hidden="true" tabindex="-1"></a>  param_history[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
-<span id="cb43-44"><a href="#cb43-44" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>){</span>
-<span id="cb43-45"><a href="#cb43-45" aria-hidden="true" tabindex="-1"></a>    q <span class="ot">&lt;-</span> <span class="fu">polynomial_update3</span>(m, X, prior_p, q)</span>
-<span id="cb43-46"><a href="#cb43-46" aria-hidden="true" tabindex="-1"></a>    param_history[[i<span class="sc">+</span><span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
-<span id="cb43-47"><a href="#cb43-47" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb43-48"><a href="#cb43-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">toc</span>()</span>
-<span id="cb43-49"><a href="#cb43-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(param_history)</span>
-<span id="cb43-50"><a href="#cb43-50" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>poisson_ll <span class="ot">&lt;-</span> <span class="cf">function</span>(y){</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="cf">function</span>(psi) <span class="fu">dpois</span>(y, <span class="fu">exp</span>(psi), <span class="at">log =</span> T)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(f)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>poisson_approx <span class="ot">&lt;-</span> <span class="cf">function</span>(y, R, k, <span class="at">as_function=</span>F){</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">poisson_ll</span>(y)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">make_approximation</span>(f, R, k, <span class="at">plot =</span> F)</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(as_function){</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    p2 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">polyval2</span>(p, x)</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(p2)</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(p)</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>poisson_poly_approx <span class="ot">&lt;-</span> <span class="cf">function</span>(y, R, k){</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>  unique_counts <span class="ot">&lt;-</span> <span class="fu">unique</span>(y)</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>  polynomials <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(yy <span class="cf">in</span> unique_counts){</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>    polynomials[[yy <span class="sc">+</span> <span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">poisson_approx</span>(yy, R, k)</span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, purrr<span class="sc">::</span><span class="fu">map</span>(y, <span class="sc">~</span>polynomials[[.x <span class="sc">+</span> <span class="dv">1</span>]]))</span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(m)</span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>poisson_regression_polynomial_approximation <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, R, <span class="at">K=</span><span class="dv">2</span>){</span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># observations in polynomial coeeficients</span></span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tic</span>()</span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">poisson_poly_approx</span>(y, R, K)</span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X)</span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a>  prior_p <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>p){</span>
+<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>    prior_p[[j]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.5</span>), <span class="fu">rep</span>(<span class="dv">0</span>, K<span class="dv">-2</span>)) <span class="co"># extend polynomial to agree with m</span></span>
+<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a>    q[[j]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">mu =</span> <span class="dv">0</span>, <span class="at">var=</span><span class="dv">1</span>) <span class="co"># initialize normal posterior</span></span>
+<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb35-40"><a href="#cb35-40" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-41"><a href="#cb35-41" aria-hidden="true" tabindex="-1"></a>  <span class="co"># iteratively update</span></span>
+<span id="cb35-42"><a href="#cb35-42" aria-hidden="true" tabindex="-1"></a>  param_history <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb35-43"><a href="#cb35-43" aria-hidden="true" tabindex="-1"></a>  param_history[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
+<span id="cb35-44"><a href="#cb35-44" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>){</span>
+<span id="cb35-45"><a href="#cb35-45" aria-hidden="true" tabindex="-1"></a>    q <span class="ot">&lt;-</span> <span class="fu">polynomial_update3</span>(m, X, prior_p, q)</span>
+<span id="cb35-46"><a href="#cb35-46" aria-hidden="true" tabindex="-1"></a>    param_history[[i<span class="sc">+</span><span class="dv">1</span>]] <span class="ot">&lt;-</span> q</span>
+<span id="cb35-47"><a href="#cb35-47" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb35-48"><a href="#cb35-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">toc</span>()</span>
+<span id="cb35-49"><a href="#cb35-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(param_history)</span>
+<span id="cb35-50"><a href="#cb35-50" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="visualize-approximation" class="level3">
 <h3 class="anchored" data-anchor-id="visualize-approximation">Visualize approximation</h3>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_e5634ff16f86d4413ad5abe3cdf0df2b">
+<p>We approximation <span class="math inline">\(f(\psi) = Pois(y=3; \lambda = e^\psi)\)</span> using polynomials of increasing degree on the interval <span class="math inline">\([-5, 5]\)</span></p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_c780e01573d5c38c3246c846ce5c7014">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">poisson_ll</span>(<span class="dv">3</span>)</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">make_approximation</span>(f, <span class="dv">10</span>, <span class="dv">12</span>, <span class="at">plot=</span>T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">poisson_ll</span>(<span class="dv">3</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co"># polynomial approximation via pracma</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>f_k2 <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyApprox</span>(f, <span class="sc">-</span>R, R, <span class="at">n =</span> <span class="dv">2</span>)<span class="sc">$</span>p)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>f_k4 <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyApprox</span>(f, <span class="sc">-</span>R, R, <span class="at">n =</span> <span class="dv">4</span>)<span class="sc">$</span>p)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>f_k8 <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyApprox</span>(f, <span class="sc">-</span>R, R, <span class="at">n =</span> <span class="dv">8</span>)<span class="sc">$</span>p)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>f_k16 <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyApprox</span>(f, <span class="sc">-</span>R, R, <span class="at">n =</span> <span class="dv">16</span>)<span class="sc">$</span>p)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> R <span class="sc">+</span> <span class="dv">2</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span>S, S, <span class="at">by=</span><span class="fl">0.1</span>)</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(f, <span class="sc">-</span>S, S)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(f_k2, x), <span class="at">col=</span><span class="st">'red'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(f_k4, x), <span class="at">col=</span><span class="st">'blue'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(f_k8, x), <span class="at">col=</span><span class="st">'green'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">polyval2</span>(f_k16, x), <span class="at">col=</span><span class="st">'orange'</span>, <span class="at">lty=</span><span class="st">'dotted'</span>)</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span>R); <span class="fu">abline</span>(<span class="at">v=</span><span class="sc">-</span>R)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">poisson_approx</span>(<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">12</span>, T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 </section>
 <section id="simulate-poisson-regression" class="level3">
@@ -1057,22 +1045,22 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 <div class="cell" data-hash="index_cache/html/simulate-lr_9459d42e5b28f7ae7507a6a53c670d5d">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>simulate_poisson_regression <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n=</span><span class="dv">500</span>, <span class="at">p=</span><span class="dv">2</span>, <span class="at">lenghtscale =</span> <span class="fl">0.8</span>, <span class="at">prior_variance=</span><span class="dv">1</span>){</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>p), <span class="at">nrow=</span>n)</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  K <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>(<span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">'-'</span>)<span class="sc">/</span>lenghtscale)<span class="sc">**</span><span class="dv">2</span>)</span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> Z <span class="sc">%*%</span> K</span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(p) <span class="sc">*</span> <span class="fu">sqrt</span>(prior_variance)</span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  logrates <span class="ot">&lt;-</span> (X <span class="sc">%*%</span> b)[, <span class="dv">1</span>]</span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="fu">length</span>(logrates), <span class="fu">exp</span>(logrates))</span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">X=</span>X, <span class="at">b=</span>b, <span class="at">logrates=</span>logrates))</span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate_poisson_regression</span>(<span class="at">p=</span><span class="dv">4</span>, <span class="at">prior_variance =</span> <span class="dv">1</span>)</span>
-<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> sim<span class="sc">$</span>y</span>
-<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> sim<span class="sc">$</span>X</span>
-<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> sim<span class="sc">$</span>b</span>
-<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>simulate_poisson_regression <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n=</span><span class="dv">500</span>, <span class="at">p=</span><span class="dv">2</span>, <span class="at">lenghtscale =</span> <span class="fl">0.8</span>, <span class="at">prior_variance=</span><span class="dv">1</span>){</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>p), <span class="at">nrow=</span>n)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  K <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>(<span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">'-'</span>)<span class="sc">/</span>lenghtscale)<span class="sc">**</span><span class="dv">2</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> Z <span class="sc">%*%</span> K</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(p) <span class="sc">*</span> <span class="fu">sqrt</span>(prior_variance)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  logrates <span class="ot">&lt;-</span> (X <span class="sc">%*%</span> b)[, <span class="dv">1</span>]</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="fu">length</span>(logrates), <span class="fu">exp</span>(logrates))</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">y=</span>y, <span class="at">X=</span>X, <span class="at">b=</span>b, <span class="at">logrates=</span>logrates))</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate_poisson_regression</span>(<span class="at">p=</span><span class="dv">4</span>, <span class="at">prior_variance =</span> <span class="dv">1</span>)</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> sim<span class="sc">$</span>y</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> sim<span class="sc">$</span>X</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> sim<span class="sc">$</span>b</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -1.3296046  0.6149598  0.7740477  0.2643521</code></pre>
@@ -1081,51 +1069,58 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 </section>
 <section id="example-1" class="level3">
 <h3 class="anchored" data-anchor-id="example-1">Example</h3>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-3_ac54fbe1220bc2095979895075922eae">
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-3_bb3fff04b22847e9d9f937e3f6de779d">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>pois_R5_K2 <span class="ot">&lt;-</span> <span class="fu">poisson_regression_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">5</span>, <span class="at">K=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>pois_R5_K2 <span class="ot">&lt;-</span> <span class="fu">poisson_regression_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">5</span>, <span class="at">K=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>6.131 sec elapsed</code></pre>
+<pre><code>6.152 sec elapsed</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>pois_R5_K4 <span class="ot">&lt;-</span> <span class="fu">poisson_regression_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">5</span>, <span class="at">K=</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>pois_R5_K4 <span class="ot">&lt;-</span> <span class="fu">poisson_regression_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">5</span>, <span class="at">K=</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>9.477 sec elapsed</code></pre>
+<pre><code>9.306 sec elapsed</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co">#pois_R5_K8 &lt;- poisson_regression_polynomial_approximation(y, X, R=5, K=8)</span></span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="co">#pois_R5_K16 &lt;- poisson_regression_polynomial_approximation(y, X, R=5, K=16)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>pois_R5_K8 <span class="ot">&lt;-</span> <span class="fu">poisson_regression_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">5</span>, <span class="at">K=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-stdout">
+<pre><code>20.818 sec elapsed</code></pre>
 </div>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-4_709d0765ce0f929fe8c2e8d7ef9081af">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
-<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(pois_R5_K2[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=2'</span>)</span>
-<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(pois_R5_K4[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=4'</span>)</span>
-<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="co">#plot_effect_posterior(pois_R5_K8[[51]], b, main='K=8')</span></span>
-<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="co">#plot_effect_posterior(pois_R5_K16[[51]], b, main='K=16')</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>pois_R5_K16 <span class="ot">&lt;-</span> <span class="fu">poisson_regression_polynomial_approximation</span>(y, X, <span class="at">R=</span><span class="dv">5</span>, <span class="at">K=</span><span class="dv">16</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>61.81 sec elapsed</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(pois_R5_K2[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=2'</span>)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(pois_R5_K4[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=4'</span>)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(pois_R5_K8[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=8'</span>)</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(pois_R5_K16[[<span class="dv">51</span>]], b, <span class="at">main=</span><span class="st">'K=16'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-4_e33d8446716552c2c16bdd2aed6215e3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(pois_R5_K2[[<span class="dv">51</span>]], sim<span class="sc">$</span>b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
-</div>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-5_09c93fa429c1566f7a302dd0d161b8e3">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_effect_posterior</span>(pois_R5_K2[[<span class="dv">51</span>]], sim<span class="sc">$</span>b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>purrr<span class="sc">::</span><span class="fu">map_dbl</span>(pois_R5_K2[[<span class="dv">51</span>]], <span class="sc">~</span>purrr<span class="sc">::</span><span class="fu">pluck</span>(.x, <span class="st">'mu'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>purrr<span class="sc">::</span><span class="fu">map_dbl</span>(pois_R5_K2[[<span class="dv">51</span>]], <span class="sc">~</span>purrr<span class="sc">::</span><span class="fu">pluck</span>(.x, <span class="st">'mu'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -1.51427519  0.50936054  0.92844494  0.08298042</code></pre>
@@ -1147,61 +1142,8 @@ q(b_j) = N(\mu_j, \sigma^2_j)
 <p>Where <span class="math inline">\(q_{\text{gauss}}\)</span> is the Gaussian distribution that minimizes the divergence to <span class="math inline">\(q_{\text{gauss}} = \arg \min_{q_g} KL(q_g ||q)\)</span>.</p>
 <p>It would be better if we could compute the moments of <span class="math inline">\(q(b_l) \propto \exp\{\sum_k \eta_k b_l^k\}\)</span>. We define the log normalizing constant <span class="math inline">\(A({\bf \eta}) = \log \int \exp\{\sum_{k=0}^K \eta_k b_l^k\} db\)</span>. Let <span class="math inline">\(f(b) = \sum_{k=0}^K \eta_k b^k - A(\eta)\)</span> so that <span class="math inline">\(q(b) = \exp\{f(b)}\)</span>.</p>
 <p>Because <span class="math inline">\(q\)</span> is in an exponential family, we know that <span class="math inline">\(\nabla_{\eta} A(\eta) = \mathbb E[T(x)] = [1, \mathbb E[b], \mathbb E[b^2], \dots, \mathbb E[b^K]]\)</span>. Is there an easy way to compute the gradient of <span class="math inline">\(A\)</span>?</p>
-<section id="quick-note-on-laplace-approximation" class="level3">
-<h3 class="anchored" data-anchor-id="quick-note-on-laplace-approximation">Quick note on Laplace approximation</h3>
-<p>Then we can compute the first and second derivatives <span class="math inline">\(f'(b) = \sum_{k=1}^K \eta_k kb^{k-1}\)</span> and <span class="math inline">\(f''(b) = \sum_{k=2}^K \eta_k k(k-1)b^{k-2}\)</span></p>
-<p>Next, we can form a quadratic approximation to <span class="math inline">\(f\)</span> around its maximum, <span class="math inline">\(x_0\)</span> (so that <span class="math inline">\(f'_0 = 0\)</span>)</p>
-<p><span class="math display">\[
-\begin{aligned}
-\hat f(x)
-&amp;= f_0  + \frac{1}{2}f''_0(x-x_0)^2 \\
-&amp;= \frac{1}{2}f''_0 x^2 + (- f''_0x_0) x + (\frac{1}{2}f''_0x_0^2 + f_0)
-\end{aligned}
-\]</span></p>
-<p>Identifying <span class="math inline">\(a = \frac{1}{2}|f''_0|\)</span>, <span class="math inline">\(b = - f''_0x_0\)</span> and <span class="math inline">\(c = \frac{1}{2}f''_0x_0^2 + f_0\)</span> we can evaluate the integral</p>
-<p><span class="math display">\[
-\int e^{-ax^2 + bx + c} dx = \sqrt{\frac{\pi}{a}} e^{\frac{b^2}{4a} + c}.
-\]</span></p>
-<div class="cell" data-hash="index_cache/html/laplace-scratch_0c7733569bac696de9d51921174587c1">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>m_post <span class="ot">&lt;-</span> qs_k10[[<span class="dv">51</span>]][[<span class="dv">1</span>]]<span class="sc">$</span>m_post</span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>points <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="at">by=</span><span class="fl">0.1</span>)</span>
-<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(points, <span class="fu">polyval2</span>(m_post, points), <span class="at">type =</span> <span class="st">'line'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in plot.xy(xy, type, ...): plot type 'line' will be truncated to first
-character</code></pre>
-</div>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/laplace-scratch-1.png" class="img-fluid" width="672"></p>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>exp_p_laplace <span class="ot">&lt;-</span> <span class="cf">function</span>(p, <span class="at">k=</span><span class="dv">0</span>){</span>
-<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="cf">function</span>(x){<span class="fu">polyval2</span>(m_post, x)}</span>
-<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  x0 <span class="ot">&lt;-</span> <span class="fu">optimize</span>(f, <span class="at">interval =</span> <span class="fu">c</span>(<span class="sc">-</span>R, R), <span class="at">maximum =</span> T)<span class="sc">$</span>maximum</span>
-<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyder</span>(<span class="fu">rev</span>(m_post)))</span>
-<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>  d2 <span class="ot">&lt;-</span> <span class="fu">rev</span>(pracma<span class="sc">::</span><span class="fu">polyder</span>(<span class="fu">rev</span>(d)))</span>
-<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>  f_x0 <span class="ot">&lt;-</span> <span class="fu">f</span>(x0)</span>
-<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>  d2_x0 <span class="ot">&lt;-</span> <span class="fu">polyval2</span>(d2, x0)</span>
-<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># coefficients</span></span>
-<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">abs</span>(d2_x0)</span>
-<span id="cb59-13"><a href="#cb59-13" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="sc">-</span> d2_x0 <span class="sc">*</span> x0</span>
-<span id="cb59-14"><a href="#cb59-14" aria-hidden="true" tabindex="-1"></a>  c <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">*</span> d2_x0 <span class="sc">*</span> x0<span class="sc">**</span><span class="dv">2</span></span>
-<span id="cb59-15"><a href="#cb59-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb59-16"><a href="#cb59-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># gaussian integral</span></span>
-<span id="cb59-17"><a href="#cb59-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exp</span>(b<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>(<span class="dv">4</span><span class="sc">*</span>a) <span class="sc">+</span> c <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(pi <span class="sc">/</span> a))</span>
-<span id="cb59-18"><a href="#cb59-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
