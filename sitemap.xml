@@ -2,22 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://karltayeb.github.io/research/polynomial_approximation/index.html</loc>
-    <lastmod>2023-03-16T14:26:30.643Z</lastmod>
+    <lastmod>2023-04-17T14:10:45.853Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/polynomial_regression_vb/index.html</loc>
-    <lastmod>2023-03-16T14:26:31.999Z</lastmod>
+    <lastmod>2023-04-17T14:10:47.219Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/research/mode_matching_rss_vb/index.html</loc>
+    <lastmod>2023-04-17T14:10:48.177Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/research/polynomial_susie/index.html</loc>
+    <lastmod>2023-04-17T14:10:48.987Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/research/constrained_multinomial_stickbreaking/index.html</loc>
+    <lastmod>2023-04-17T14:10:49.831Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/research/multinomial_stickbreaking/index.html</loc>
+    <lastmod>2023-04-17T14:10:50.738Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research.html</loc>
-    <lastmod>2023-03-16T14:26:32.676Z</lastmod>
+    <lastmod>2023-04-17T14:10:51.506Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/index.html</loc>
-    <lastmod>2023-03-16T14:26:34.950Z</lastmod>
+    <lastmod>2023-04-17T14:10:54.508Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/about.html</loc>
-    <lastmod>2023-03-16T14:26:36.700Z</lastmod>
+    <lastmod>2023-04-17T14:10:56.287Z</lastmod>
   </url>
 </urlset>

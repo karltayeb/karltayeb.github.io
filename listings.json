@@ -2,7 +2,11 @@
   {
     "listing": "/research.html",
     "items": [
+      "/research/constrained_multinomial_stickbreaking/index.html",
       "/research/polynomial_regression_vb/index.html",
+      "/research/mode_matching_rss_vb/index.html",
+      "/research/multinomial_stickbreaking/index.html",
+      "/research/polynomial_susie/index.html",
       "/research/polynomial_approximation/index.html"
     ]
   }
