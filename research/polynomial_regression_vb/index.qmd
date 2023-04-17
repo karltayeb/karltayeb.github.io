@@ -1,6 +1,6 @@
 ---
-title: "Implementing polynomial approximation VB"
-description: "Rough implimentation of of approximate VB regression, where we approximate the data likelihood with a polynomial. We implement a mean field gaussian variational approximation. We demonstrate the method on Gaussian linear model (no approximation), and Bernoulli-logit (logistic regression) and Poisson-log (poisson regression) models with varying approximation degree."
+title: "Implementation polynomial approximation VB"
+description: "Rough implementation of of approximate VB regression, where we approximate the data likelihood with a polynomial. We implement a mean field gaussian variational approximation. We demonstrate the method on Gaussian linear model (no approximation), and Bernoulli-logit (logistic regression) and Poisson-log (poisson regression) models with varying approximation degree."
 author: "Karl Tayeb"
 date: "3/15/23"
 format: 
@@ -601,11 +601,11 @@ logistic_polynomial_approximation <- function(y, X, R, K=2){
 }
 ```
 
-### Compare implimentations
+### Compare implementations
 
-The two implimentations agree!
+The two implementations agree!
 
-```{r compare-k2-and-any-k-implimentations}
+```{r compare-k2-and-any-k-implementations}
 set.seed(12)
 sim <- simulate_lr(p=3)
 y <- sim$y
@@ -647,7 +647,7 @@ plot_effect_posterior(qs_k14[[51]], b, main='K=14')
 
 ## Poisson regression example
 
-### Impliment
+### Implement
 
 ```{r}
 poisson_ll <- function(y){
@@ -774,7 +774,7 @@ purrr::map_dbl(pois_R5_K2[[51]], ~purrr::pluck(.x, 'mu'))
 
 In the above implementation we compute a polynomial proportional to the posterior density, but reduce this to a Gaussian approximation by taking a Laplace approximation.
 
-That is we want to compute
+That is we want to compute    
  
 $$
 \mathbb E [b^j] = \int_{\mathbb R} b^j q(b)

@@ -9,11 +9,13 @@ date: "3/15/23"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-:::{.hiden}
-\newcommand{\bracket}[1]{\left[ #1 \right]}
-\newcommand{\set}[1]{\left\{ #1 \right\}}
-\newcommand{\E}[2]{\mathbb E_{#1}\bracket{#2}}
-:::
+$$
+\newcommand{\curlyb}[1]{\left\{ #1 \right\}}
+\newcommand{\squareb}[1]{\left[ #1 \right]}
+\newcommand{\E}[2]{\mathbb E_{ #1 } \squareb{ #2 }}
+
+\newcommand{\bm}{{\bf m}}
+$$
 
 ## Overview
 
@@ -23,7 +25,7 @@ This is the main benefit of our approach: inference boils down to simple manipul
 
 This approach can be generalized to many likelihood (e.g. Binomial, Poisson) with various choices of link function (which relate the regression predictions to the distribution parameters)-- at least to the extent that we can develop a good polynomial approximation for each combination of likelihood and link. 
 
-Take a look at this [rough implimentation](../polynomial_regression_vb).
+Take a look at this [rough implementation](../polynomial_regression_vb).
 
 ## Global polynomial approximations
 
@@ -178,28 +180,47 @@ We may not be able to use these techniques, unless we can get an expression for 
 Here we present the variational approximation for SuSiE and explore how to perform coordinate ascent variational inference with this approximation and our polynomial likelihoods.
 
 ### Evidence lower bound, and a polynomial approximation
-We can write the log likelihood for a single observation as a function $y_i$ of a function of the linear predictor $\psi_i = \sum_{l} \psi_{li}$.
+
+We can write the log likelihood for a single observation as a function $y_i$ of a function of the linear predictor $\psi_i = \sum_{l} \psi_{li}$, then we will approximate that likelihood with a polynomial in $\psi_i$
 
 $$
-\log p (y_i | \psi_i) = l_i(\psi_i) \approx \sum_{k=0}^K a_{yk} A_k(\psi)
+\log p (y_i | \psi_i) \approx \sum_{k=0}^K m_{ik} \psi_i^k =:  l_i(\psi_i)
 $$
 
-We will take a polynomial approximation to $l(y_i; \psi_i) \approx \sum_k c_{ik} P_k(\psi_i) = f_i(\psi_i)$.
 Then we can approximate the ELBO
 
-
-```{=markdown}
-\begin{align}
-  F_1(q) &= \E{q}{\sum l_i(\psi_i)\} - KL(q || p) \\\\
-         &\approx \E{q}{\sum f_i(\psi_i)\} - KL(q || p) = F_2(q)
-\end{align}
-```
+$$
+\begin{aligned}
+F_1(q) &= \E{q}{\sum \log p (y_i | \psi_i)}- KL(q || p) \\
+       &\approx \E{q}{\sum l_i(\psi_i)} - KL(q || p) =: F_2(q)
+\end{aligned}
+$$
 
 We perform inference by selecting $q \in \mathcal Q$ to optimize $F_2$, where $\mathcal Q$ is a family of distributions.
 
 $$
 q^* = \arg\max_{q \in \mathcal Q} F_2(q)
 $$
+
+
+### Coordinate ascent variational inference
+
+So far we have approximated the evidence lower bound $F_1$ with $F_2$, a polynomial approximation in terms of the linear predictors $\psi$. To perform coordinate ascent variational inference we will write the approximate ELBO as a function of the latent effect sizes $b_l$, while marginalizing over the other latent variables.
+
+Let $\bm_i = (m_{i0}, \dots, m_{iK})$ denote the coefficients for $l_i(\psi_)$. We will need to compute $\E{q_{-l}}{ l(\psi_l + \psi_{-l})}$. We will write $ l(\psi_l; \psi_{-l}) =  l(\psi_l + \psi_{-l})$ to emphasize that we are treating the polynomial approximation to the likelihood as a function of $\psi_l$, with $psi_{-l}$ *fixed*. By expanding and collecting terms we can write $l(\psi_l; \psi_{-l}) = \sum_k  m_k^*(\psi_{-l}) \psi_l^k$. Now $ \bm^* (\psi_{-l}) = (m_k^*(\psi_{-l}))_{k=0}^K = M(\psi_{-l}) {\bf m}$ give the coefficients for a polynomial in $\psi_l$. Taking expectations
+
+$$
+\tilde l (\psi_l; q_{-l}) := \E{q_{-l}}{ l(\psi_l + \psi_{-l})} 
+= \E{q_{-l}}{ l(\psi_l; \psi_{-l})}
+= \sum_k \E{q_{-l}}{ m_k^*(\psi_{-l})} \psi_l^k = \sum_k \tilde m_k(q_{-l})\psi_l^k
+$$
+
+$\tilde l$ is a polynomial with coefficients given by $\tilde \bm = \E{q_{-l}}{M(\psi_{-l})}{\bf m}$. $M(\psi)$ is a "shift matrix" which carries out the change of variable, giving us a polynomial in $psi_l$. $M(\psi)$ is a $K\times K$ upper triangular matrix whose entries are given by binomial coefficients and powers of $\psi_{-l}$. It is easy to construct, and as long as we can compute the moments of $\psi_{-l}$, it is easy to take expectations.
+
+
+### Complexity
+
+For each observation, we compute ${\tilde \bm_i}(q_{-l})$, each consists of a matrix-vector multiplication $O(K^2n)$. Then we for each feature $j \in [p]$ we must rescale ${\tilde \bm_i}(q_{-l})$ to $\hat \bm_i(q_{-l}, x_j)$, $O(Knp)$. Finally, we sum the coefficients $O(Kn)$ to get an unormalized log posterior. We convert it to a Gaussian approximation by a root finding algorithm and evaluation of the second derivative $O(K^3)$. Finally we compute moments under the new approximation $O(K)$. We repeat this procedure for $L$ single effects for a per-iteration complexity $O(LK^2n + LKnp + LK^3)$. Assuming $n, p >> K$, $O(LKnp)$.
 
 ### SuSiE variational approximation
 
@@ -383,6 +404,17 @@ An algorithm would look like this
 1. Compute $\Psi_2$ ...
 
 Note that $\Psi_l$ is constructed by taking expectations is a particular order, or multiplying matrices in a particular order. But I think order should not matter. Is it the case that triangular matrix multiplication commutes?
+
+## Discussion
+
+### Quality of the global approximation
+
+Theorem C.3 in [[@hugginsPASSGLMPolynomialApproximate2017]] provides a bound on the Wasserstein distance between
+the exact posterior and the polynomial approximation to the posterior, "the result depends primarily on the peakedness of the approximate posterior, and the error of the approximate gradients". Informally, I suspect that the more data we accrue, and the more peaked our approximate posterior becomes, the greater demand we must put on the quality of our approximation to the log density. Imagine a situation where the true likelihood surface is flat, but looks a little bumpy due to error in the polynomial approximation. These small bumps will accumulate over a large sample size leading to a spiky posterior where it should have been flat.
+
+In contrast, the local approximations should shine as we accumulate more evidence and the likelihood becomes more peaked. This is because we can tune the local approximation to be tight where the likelihood peaks. The errors in the local approximation matter less because we don't need to stray far from where the bound is tight. Note: when the likelihood is log-concave, the local variational approximations are also concave [[@seegerSparseLinearModels2009; @challisConcaveGaussianVariational2011]]. I'll need to do some more work to understand this completely for generalized local approximations, but it is certainly the case for the logistic case. In fact, running EM with the JJ bound is a good alternative to using Newton's method to get point estimates of the MAP. Whereas Newton's method may diverge for some initialization, JJ should converge for any initialization of the variational parameters (note: check this claim).
+
+Q: Is logistic regression with a Gaussian prior/L2 penalty on the effects convex? If so, we're replacing a convex problem with a potentially multimodal one.
 
 ## Glossary
 

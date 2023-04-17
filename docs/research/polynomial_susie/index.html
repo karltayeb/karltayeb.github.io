@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Karl Tayeb">
+<meta name="dcterms.date" content="2023-03-15">
+<meta name="description" content="We extend the sum of single effects regression to support arbitrary likelihood and link function by representing (perhaps approximately) the log likelihood of each observations as a polynomial in the linear prediction. Once this approximation is made we can treat inference in multiple likelihoods with a uniform inference procedure. Furthermore, we can make the polynomial approximation arbitrarily precise by increasing the degree of the polynomial approximation.">
+
+<title>Karl’s Website - Polynomial approximation SuSiE</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Karl’s Website</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../research.html">
+ <span class="menu-text">Research Notes</span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#preliminaries" id="toc-preliminaries" class="nav-link" data-scroll-target="#preliminaries">Preliminaries</a>
+  <ul class="collapse">
+  <li><a href="#polynomial-shift" id="toc-polynomial-shift" class="nav-link" data-scroll-target="#polynomial-shift">Polynomial shift</a></li>
+  <li><a href="#polynomial-rescaling" id="toc-polynomial-rescaling" class="nav-link" data-scroll-target="#polynomial-rescaling">Polynomial rescaling</a></li>
+  </ul></li>
+  <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model">Model</a>
+  <ul class="collapse">
+  <li><a href="#polynomial-approximation-to-the-log-likelihood" id="toc-polynomial-approximation-to-the-log-likelihood" class="nav-link" data-scroll-target="#polynomial-approximation-to-the-log-likelihood">Polynomial approximation to the log-likelihood</a></li>
+  </ul></li>
+  <li><a href="#single-effect-regression-with-polynomial-approximation" id="toc-single-effect-regression-with-polynomial-approximation" class="nav-link" data-scroll-target="#single-effect-regression-with-polynomial-approximation">Single effect regression with polynomial approximation</a>
+  <ul class="collapse">
+  <li><a href="#ser-prior" id="toc-ser-prior" class="nav-link" data-scroll-target="#ser-prior">SER prior</a></li>
+  <li><a href="#polynomial-approximation-for-ser-posterior" id="toc-polynomial-approximation-for-ser-posterior" class="nav-link" data-scroll-target="#polynomial-approximation-for-ser-posterior">Polynomial approximation for SER posterior</a></li>
+  <li><a href="#variational-objective" id="toc-variational-objective" class="nav-link" data-scroll-target="#variational-objective">Variational objective</a></li>
+  <li><a href="#polynomial-to-gaussian" id="toc-polynomial-to-gaussian" class="nav-link" data-scroll-target="#polynomial-to-gaussian">Polynomial to Gaussian</a></li>
+  </ul></li>
+  <li><a href="#polynomial-susie" id="toc-polynomial-susie" class="nav-link" data-scroll-target="#polynomial-susie">Polynomial SuSiE</a>
+  <ul class="collapse">
+  <li><a href="#variational-approximation" id="toc-variational-approximation" class="nav-link" data-scroll-target="#variational-approximation">Variational approximation</a></li>
+  <li><a href="#variational-objective-1" id="toc-variational-objective-1" class="nav-link" data-scroll-target="#variational-objective-1">Variational objective</a></li>
+  <li><a href="#coordinate-ascent-in-the-approximate-elbo" id="toc-coordinate-ascent-in-the-approximate-elbo" class="nav-link" data-scroll-target="#coordinate-ascent-in-the-approximate-elbo">Coordinate ascent in the approximate ELBO</a></li>
+  <li><a href="#update-rule" id="toc-update-rule" class="nav-link" data-scroll-target="#update-rule">Update Rule</a></li>
+  <li><a href="#algorithm" id="toc-algorithm" class="nav-link" data-scroll-target="#algorithm">Algorithm</a></li>
+  <li><a href="#complexity" id="toc-complexity" class="nav-link" data-scroll-target="#complexity">Complexity</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Polynomial approximation SuSiE</h1>
+</div>
+
+<div>
+  <div class="description">
+    We extend the sum of single effects regression to support arbitrary likelihood and link function by representing (perhaps approximately) the log likelihood of each observations as a polynomial in the linear prediction. Once this approximation is made we can treat inference in multiple likelihoods with a uniform inference procedure. Furthermore, we can make the polynomial approximation arbitrarily precise by increasing the degree of the polynomial approximation.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Karl Tayeb </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 15, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>The sum of single effects (SuSiE) regression, is a regression with a SuSiE prior on the effects. For a Gaussian model with identity link, using a variational approximation that factorizes over single effects yields a fast coordinate ascent variational inference scheme which can be optimized by fitting a sequence of single effect regression (SERs). The computational simplicity of this result relies on (1) the variational approximation and (2) the fact the the log likelihood is quadratic in the regression coefficients.</p>
+<p>Here, we consider the more general case where the log-likelihood is a polynomial in the regression coefficients. We can approximate the log-likelihood of models with many choices of likelihood and link function with polynomials, so having a fast inference scheme for this case provides a uniform treatment of extensions of SuSiE to different observation models. We use the same variational approximation as in linear SuSiE. Approximating the log-likelihood as as polynomial is sufficient to</p>
+</section>
+<section id="preliminaries" class="level2">
+<h2 class="anchored" data-anchor-id="preliminaries">Preliminaries</h2>
+<section id="polynomial-shift" class="level3">
+<h3 class="anchored" data-anchor-id="polynomial-shift">Polynomial shift</h3>
+<p>Given the coefficients <span class="math inline">\({\bf a}\)</span> we would like to find the coefficients for the change of variable</p>
+<p><span class="math display">\[\phi_{\bf a}(x + y) = \phi_{{\bf b}({\bf a}, y)}(x)\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\phi_{\bf a}(x + y)
+&amp;= \sum_{m=0}^M a_m(x + y)^m \\
+&amp;= \sum_{m=0}^M a_m \sum_{k=0}^m {m \choose k} x^k y^{m-k} \\
+&amp;= \sum_{k=0}^M \left(\sum_{m=k}^M a_m {m \choose k}y^{m-k} \right) x^k \\
+&amp;= \sum_{k=0}^M {\bf b}({\bf a}, y)_k x^k, \quad  {\bf b}({\bf a}, y)_k := \left(\sum_{m=k}^M a_m {m \choose k}y^{m-k} \right)
+\end{aligned}
+\]</span> Inspecting the expression for <span class="math inline">\({\bf b}({\bf a}, y)_k\)</span> we can see that the new coefficient vector <span class="math inline">\({\bf b}({\bf a}, y)\)</span> can be written compactly in matrix form</p>
+<p><span class="math display">\[
+{\bf b}({\bf a}, y) = M(y) {\bf a}, \quad M_{ij} = {j \choose i} y^{j -i}\;  \forall j \geq i, 0 \text{ otherwise}
+\]</span> Supposing <span class="math inline">\(y\)</span> is random, we will also have need to compute the expected value of <span class="math inline">\({\bf b}({\bf a}, y)\)</span>. For <span class="math inline">\(y \sim p\)</span>, <span class="math inline">\(\mathcal M(p) = \mathbb E_p[M(y)]\)</span>, we can compute these expected coefficients</p>
+<p><span class="math display">\[
+{\bf c}({\bf a}, p) = \mathcal M(p) {\bf a}
+\]</span></p>
+</section>
+<section id="polynomial-rescaling" class="level3">
+<h3 class="anchored" data-anchor-id="polynomial-rescaling">Polynomial rescaling</h3>
+<p><span class="math display">\[\phi_{\bf a}(cx) = \phi_{{\bf d}({\bf a}, c)}(x)\]</span></p>
+<p><span class="math display">\[
+\sum_m a_m(c x)^m = \sum_m (a_m c^m) x^m = \sum_m {\bf d}({\bf a}, c)_m x^m
+\]</span></p>
+</section>
+</section>
+<section id="model" class="level2">
+<h2 class="anchored" data-anchor-id="model">Model</h2>
+<p><span class="math display">\[
+\begin{aligned}
+y_i | \mu_i &amp;\sim f(\mu_i, \theta) \\
+\mu_i &amp;= g({\bf x}^T_i \beta ) \\
+\beta &amp;\sim \text{SuSiE}(L, \{\sigma_{0l}\})
+\end{aligned}
+\]</span> <span class="math inline">\(f\)</span> is the observation model, parameterized by <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\theta\)</span>. <span class="math inline">\(g\)</span> is a link function which maps the linear predictions <span class="math inline">\(\psi_i := {\bf x}_i^T \beta\)</span> to the parameter <span class="math inline">\(\mu_i\)</span>.</p>
+<section id="polynomial-approximation-to-the-log-likelihood" class="level3">
+<h3 class="anchored" data-anchor-id="polynomial-approximation-to-the-log-likelihood">Polynomial approximation to the log-likelihood</h3>
+<p>For each observation <span class="math inline">\(y\)</span>, we can approximate the log-likelihood as a polynomial in the linear prediction. <span class="math inline">\(f\)</span> is a polynomial of degree <span class="math inline">\(M\)</span></p>
+<p><span class="math display">\[
+\log p(y | \psi) = \log f(y | g(\psi)) \approx f(\psi)
+\]</span></p>
+<p><span class="math display">\[
+f(\psi) = \sum_{m=0}^M a_m \psi^m
+\]</span></p>
+<p>There are many ways to construct this approximation. At a high level, we want the approximation to be “good” (some measure of error between the approximate log-likelihood and the exact log-likelihood is small) at plausible values of <span class="math inline">\(\psi\)</span>. So far, if have used a truncated Chebyshev series.</p>
+<p>We write <span class="math inline">\(f_i(\psi)\)</span> as the polynomial approximation for <span class="math inline">\(\log p(y_i | \psi)\)</span>. We write it’s coefficients <span class="math inline">\(\left( a_m^{(i)} \right)_{m \in [M]}\)</span>. To denote a polynomial with coefficients <span class="math inline">\({\bf a}\)</span> we will write <span class="math inline">\(\phi_{\bf a}\)</span>, e.g.&nbsp;<span class="math inline">\(f(\psi) = \phi_{\bf a}(\psi)\)</span>.</p>
+<p>We have a polynomial approximation for each observations. Let <span class="math inline">\({\bf a}_i\)</span> denote the coefficients for observations <span class="math inline">\(i\)</span>. and <span class="math inline">\(A\)</span> be the <span class="math inline">\(n \times m\)</span> matrix where each row corresponds to an observation.</p>
+</section>
+</section>
+<section id="single-effect-regression-with-polynomial-approximation" class="level2">
+<h2 class="anchored" data-anchor-id="single-effect-regression-with-polynomial-approximation">Single effect regression with polynomial approximation</h2>
+<section id="ser-prior" class="level3">
+<h3 class="anchored" data-anchor-id="ser-prior">SER prior</h3>
+<p>The SER prior <span class="math inline">\(\beta \sim SER(\sigma_0^2, \pi)\)</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\beta = b\gamma\\
+b \sim N(0, \sigma_0^2) \\
+\gamma \sim \text{Mult}(1, \pi)
+\end{aligned}
+\]</span></p>
+</section>
+<section id="polynomial-approximation-for-ser-posterior" class="level3">
+<h3 class="anchored" data-anchor-id="polynomial-approximation-for-ser-posterior">Polynomial approximation for SER posterior</h3>
+<p>The SER follows from <span class="math inline">\(p\)</span> univariate regressions</p>
+<p><span class="math display">\[
+\begin{aligned}
+p(b | {\bf y}, X, \gamma=j, \sigma^2_0)
+  &amp;= p(b | {\bf x}_j, {\bf y}, \sigma^2_0) \\
+  &amp;\propto p({\bf y}, b| {\bf x_j}, \sigma^2_0) \\
+  &amp;\approx \exp\{ \sum_i \phi_{\bf a_i}(x_{ij} b) + \log p(b)\}
+\end{aligned}
+\]</span></p>
+<p>Supposing <span class="math inline">\(\log p(b) \approxeq \phi_{\bf \rho}(b)\)</span> for some coefficients <span class="math inline">\(\rho\)</span>, the unnormalized log posterior density can be written as a degree <span class="math inline">\(M\)</span> polynomial with coefficients <span class="math inline">\({\bf f}(A, {\bf x}_j, \rho)\)</span> defined below:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\sum_i \phi_{\bf a_i}(x_{ij} b) + \phi_{\bf \rho}(b) &amp;= \sum_i \phi_{{\bf d}({\bf a}_i, x_{ij})}(b) + \phi_{\bf \rho}(b), \\
+&amp;= \phi_{{\bf f}(A, {\bf x}_j, \rho)}(b), \quad {\bf f}(A, {\bf x}_j, \rho) := \sum_i {\bf d}({\bf a}_i, x_{ij}) + \rho. \\
+\end{aligned}
+\]</span></p>
+<p>For clarity we write <span class="math inline">\({\bf f}_j\)</span> for <span class="math inline">\({\bf f}(A, {\bf x}_j, \rho)\)</span>. The posterior density is <span class="math inline">\(q(b) = \frac{1}{Z_j}\exp\{\phi_{{\bf f}_j}(b)\}\)</span> where <span class="math inline">\(Z_j = \int_{\mathbb R} \exp\{\phi_{{\bf f}_j}(b)\} db\)</span>. The normalizing constant may be computed numerically. Or, we can take a Gaussian approximation for <span class="math inline">\(q(b)\)</span>.</p>
+<p><span class="math display">\[
+\begin{aligned}
+p(\gamma = j | {\bf y}, X, \sigma^2_0)
+&amp;\propto p({\bf y} | {\bf x}_j, \gamma = j) \pi_j \\
+&amp;= \left(\int p({\bf y}, b | {\bf x}_j, \gamma = j) db\right) \pi_j \\
+&amp;= \left(\int \exp\{\sum_i \phi_{{\bf a}_i} (x_{ij} b) + \phi_{\rho}(b) \}\right) \pi_j \\
+&amp;= \left(\int \exp\{\phi_{{\bf f}_j}(b) \} db\right) \pi_j = Z_j \pi_j \\
+\end{aligned}
+\]</span></p>
+<p><span class="math display">\[\alpha_j := q(\gamma = j) = \frac{Z_j \pi_j}{\sum_k Z_k \pi_k}\]</span></p>
+</section>
+<section id="variational-objective" class="level3">
+<h3 class="anchored" data-anchor-id="variational-objective">Variational objective</h3>
+<p>It will be useful to write out the variational objective for the SER:</p>
+<p><span class="math display">\[
+F_{SER}(q| {\bf y}, X, \sigma^2_0) = \mathbb E_q[\log p({\bf y} | X, b, \gamma, \sigma^2_0)] - KL[q || p].
+\]</span> The exact posterior maximizes <span class="math inline">\(F_{SER}\)</span>, that is</p>
+<p><span class="math display">\[
+p_{post} = \arg\max_q F_{SER}(q| {\bf y}, X, \sigma^2_0).
+\]</span></p>
+<p>We can approximate the variational objective by substituting our polynomial approximation</p>
+<p><span class="math display">\[
+\hat F_{SER}(q| A, X, \sigma^2_0) = \mathbb E_q \left[
+\sum_i \phi_{\exp\{{\bf a}_i}(X (b\gamma)) + \log p(b | \sigma^2_0) + \log p(\gamma | \pi)\}
+\right]  - KL[q || p].
+\]</span></p>
+<p>As discussed above, <span class="math inline">\(q(b | \gamma) \propto \exp\{\phi_{{\bf f}_j}(b)\}\)</span> and <span class="math inline">\(q(\gamma = j) = \frac{Z_j}{\sum_k Z_k}\)</span>.</p>
+<p>Let <span class="math inline">\(SER(A, X, \sigma^2_0, \pi)\)</span> be a function that returns <span class="math inline">\(q\)</span>.</p>
+</section>
+<section id="polynomial-to-gaussian" class="level3">
+<h3 class="anchored" data-anchor-id="polynomial-to-gaussian">Polynomial to Gaussian</h3>
+<p>For the extention to SuSiE, we are going to need to compute <span class="math inline">\(\mu_j^k = \mathbb E[b^k | \gamma = j] = \int_{\mathbb R} b^k \exp\{\phi_{{\bf f}(A, {\bf x}_j, \rho)}(b)\} db\)</span>. We can ensure that this function is integrable by making selecting polynomial approximations <span class="math inline">\({\bf a}_i\)</span> which are of even degree and <span class="math inline">\(a_{iM} &lt; 0\)</span>. This ensures that the leading coefficient of <span class="math inline">\({\bf f}\)</span> is negative and that <span class="math inline">\(e^{\bf f}\)</span> decays. However, this integral may not be available analytically in general.</p>
+<p>However, if <span class="math inline">\(\phi_{\bf f}\)</span> is degree <span class="math inline">\(2\)</span>, this is a special case where the moments of a Gaussian distribution can be computed analytically. This motivates us to “approximate the approximation”.</p>
+<p>We take a Laplace approximation to <span class="math inline">\(\phi_{\bf f}\)</span>. Currently I approximate the degree <span class="math inline">\(M\)</span> polynomial <span class="math inline">\(\phi_{\bf f}\)</span> with the degree <span class="math inline">\(2\)</span> polynomial by the following: first we search for the mode of <span class="math inline">\(\phi_{\bf f}\)</span> e.g.&nbsp;by finding the roots of <span class="math inline">\(\phi_{\bf f}^\prime\)</span> and selecting the one that maximizes <span class="math inline">\(\phi_{\bf f}\)</span> (although there may be cheaper ways to do this?). Then, we take a second order Taylor series expansion around the mode.</p>
+<p>It’s worth noting that these two levels of approximation result in a different strategy than taking a “global” second order approximation directly, or a Laplace approximation <span class="math inline">\(\log p(y, \beta) \rightarrow {\bf f} \rightarrow {\bf g}\)</span>. “Laplace approximation of a degree-<span class="math inline">\(M\)</span> polynomial approximation” is a local approximation around the approximate mode. Directly applying Laplace approximation would result in a local approximation around the exact mode. We would prefer the latter except that (1) the polynomial approximation provides the computational simplifications we need to extend to SuSiE and (2) finding the posterior mode and it’s second derivative may be more expensive in the general case.</p>
+</section>
+</section>
+<section id="polynomial-susie" class="level2">
+<h2 class="anchored" data-anchor-id="polynomial-susie">Polynomial SuSiE</h2>
+<section id="variational-approximation" class="level3">
+<h3 class="anchored" data-anchor-id="variational-approximation">Variational approximation</h3>
+<p>We will use the variational approximation that factorizes over single effects. This is the same variational approximation used in linear SuSiE</p>
+<p><span class="math inline">\(\beta_l = \gamma_l b_l\)</span> <span class="math display">\[q(\beta_1, \dots, \beta_L) = \prod_l q(\beta_l)\]</span></p>
+</section>
+<section id="variational-objective-1" class="level3">
+<h3 class="anchored" data-anchor-id="variational-objective-1">Variational objective</h3>
+<p>We want to find <span class="math inline">\(q\)</span> that optimizes the <strong>evidence lower bound</strong> (ELBO) <span class="math inline">\(F\)</span></p>
+<p><span class="math display">\[
+F_{\text{SuSiE}}(q| {\bf y}, X, \{\sigma^2_{0l}\}, \{\pi_l\}) = \mathbb E_q[\sum \log p(y_i | {\bf x}_i, \beta)] - \sum KL[q(\beta_l) || p(\beta_l | \sigma^2_{0l}, \pi_l)]
+\]</span></p>
+<p>Evaluating the expectations <span class="math inline">\(\mathbb E_q[\log p(y_i | {\bf x}_i, \beta)]\)</span> is generally hard, we make progress by substituting the polynomial approximation, we denote the approximate ELBO <span class="math inline">\(\hat F\)</span>.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\hat F_{\text{SuSiE}}(q| A, X, \{\sigma^2_{0l}\}, \{\pi_l\})
+&amp;= \mathbb E_q[\sum_i \phi_{{\bf a}_i}({\bf x}_i^T \beta)]
+- \sum KL[q(\beta_l) || p(\beta_l | \sigma^2_{0l}, \pi_l)]
+\end{aligned}
+\]</span></p>
+</section>
+<section id="coordinate-ascent-in-the-approximate-elbo" class="level3">
+<h3 class="anchored" data-anchor-id="coordinate-ascent-in-the-approximate-elbo">Coordinate ascent in the approximate ELBO</h3>
+<p>With <span class="math inline">\(\psi_{li} := {\bf x}_i^T \beta_l\)</span> and <span class="math inline">\(\psi_i = {\bf x}_i^T \beta = \sum {\bf x}_i^T \beta_l = \sum_l \psi_{li}\)</span> and <span class="math inline">\(\psi_{-li} = \psi_i - \psi_{li}\)</span>.</p>
+<p>Consider the approximate ELBO just as a function of <span class="math inline">\(q_l\)</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\hat F_{\text{SuSiE},l}(q_l| A, X,  q_{-l}, \sigma^2_{0l}, \pi_l)
+= \mathbb E_{q_l} \left[
+    \mathbb E_{q_{-l}} \left[
+      \sum_i \phi_{{\bf a}_i}(\psi_{li} + \psi_{-li})
+    \right]
+\right] - KL \left[p(\beta_l) || q(\beta_{-l})\right] + \kappa
+\end{aligned}
+\]</span></p>
+<p>Where <span class="math inline">\(\kappa\)</span> is a constant that does not depend on <span class="math inline">\(q_l\)</span> (note: it does depend on <span class="math inline">\(\{\sigma^2_{0l}\}, \{\pi_l\}\)</span>, but they are not written in the arguments to <span class="math inline">\(\hat F_{\text{SuSiE},l}\)</span>. We will need to evaluate <span class="math inline">\(\mathbb E_{q_{-l}}[\phi_{\bf a_i}(\psi_{li} + \psi_{-li})]\)</span> for each <span class="math inline">\(i\)</span>. Focusing on a single observation</p>
+<p><span class="math display">\[
+\mathbb E_{q{-l}} \left[\phi_{\bf a_i}(\psi_{li} + \psi_{-li})\right]
+= \mathbb E_{q_{-l}} \left[\phi_{{\bf b}({\bf a}, \psi_{-li})}(\psi_{li})\right] = \phi_{{\bf c}({\bf a_i}, q_{-l})}(\psi_{li})
+\]</span></p>
+<p>We will write <span class="math inline">\({\bf b}_{li} = {\bf b}({\bf a}, \psi_{-li})\)</span> and <span class="math inline">\({\bf c}_{li} = {\bf c}({\bf a_i}, q_{-l})\)</span>, Indicating that they are the coefficient for an <span class="math inline">\(M\)</span> degree polynomial in <span class="math inline">\(\psi_{li}\)</span>.</p>
+<p>Revisiting the approximate ELBO we see</p>
+<p><span class="math display">\[
+\begin{aligned}
+\hat F_{\text{SuSiE},l}(q_l| A, X,  q_{-l})
+&amp; = \mathbb E_{q_l} \left[
+    \mathbb E_{q_{-l}} \left[
+      \sum_i \phi_{{\bf a}_i}(\psi_{li} + \psi_{-li})
+    \right]
+\right] - KL \left[q(\beta_l) || p(\beta_{-l} | \sigma^2_{0l}, \pi_l)\right] + \kappa \\
+&amp;= \left(\mathbb E_{q_l} \left[
+  \sum_i \phi_{{\bf c}_{li}}(\psi_{li})
+\right] - KL \left[q(\beta_l) || p(\beta_{-l} | \sigma^2_{0l}, \pi_l)\right] \right)  + \kappa \\
+&amp;= \hat F_{\text{SER}}(q_l | C_{l}, X, \sigma^2_{0l}, \pi_l) + \kappa
+\end{aligned}
+\]</span></p>
+<p>We can see that with respect to the <span class="math inline">\(q_l\)</span> the SuSiE approximate ELBO is equal, up to a constant, to the SER approximate ELBO, for a new set of coefficients <span class="math inline">\(C_l\)</span>, which depend on <span class="math inline">\(q_{-l}\)</span>. It follows that the coordinate ascent update for <span class="math inline">\(q_l\)</span> is achieved by fitting the polynomial approximate SER with coefficients <span class="math inline">\(C_l\)</span>.</p>
+<p>This is analagous to how we fit linear SuSiE by a sequence of SERs: we can fit the polynomial approximate SuSiE with a sequence of polynomial approximate SERs. Rather than “residualizing”, we fit the polynomial approximate SER with coefficients <span class="math inline">\(C_l\)</span>.</p>
+<p>The crux of this approach is having a fast way to compute <span class="math inline">\(C_l\)</span>.</p>
+</section>
+<section id="update-rule" class="level3">
+<h3 class="anchored" data-anchor-id="update-rule">Update Rule</h3>
+<p>At iteration <span class="math inline">\(t\)</span> we have the current variational approximation</p>
+<p><span class="math display">\[
+q^{(t)} = \prod q_l^{(t)}
+\]</span></p>
+<p>Define <span class="math display">\[
+{\bf c}_i^{(0)} := \mathcal M(\psi_i, q^{(0)}) {\bf a}_i
+\]</span></p>
+<p>Note that <span class="math inline">\(\mathcal M(\psi_i, q^{(0)})\)</span> gives the expected shift matrix that removes the entire linear prediction, so that <span class="math inline">\({\bf c}_{i0}^{(0)} = \phi_{\bf c_i^{(0)}}(0) = \mathbb E_{q^{(0)}}[\log p(y_i | \psi_i)]\)</span>.</p>
+<p>At iteration <span class="math inline">\(t\)</span>, our coordinate ascent updates require <span class="math inline">\({\bf c}_{li}^{(t)} = \mathcal M(\psi_{li}, q_{-l}^{(t)})\)</span>. However, we know that:</p>
+<p><span class="math display">\[
+{\bf c}_{i}^{(t)} = \mathcal M(\psi_{li}, q_l^{(t)}){\bf c}_{li}^{(t)} \implies {\bf c}_{li}^{(t)} = \mathcal M(\psi_{li}, q_l^{(t)})^{-1}{\bf c}_{i}^{(t)}
+\]</span></p>
+<p>We can use <span class="math inline">\(C_l^{(t)}\)</span> to compute <span class="math inline">\(q_l^{(t+1)}\)</span> and then</p>
+<p><span class="math display">\[
+{\bf c}_{i}^{(t)} \leftarrow \mathcal M(\psi_{li}, q_l^{(t + 1)}){\bf c}_{li}^{(t)}
+\]</span></p>
+<p>so, by solving a triangular systems, and multiplying by upper triangular matrices <span class="math inline">\(\mathcal M\)</span> we can “efficiently” move between the coefficient representations needed for each SER update. I worry that <span class="math inline">\(\mathcal M_l\)</span> may be poorly conditioned resulting in numerical instability, but I have not seen it in toy examples yet.</p>
+</section>
+<section id="algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="algorithm">Algorithm</h3>
+<p>Initialize <span class="math inline">\(C^{(0)} = A\)</span> and <span class="math inline">\(q^{(0)} = \prod q_l^{(0)}\)</span> such that <span class="math inline">\(\mathbb E[\psi_l^k] = 0\;\; \forall l, k\)</span>.</p>
+<p>For <span class="math inline">\(t = 1, 2, \dots\)</span>:</p>
+<ol type="1">
+<li><p><span class="math inline">\(C^{(t)} = C^{(t-1)}\)</span></p></li>
+<li><p>For each <span class="math inline">\(l \in [L]\)</span>:</p>
+<ol type="1">
+<li><p>Compute <span class="math inline">\(C_l^{(t)}\)</span> by <span class="math inline">\({\bf c}_{li}^{(t)} \leftarrow \mathcal M(\psi_{li}, q_l^{(t-1)})^{-1} {\bf c}_i^{(t)}\)</span> for <span class="math inline">\(i \in [n]\)</span></p></li>
+<li><p><span class="math inline">\(q_l^{(t)} \leftarrow \text{SER}(C_l^{(t)}, X, \sigma_{0l}^2, \pi_l)\)</span></p></li>
+<li><p>Update <span class="math inline">\(C^{(t)}\)</span> by <span class="math inline">\({\bf c}_i^{(t)} \leftarrow \mathcal M(\psi_{li}, q^{(t)}_l) {\bf c}^{(l)}_i\)</span></p></li>
+</ol></li>
+</ol>
+</section>
+<section id="complexity" class="level3">
+<h3 class="anchored" data-anchor-id="complexity">Complexity</h3>
+<p>Let’s break down the complexity of the inner loop (that is, updating <span class="math inline">\(q_l\)</span> and the requisite computations for the next run of the loop).</p>
+<p><strong>Updating coefficients</strong>: Translating between polynomials <span class="math inline">\(O(M^2)\)</span> to construct <span class="math inline">\(\mathcal M\)</span> and carry out matrix-vector multiplication or solve the triangular system. This is per observations, so <span class="math inline">\(O(nM^2)\)</span></p>
+<p><strong>Fitting SER</strong> Once we computed the coefficients we update the SER in <span class="math inline">\(O(Mnp)\)</span> (we just sum the coefficients to construct the polynomial posterior for each variable). Then <span class="math inline">\(O(pM^3)\)</span> to perform root finding and make the Gaussian approximation for <span class="math inline">\(q_l\)</span>.</p>
+<p><strong>Computing moments</strong> We need to evaluate the moments <span class="math inline">\(\mathbb E[\psi_{li}^k]\)</span> for <span class="math inline">\(k=1, \dots, M-1\)</span>. This is fast if <span class="math inline">\(q_l\)</span> is Gaussian but slower if not… <span class="math inline">\(O(nM + ?)\)</span>, where <span class="math inline">\(?\)</span> is for computing <span class="math inline">\(\mu_l^k = \mathbb E_{q_l}[\beta_l]\)</span> <span class="math inline">\(O(npM)\)</span>?</p>
+<p>Total <span class="math inline">\(O(M^2n + Mnp + M^3p)\)</span></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

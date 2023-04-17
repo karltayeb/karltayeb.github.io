@@ -1,0 +1,278 @@
+---
+title: "Mode seeking in mean field VB for RSS + sparse prior"
+description: "Using polynomial approximations to perform Bayesian regression"
+author: "Karl Tayeb"
+date: "4/1/23"
+format:
+  html: 
+    include-in-header: 'macros.tex'
+---
+
+::: {.content-hidden}
+$$
+\newcommand{\curlyb}[1]{\left\{ #1 \right\}}
+\newcommand{\squareb}[1]{\left[ #1 \right]}
+\newcommand{\E}[2]{\mathbb E_{#1} \squarb{#2}}
+
+\newcommand{\sN}{\mathcal N}
+$$
+:::
+
+The RSS likelihood relates observed marginal effects to the unobserved effects of a joint model
+
+\begin{align}
+\hat \beta \sim \sN(SRS^{-1} \beta, SRS) \\
+\beta \sim g(\cdot)
+\end{align}
+
+Where we consider the problem of putting an i.i.d. prior on the entries of $\beta$
+and using a mean field approximation for variational inference.
+
+Specifically, we put a spike and slab prior on $\beta_j = b_j\gamma_j$ for $j \in [p]$. Where $b_j \sim N(0, \sigma^2)$ gives the distribution of non-zero effects, and and $\gamma_j \sim Bernoulli(\pi)$. That is, the effect is non-zero with probability $\pi$.
+
+The problem we demonstrate, is that due to the mode matching behavior of the "reverse" KL divergence, which is minimized in variational inference, the posterior on $q(\gamma_1, \dots, \gamma_p)$ will tend to concentrate instead of accurately representing uncertainty. Furthermore, due to strong dependence among the posterior means.
+
+We work with a simplified version of RSS assuming we observe $z$-scores $\hat z$. 
+
+$$
+\begin{aligned}
+\hat z &\sim \sN(Rz, R) \\
+z_i &\sim \pi_0 \delta_0 + \pi_1 \sN(0, \sigma^2)
+\end{aligned}
+$$
+
+$$
+q(z, \gamma) = \prod_j q(z_j, \gamma_j)
+$$
+
+$$
+\begin{aligned}
+ELBO(q_j) &= \E{q_{-j}}{\log p(\hat z| z, R) + \log p(z_j) - \log q(b_l, \gamma_l)} + H(q_l) \\
+&= \hat z_j (b_j \gamma_j) - \frac{1}{2} \left[ (b_j \gamma_j)^2 + 2 (b_j \gamma_j) \sum_{i \neq j} R_{ij} \E{q_{-j}}{z_j} \right] + \log p(b_l | \gamma_l) + \log p(\gamma_l) + H(q_l) + C
+\end{aligned}
+$$
+
+Then $q(b_l | \gamma_l = 1) = N(\frac{\nu_j}{\tau_j}, \tau^{-1}_j)$ 
+Where $\nu_j = \hat z_j - \sum_{i\neq j} R_{ij} \alpha_i \mu_i$, and $\tau_j = 1 + \sigma^{-2}_0$.
+
+It's easy to see that the best choice for $q(b_l | \gamma_l = 0)$ is the prior, since all fo the data terms disappear, also noted here [[@titsiasDoublyStochasticVariational]]
+
+And $q(\gamma_j) = Bernoulli(\alpha_j)$, where $\log \left(\frac{\alpha_j}{1 - \alpha_j}\right) = \hat z \mu_j - \frac{1}{2} \left[\mu^2_j + \sigma^2_j + 2 \mu_j \sum_{i\neq j} R_{ij} \mu_i \alpha_i \right] + \log\left(\frac{\pi}{1 - \pi}\right)$.
+
+### Simulation
+
+```{r cavi_update}
+#' @param q q(mu, var, alpha)
+#' @param R LD matrix-- assumes diag(R) = rep(1, p)
+#' @param tau0 prior effect variance
+#' @param prior_logit p-vector with prior log odds for gamma = 1
+rssvb <- function(zhat, q, R, tau0, prior_logit){
+  # unpack
+  mu <- q$mu
+  var <- q$var
+  alpha <- q$alpha
+
+  p <- length(zhat)
+  psi <- (R %*% (mu * alpha))[,1] # prediction
+  for(i in 1:p){
+    # remove effect of this variable
+    psi <- psi - R[i,] * (mu[i]*alpha[i])
+
+    # compute q(beta | gamma = 1)
+    nu <- zhat[i] - psi[i]
+    tau <- 1 + tau0
+    mu[i] <- nu/tau
+    var[i] <- 1/tau
+
+    # logit <- zhat[i] * mu[i]
+    #   - 0.5 * (psi[i] * mu[i] +  mu[i]^2 + var[i])
+    #   -0.5 * tau0 * (mu[i]^2 + var[i]) + prior_logit[i]
+    logit <- 0.5 * (mu[i]^2/var[i] + log(var[i]) + log(tau0)) + prior_logit[i]
+    alpha[i] <- 1/(1 + exp(-logit))
+
+    alpha[i]
+    psi <- psi + R[i,] * (mu[i]*alpha[i])
+  }
+  return(list(mu=mu, var=var, alpha=alpha))
+}
+```
+
+
+```{r sim-funtions}
+sim_zscores <- function(n, p, effect=5, ls=5, idx=1){
+  X <- logisticsusie:::sim_X(n=n, p = p, length_scale = ls)
+  R <- cor(X)
+  z <- rep(0, p)
+  z[idx] <- effect
+  zhat <- (R %*% z)[,1] + mvtnorm::rmvnorm(1, sigma=R)[1,]
+  return(list(zhat = zhat, z=z, R=R))
+}
+
+init_q <- function(p){
+  q = list(
+    mu = rep(0, p),
+    var = rep(1, p),
+    alpha = rep(1/p, p)
+  )
+  return(q)
+}
+
+#' Simple z-score simulation
+#' @param effect controls the size of the "causal z-score"
+#' @param ls controls the degree of LD
+run_sim <- function(n = 100, p = 50, tau0=1, prior_logit = -3, effect=5, ls=5, idx=1){
+  sim <- sim_zscores(n = n, p = p, effect=effect, ls=ls, idx=idx)
+  q <- init_q(p)
+  prior_logit <- rep(prior_logit, p)
+  for(i in 1:100){
+    q <- with(sim, rssvb(zhat, q, R, tau0, prior_logit))
+  }
+  
+  sim$q <- q
+  return(sim)
+}
+```
+
+
+For 100 independent simulations, we simulate $50$ dependent $z$-scores. The true non-zero $z$-score is at index $10$ with $\mathbb E[\hat z_{10}] = 5$. However, over half the time, the VB approximation confidently selects another nearby feature.
+
+```{r sims}
+set.seed(11)
+
+p2lo <- function(p){log(p/(1-p))} 
+prior_logit <- p2lo(1/100)
+
+sims <- list()
+sims$low <- list(sims = purrr::map(1:100, ~run_sim(p = 100, tau0=0.1, prior_logit = -3.9, effect = 10, ls = 5, idx=10)))
+sims$med <- list(sims = purrr::map(1:100, ~run_sim(p = 100, tau0=0.1, prior_logit = -3.9, effect = 10, ls = 10, idx=10)))
+sims$high <- list(sims = purrr::map(1:100, ~run_sim(p = 100, tau0=0.1, prior_logit = -3.9, effect = 10, ls = 50, idx=10)))
+```
+
+
+```{r sims}
+comp_max_idx <- function(sims){
+  purrr::map_int(1:length(sims), ~which.max(sims[[.x]]$q$alpha))
+}
+
+get_alpha_idx <- function(sims, idx=1){
+  purrr::map_dbl(1:length(sims), ~sims[[.x]]$q$alpha[idx])
+}
+
+sims$low$max_idx <- comp_max_idx(sims$low$sims)
+sims$med$max_idx <- comp_max_idx(sims$med$sims)
+sims$high$max_idx <- comp_max_idx(sims$high$sims)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+R <- sims$low$sims[[1]]$R
+ldlow <- reshape2::melt(R[1:20, 1:20], varnames=c('x', 'y')) %>%
+  ggplot(aes(x=x, y=y, fill=value)) + 
+  geom_tile() + 
+  scale_fill_gradient2(low='red', mid='white', high='black', midpoint = 0) +
+  theme_void()
+
+plot_hist <- function(sims, idx){
+  alpha<- get_alpha_idx(sims, idx)
+  hist <- data.frame(x=alpha) %>% ggplot(aes(x=x)) + 
+    geom_histogram() + theme_bw() + 
+    xlab('PIP of Causal SNP')
+  hist
+}
+
+histlow <- plot_hist(sims$low$sims, 10)
+histmed <- plot_hist(sims$med$sims, 10)
+histhigh <- plot_hist(sims$high$sims, 10)
+```
+
+
+```{r}
+plot_ld_heatmap <- function(sims){
+  R <- sims[[1]]$R
+  ldheatmap <- reshape2::melt(R[1:20, 1:20], varnames=c('x', 'y')) %>%
+    ggplot(aes(x=x, y=y, fill=value)) + 
+    geom_tile() + 
+    scale_fill_gradient2(low='red', mid='white', high='black', midpoint = 0) +
+    theme_void() + theme(legend.position="none")
+  return(ldheatmap)
+}
+
+ldlow <- plot_ld_heatmap(sims$low$sims)
+ldmed <- plot_ld_heatmap(sims$med$sims)
+ldhigh <- plot_ld_heatmap(sims$high$sims)
+```
+
+
+```{r}
+plot_grid(
+  histlow, histmed, histhigh,
+  ldlow, ldmed, ldhigh,
+  labels=c('LD-low', 'LD-med', 'LD-high'),
+  nrow=2, label_x = 0, label_y=3)
+```
+
+```{r}
+library(ggplot2)
+library(cowplot)
+
+p1 <- ggplot(mtcars, aes(disp, mpg)) + 
+  geom_point()
+p2 <- ggplot(mtcars, aes(qsec, mpg)) +
+  geom_point()
+
+plot_grid(p1, p2, labels = c('A', 'B'))
+```
+
+
+
+```{r sims}
+alpha_lowld<- purrr::map_dbl(1:100, ~sim_lowld[[.x]]$q$alpha[10])
+alpha_highld<- purrr::map_dbl(1:100, ~sim_highld[[.x]]$q$alpha[10])
+
+hist(alpha_lowld)
+hist(alpha_highld)
+
+table(max_idx)
+```
+
+### Many small effects vs a few large effects
+
+The interpretation of $\sigma_0^2$ depends a lot on how polygenic the trait is.
+Even though we only simulate one non-zero effect, if we use a prior $\pi_1 >> 0$ the model approaches a mean field approximation of ridge regression. Since ridge can estimate many small effects we get less shrinkage than if we enforce sparse architecture with $\pi_1 \approx 0$. 
+
+```{r}
+posterior_mean <- function(sim){
+  return((sim$R %*% (sim$q$mu * sim$q$alpha))[, 1])
+}
+
+shrinkage_plot <- function(sims, ...){
+  lims <- range(purrr::map(1:length(sims), ~sims[[.x]]$zhat))
+  plot(
+    sims[[1]]$zhat,
+    posterior_mean(sims[[1]]),
+    xlim = c(-4, 7),
+    ylim = c(-4, 7),
+    xlab = 'zhat',
+    ylab = 'posterior mean z',
+    ...
+  )
+  for(i in 1:100){
+    points(sims[[i]]$zhat, posterior_mean(sims[[i]]))
+  }
+  abline(0, 1, col='red')
+}
+
+set.seed(10)
+
+sim_sparse <- purrr::map(1:100, ~run_sim(tau0=0.1, prior_logit = -3))
+sim_poly <- purrr::map(1:100, ~run_sim(tau0=0.1, prior_logit = 3))
+
+par(mfrow=c(1,2))
+shrinkage_plot(sim_sparse, main='Sparse')
+shrinkage_plot(sim_poly, main='Polygenic')
+```
+
+
+

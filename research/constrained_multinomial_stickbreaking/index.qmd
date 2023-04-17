@@ -1,0 +1,124 @@
+---
+title: "Constrained multinomial stick-breaking"
+description: "Multinomial stickbreaking is an easy"
+author: "Karl Tayeb"
+date: "4/1/23"
+format:
+  html: 
+    include-in-header: 'macros.tex'
+---
+
+## Demo
+
+```{r}
+sigmoid <- function(x){1/(1 + exp(-x))}
+
+tilde_pi2pi <- function(tpi){
+  tmp <- c(1, head(cumprod(1 - tpi), -1))
+  pi <- tmp * tpi
+  pi <- c(pi, (1 - sum(tmp * pi)))
+  return(pi)
+}
+
+make_pi <- function(K, b0, b, x){
+  psi <-  do.call(cbind, purrr::map(b0, ~b + x + .x))
+  tilde_pi <- sigmoid(psi)
+  tpi <- tilde_pi[12, ]
+  pi <- do.call(rbind, purrr::map(1:nrow(tilde_pi), ~tilde_pi2pi(tilde_pi[.x,])))
+  return(pi)
+}
+
+plot_pi <- function(pi, idx, x){
+  par(mfrow = c(1, length(idx)))
+  K <- ncol(pi)
+  for(i in idx){
+    plot(1:K, pi[i,], type = 'b', xlab = 'K', ylab = 'prob', main=paste0('x = ', x[i]))
+  }
+}
+```
+
+
+### Shared
+
+$\psi_k \equiv \psi\; \forall\  k \in[0, K-1]$ 
+
+```{r}
+#| fig-height: 2
+K <- 20
+b0 <- rep(0, K)
+b <- 1
+x <- seq(-3, 3.2, by=0.2)
+pi <- make_pi(K, b0, b, x)
+plot_pi(pi, c(6, 11, 21, 26), x)
+```
+
+### Fixed prediction, seperate intercept
+
+```{r}
+K <- 10
+b0 <- rep(0, K)
+b <- 1
+x <- seq(-3, 3, by=0.2)
+pi <- make_pi(K, b0, b, x)
+plot_pi(pi, c(6, 11, 21, 26), x)
+```
+
+
+```{r}
+K <- 10
+b0 <- rnorm(10)
+b <- 1
+x <- seq(-3, 3, by=0.2)
+pi <- make_pi(K, b0, b, x)
+plot_pi(pi, c(6, 11, 21, 26), x)
+```
+
+
+```{r}
+K <- 10
+b0 <- 1:K
+b <- 1
+x <- seq(-5, 5, by=0.1)
+pi <- make_pi(K, b0, b, x)
+plot(pi[40,])
+```
+
+```{r}
+K <- 10
+b0 <- rnorm(K)
+b <- 1
+x <- seq(-5, 5, by=0.1)
+pi <- make_pi(K, b0, b, x)
+
+par(mfrow = c(2, 3))
+plot(pi[10,])
+plot(pi[20,])
+plot(pi[30,])
+plot(pi[40,])
+plot(pi[50,])
+plot(pi[60,])
+```
+
+
+## Comparison to propotional-odds
+
+In the ordered logit model, we specify a set of "thresholds"
+$ \theta_1 < \theta_2 <  \dots < \theta_K$, and a vector of effects $\beta$ so 
+that,
+
+$$
+Pr(y \leq i) = \sigma(\theta_i - \beta^T {\bf x})
+$$
+
+In comparison, the stick breaking model proposed here also has a set of intercept terms
+$\{\theta_1, \dots, \theta_K\}$ and a set of coefficients $\beta$ so that
+
+$$
+Pr(y = i | y \geq i) =  \sigma(\theta_i - \beta^T {\bf x})
+$$
+
+Evidently these are different models. There is no constraint on the intercept terms. The intercept terms can be thought of as giving a "base" probability distribution when ${\bf x} = {\bf 0}$. Then the covariates modify this base distribution. There is a correspondence between the mixture distribution $\pi$ and these coefficients. 
+
+The model still has and ordered flavor, increasing the probability of selecting category $i$ decreases the probability of being in any subsequent categories. Since the coefficients $\beta$ are shared, we increase/decrease the probability of staying in each category in a way that is consistent across categories.
+
+Note that in the stick breaking construction, all the remaining probability mass goes to the $K$-th category. This may be awkward, because we need to balance selecting a good "base" probability while also allowing the covariates to shift the mixing weights. We'll see how it goes...

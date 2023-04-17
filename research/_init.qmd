@@ -1,0 +1,4 @@
+# _init.qmd
+::: {.content-hidden}
+$ {{< include ../macros.tex >}} $
+:::
