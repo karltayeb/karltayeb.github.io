@@ -305,11 +305,13 @@ For $t = 1, 2, \dots$:
 
 Let's break down the complexity of the inner loop (that is, updating $q_l$ and the requisite computations for the next run of the loop).
 
-**Updating coefficients**: Translating between polynomials $O(M^2)$ to construct $\mathcal M$ and carry out matrix-vector multiplication or solve the triangular system. This is per observations, so $O(nM^2)$
+**Computing coefficients $C_l$**: Computing ${\bf c}_{li}$ is $O(M^2)$ to construct $\mathcal M_l$ and to solve the triangular system ${\bf c}_i = \mathcal M_l(\psi_{li}, q_l) {\bf c}_{li}$. This is per observations, so computing $C_{l}$ is $O(M^2m)$
 
-**Fitting SER** Once we computed the coefficients we update the SER in $O(Mnp)$ (we just sum the coefficients to construct the polynomial posterior for each variable). Then $O(pM^3)$ to perform root finding and make the Gaussian approximation for $q_l$.
+**Fitting SER** Once we computed the coefficients we update the SER in $O(Mnp)$. We just sum the coefficients to construct the polynomial posterior for each variable). Then $O(pM^3)$ to perform root finding and make the Gaussian approximation for $q_l$.
 
-**Computing moments** We need to evaluate the moments $\mathbb E[\psi_{li}^k]$ for $k=1, \dots, M-1$. This is fast if $q_l$ is Gaussian but slower if not... $O(nM + ?)$, where $?$ is for computing $\mu_l^k = \mathbb E_{q_l}[\beta_l]$ $O(npM)$?
+**Computing moments** We need to evaluate the moments $\mathbb E[\psi_{li}^k]$ for $k=1, \dots, M-1$. $O(Mnp)$? This is fast if $q_l$ is Gaussian but the scaling factor may be large if we need to compute numerically. If we are making the Gaussian approximation, that costs $O(M^3p)$.
+
+**Updating $C$** Again $O(nM^2)$. We need to construct $\mathcal M (\psi_{li}, q_l)$ and compute the matrix-vector product $\mathcal M_l {\bf c}$. 
 
 Total $O(M^2n + Mnp + M^3p)$
 

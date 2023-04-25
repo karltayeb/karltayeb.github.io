@@ -1,0 +1,324 @@
+
+We've been exploring using polynomial approximation of the log likelihood to develop an approximate inference scheme. When the log of the prior density is also a polynomial, the log of the posterior density is a polynomial.
+
+Suppose the unnormalized log posterior is a polynomial with coefficients $\tilde {\bf a}$. That is, $p_{\text{post}}(x) \propto e^{\phi_{\bf \tilde a}(x)}$.
+
+We can compute the normalizing constant $Z$ via quadrature $p_{\text{post}}(x)= Z e^{\phi_{\bf \tilde a}(x)} = e ^{\phi_{\bf a} (x)}$. 
+
+$p_{\text{post}}$ is an exponential family. ${\bf a}$ are the coefficients such that $a_0 = \tilde a_0  + \log(Z)$ and $a_i = \tilde a_i\; i \geq 1$. That is, ${\bf a}$ give the coefficients of log-posterior density (which is a polynomial).
+
+
+Then, we would like to find the "best" Gaussian distribution $q$. Note that $q(x) = e ^{\phi_{\bf b}(x)}$. Letting $\mu_q^{k} = \mathbb E_q [x^k]$
+
+$$
+\arg\min_q KL[q || p] = \int_{\mathbb R} e^{\phi_b(x)} [\phi_{\bf b - a}(x)] = \sum (b_k - a_k) \mu^{k}_q
+$$
+
+The moments of the Gaussian distribution are readily expressed in terms of 
+
+```{r}
+normal_moments <- function(mu, var, K){
+  moments <- rep(0, K)
+  moments[1] <- mu
+  moments[2] <- mu^2 + var
+  for (k in 3:K){
+    moments[k] <- mu * moments[k-1] + (k-1) * var * moments[k-2]
+  }
+  return(moments)
+}
+
+normal_moments_grad_mu <- function(mu, var, moments){
+  K <- length(moments)
+  grad_mu <- rep(0, K)
+  grad_mu[1] <- 1
+  grad_mu[2] <- 2 * mu
+  for (k in 3:K){
+    grad_mu[k] <- moments[k-1] + mu * grad_mu[k-1] + (k-1) * var * grad_mu[k-2]
+  }
+  return(grad_mu)
+}
+
+normal_moments_grad_var <- function(mu, var, moments){
+  K <- length(moments)
+  grad_var <- rep(0, K)
+  grad_var[1] <- 0
+  grad_var[2] <- 1
+  for (k in 3:K){
+    grad_var[k] <- mu * grad_var[k-1] + (k-1) * (var * grad_var[k-2] + moments[k-2])
+  }
+  return(grad_var)
+}
+
+normal_moments_hessian_precompute <- function(mu, var, moments, grad_mu, grad_var){
+  K <- length(moments)
+  dvar_dmu <- rep(0, K)
+  d2var <- rep(0, K)
+  d2mu <- rep(0, K)
+  d2mu[2] <- 2
+
+  for (k in 3:K){
+    dvar_dmu[k] <- grad_var[k-1] + mu * dvar_dmu[k-1] + (k-1) * (var * dvar_dmu[k-2] + grad_mu[k-2])
+    d2var[k] <- mu * d2var[k-1] + (k-1) * (2 * grad_var[k-2] + var * d2var[k-2])
+    d2mu[k] <- 2 * grad_mu[k-1] + mu * d2mu[k-1] + (k-1) * var * d2mu[k-2]
+  }
+  
+  res <- list(dvar_dmu=dvar_dmu, d2var=d2var, d2mu=d2mu)
+  return(res)
+}
+
+mu <- normal_moments(0.1, 1, 5)
+normal_moments_grad_mu(0.1, 1, mu)
+normal_moments_grad_var(0.1, 1, mu)
+```
+
+```{r}
+#' @param q a vector of length 2 with mean and variance of normal distribution
+#' @param p coefficients of a polynomial log-density. p should be normalized 
+#'     for accurate KL, but we can optimize over `q` with an unnormalized `p`
+normal_poly_kl <- function(q, p){
+  mu <- q[1]
+  var <- q[2]
+
+  M <- length(p) - 1
+  rho <- polysusie:::gaussian_to_poly(mu, var, M)
+  moments <- normal_moments(mu, var, M)
+  kl <- sum(tail(rho - p, -1) * moments) + rho[1] - p[1]
+  return(list(kl=kl, rho=rho, moments=moments))
+}
+
+normal_poly_kl_grad <- function(q, eval){
+  mu <- q[1]
+  var <- q[2]
+  moments <- eval$moments
+  moments_grad_mu <- normal_moments_grad_mu(mu, var, moments)
+  moments_grad_var <- normal_moments_grad_var(mu, var, moments)
+  
+  c <- rho[1] + p[1]
+  phi <- tail((rho - p), -1)
+  kl <- sum(phi * moments) + c
+  grad_mu <- sum(phi * moments_grad_mu)
+  grad_var <- sum(phi * moments_grad_var)
+  grad <- c(grad_mu, grad_var)
+  return(grad)
+}
+
+set_max_stepsize <- function(q, grad){
+  if(grad[2] > 0){
+      max_stepsize <- 0.5 * q[2] / grad[2]
+  } else{
+    max_stepsize <- 1
+  }
+  return(max_stepsize)
+}
+
+search_gradient_direction <- function(q, p, eval, grad, stepsize){
+  q2 <- q - stepsize * grad
+  eval2 <- normal_poly_kl(q2, p)
+  diff <- eval$kl - eval2$kl
+  if(diff >= 0){
+    return(list(q = q2, diff = diff, stepsize=stepsize))
+  } else{
+    search_gradient_direction(q, p, eval, grad, stepsize/2)
+  }
+}
+
+minimize_normal_poly_kl <- function(mu, var, p, tol=1e-5, max_iter=100){
+  q_init <- c(mu, var)
+  q <- q_init
+  for(iter in 1:max_iter){
+    eval <- normal_poly_kl(q, p)
+    grad <- normal_poly_kl_grad(q, eval)
+    stepsize <- set_max_stepsize(q, grad)
+    update <- search_gradient_direction(q, p, eval, grad, stepsize)
+    q <- update$q
+    if(abs(update$diff) < tol){
+      message('converged')
+      break
+    }
+  }
+  eval <- normal_poly_kl(q, p)
+  eval$q <- q
+  eval$grad <- grad
+  eval$diff <- update$diff
+  eval$iter <- iter
+  eval$mu <- q[1]
+  eval$var <- q[2]
+  return(eval)
+}
+
+library(tictoc)
+p <- rnorm(5)
+p[5] <- -1
+p <- polysusie:::normalize_polynomial_log_density(p)
+with(g1, normal_moments(mu, var, 4))
+g1 <- polysusie:::poly_to_gaussian(p)
+with(g1, normal_moments(mu, var, 4))
+g2 <- with(g1, minimize_normal_poly_kl(mu, var, p, tol = 1e-15))
+
+q2 <- polysusie:::poly_to_gaussian(p)
+
+with(g1, normal_poly_kl(c(mu, var), p))$kl
+with(g2, normal_poly_kl(c(mu, var), p))$kl
+
+
+# optimize with optim
+f <- function(mu){normal_poly_kl(c(mu, g2$var), p)}$kl
+```
+
+
+```{r fixed-point iteration}
+fixed_point_mu <- function(mu, var, p, K){
+  moments = normal_moments(mu, var, K)
+  grad_mu = normal_moments_grad_mu(mu, var, moments)
+  
+  moments <- c(1, moments)
+  grad_mu <- c(0, grad_mu)
+  
+  a = sum(p[3:length(p)] * grad_mu[2:(length(moments) - 1)])
+  b <- p[2]
+  for(k in 3:(K+1)){
+    b <- b + p[k] * (moments[k-1] + var * (k-1) * moments[k-2])
+  }
+  mu = -b/a
+  return(mu)
+}
+
+mu = fixed_point_mu(mu, var, p, K)
+print(mu)
+print(normal_poly_kl(c(mu, var), p)$kl)
+print(normal_poly_kl(c(mu, var), q))
+  
+  a <- head(grad_mu, -1) * tail(p, -1)
+  b = 0
+  for (k in 2:(K+1)){
+    b <- b + grad_mu[k-1] + var * (k-1) * grad_mu[k-2]
+  }
+  
+  a = sum(p * grad_mu)
+  b = 
+}
+```
+
+```{r}
+q1 <- with(g1, polysusie:::gaussian_to_poly(mu, var))
+polysusie:::compute_kl_polynomial(q1, p)
+normal_poly_kl(unname(unlist(g1)), p)$kl
+
+q2 <- with(g2, polysusie:::gaussian_to_poly(mu, var))
+polysusie:::compute_kl_polynomial(q2, p)
+
+normal_poly_kl(unname(unlist(g1)), p)$kl
+
+compute_kl
+toc()
+
+bm2 <- microbenchmark::microbenchmark(polysusie:::poly_to_gaussian(p), unit='milliseconds')
+bm <- microbenchmark::microbenchmark(minimize_normal_poly_kl(0, 1, p, tol = 1e-5), unit='milliseconds')
+a <- normal_poly_kl(q, p)
+
+q2 <- q - 0.1 * a$grad
+a2 <- normal_poly_kl(q2, p)
+
+```
+
+
+
+### Jax
+
+```{python}
+import jax.numpy as jnp
+import numpy as np
+from jax.lax import scan
+from jax import jit, grad
+from jax.scipy.stats import norm
+import jax
+import jaxopt
+
+
+def normal_moments_recurrence(state, x=None):
+  mu = state['mu']
+  var = state['var']
+  m1 = state['m1']
+  m2 = state['m2']
+  k = state['k']
+  
+  m3 = mu * m2 + (k-1) * var * m1
+  state = dict(mu=mu, var=var, m1=m2, m2=m3, k = k+1)
+  return state, m3
+
+def normal_moments(mu, var, k):
+  init = dict(mu=mu, var=var, m1=mu, m2=(mu**2 + var), k=3)
+  _, moments = scan(normal_moments_recurrence, init, jnp.ones(k-2))
+  a = jnp.array([mu, mu**2 + var])
+  moments = jnp.concatenate([a, moments])
+  return moments
+
+def normal_poly_kl(mu, var, p, k):
+  entropy = 0.5 * jnp.log(2 * jnp.pi * var) + 0.5
+  moments = normal_moments(mu, var, k)
+  kl = -(entropy  + jnp.inner(moments, p[1:]) + p[0])
+  return(kl)
+  
+# mu <- q[1]
+# var <- q[2]
+# 
+# M <- length(p) - 1
+# rho <- polysusie:::gaussian_to_poly(mu, var, M)
+# moments <- normal_moments(mu, var, M)
+# kl <- sum(tail(rho - p, -1) * moments) + rho[1] - p[1]
+
+p = np.array(r['p'])
+k = len(p) - 1
+mu = r['g1']['mu']
+var = r['g1']['var']
+normal_moments(mu, var, k)
+normal_poly_kl(mu, var, p, k)
+
+def f(params, p, k):
+  return normal_poly_kl(params[0], jnp.exp(params[1]), p, k)
+  
+g = jax.grad(f)
+H = jax.hessian(f)
+newtonStep = lambda params, p, k: params - jnp.linalg.solve(H(params, p, k), g(params, p, k))
+newtonStep_jit = jax.jit(newtonStep)
+
+params = jnp.array([mu, jnp.log(var)])
+g(params, p, k)
+H(params, p, k)
+
+for i in range(10):
+  params = newtonStep(params, p, k)
+  print(params)
+  
+grad_mu = jax.grad(normal_poly_kl, 0)
+grad2_mu = jax.grad(grad_mu, 0)
+
+grad_mu = jax.grad(normal_poly_kl, 0)
+grad2_mu = jax.grad(grad_mu, 0)
+
+grad_mu(mu, var, p, k)
+grad2_mu(mu, var, p, k)
+
+mu2 = mu
+for i in range(10):
+  mu2 = mu2 - grad_mu(mu2, var, p, k)/grad2_mu(mu2, var, p, k)
+  print(normal_poly_kl(mu2, var, p, k))
+
+H = jax.hessian(normal_poly_kl, [0, 1])
+
+jax.flatten_util.flatten_pytree(H(mu, var, p, k))
+
+jax.jacobian(normal_poly_kl, [0, 1])(mu, var, p, k)
+
+normal_poly_kl_grad = grad(normal_poly_kl, [0, 1])
+
+normal_poly_kl_grad(mu, var, p[2:], k-2)
+
+normal_moments_jit = jit(normal_moments)
+normal_moments_grad = grad(normal_moments, [0, 1])
+
+
+normal_moments_jit(1.1, 2.1, 5)
+normal_moments_grad(1.1, 2.1, 5)
+```
+
