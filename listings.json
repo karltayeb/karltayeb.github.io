@@ -3,6 +3,7 @@
     "listing": "/research.html",
     "items": [
       "/research/constrained_multinomial_stickbreaking/index.html",
+      "/research/ibss_glm_estimating_prior_variance/index.html",
       "/research/polynomial_regression_vb/index.html",
       "/research/mode_matching_rss_vb/index.html",
       "/research/multinomial_stickbreaking/index.html",

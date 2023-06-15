@@ -2,42 +2,50 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://karltayeb.github.io/research/polynomial_approximation/index.html</loc>
-    <lastmod>2023-05-15T16:44:09.247Z</lastmod>
+    <lastmod>2023-06-15T13:15:01.589Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/polynomial_regression_vb/index.html</loc>
-    <lastmod>2023-05-15T16:44:10.611Z</lastmod>
+    <lastmod>2023-06-15T13:15:03.162Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/mode_matching_rss_vb/index.html</loc>
-    <lastmod>2023-05-15T16:44:11.565Z</lastmod>
+    <lastmod>2023-06-15T13:15:04.135Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/polynomial_susie/index.html</loc>
-    <lastmod>2023-05-15T16:44:12.468Z</lastmod>
+    <lastmod>2023-06-15T13:15:04.919Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/logistic_abf_accuracy/index.html</loc>
-    <lastmod>2023-05-15T16:44:13.620Z</lastmod>
+    <lastmod>2023-06-15T13:15:06.056Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/research/ibss_glm_estimating_prior_variance/index.html</loc>
+    <lastmod>2023-06-15T13:15:07.047Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/constrained_multinomial_stickbreaking/index.html</loc>
-    <lastmod>2023-05-15T16:44:14.452Z</lastmod>
+    <lastmod>2023-06-15T13:15:07.869Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/multinomial_stickbreaking/index.html</loc>
-    <lastmod>2023-05-15T16:44:15.407Z</lastmod>
+    <lastmod>2023-06-15T13:15:08.840Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research.html</loc>
-    <lastmod>2023-05-15T16:44:16.126Z</lastmod>
+    <lastmod>2023-06-15T13:15:09.588Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/index.html</loc>
-    <lastmod>2023-05-15T16:44:18.957Z</lastmod>
+    <lastmod>2023-06-15T13:15:13.393Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/about.html</loc>
-    <lastmod>2023-05-15T16:44:20.719Z</lastmod>
+    <lastmod>2023-06-15T13:15:15.279Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/presentations/committee_meeting_june23/committee_meeting_june23.html</loc>
+    <lastmod>2023-06-15T13:15:17.485Z</lastmod>
   </url>
 </urlset>
