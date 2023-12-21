@@ -6,6 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="dcterms.date" content="2023-12-21">
+<meta name="description" content="Demonstrate the behavior of fitting linear and logistic regression to data generated from a random intercept mode. OLS gives unbiased estimates for the Gaussian linear model, but the estimated effects are biased in the GLM.">
 
 <title>Karl’s Website - Random intercepts</title>
 <style>
@@ -186,11 +188,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1 class="title">Random intercepts</h1>
 </div>
 
+<div>
+  <div class="description">
+    Demonstrate the behavior of fitting linear and logistic regression to data generated from a random intercept mode. OLS gives unbiased estimates for the Gaussian linear model, but the estimated effects are biased in the GLM.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
 
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 21, 2023</p>
+    </div>
+  </div>
   
     
   </div>
@@ -198,84 +211,58 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 </header>
 
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-1_9c32856002e86e2ee2d31f79a7608a7e">
+<div class="cell" data-hash="index_cache/html/setup_654aefdb381892e326346afd470ae9c2">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'dplyr'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:stats':
-
-    filter, lag</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    intersect, setdiff, setequal, union</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'kableExtra'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:dplyr':
-
-    group_rows</code></pre>
-</div>
 </div>
 <p>What happens when you ignore the randomness in a random intercept model? Here is a quick demonstration to show that the behavior is very different for linear regression and logistic regression.</p>
 <section id="linear-regression" class="level2">
 <h2 class="anchored" data-anchor-id="linear-regression">Linear regression</h2>
 <p>For linear models if the intercept <span class="math inline">\(b_0 \sim N(\mu_0, \sigma^2_0)\)</span> then fitting the linear regression will just have the effect of having a larger residual variance. Standard statistical software estimates the residual variance, and for modest sample size compared to the number of features this can be done quite well.</p>
 <p><span class="math display">\[
-y = b_0 + b x + \tilde\epsilon; \tilde\epsilon \sim N(0, \sigma^2_0 + \sigma^2)
+y = b_0 + b x + \epsilon;\; \epsilon \sim N(0, \sigma^2)
 \]</span></p>
 <p><span class="math display">\[
-y = \mu_0 + b x + \tilde\epsilon; \tilde\epsilon \sim N(0, \sigma^2_0 + \sigma^2)
+y = \mu_0 + b x + \tilde\epsilon;\; \tilde\epsilon \sim N(0, \sigma^2_0 + \sigma^2)
 \]</span></p>
-<p>So we should expect OLS to give us unbiased estimate of the intercept and effect.</p>
+<p>So we should expect OLS to give us unbiased estimate of the intercept and effect. That is what we see. Here we simulate 100 replicates of a simulation with <span class="math inline">\(n = 100\)</span>, <span class="math inline">\(\mu_0 = -1\)</span> and <span class="math inline">\(b=1\)</span>. We vary <span class="math inline">\(\sigma_0\)</span>. Here we show the coverage of the 95% confidence intervals across 100 simulations. As expected, we achieve coverage for all settings of <span class="math inline">\(\sigma_0\)</span> in the Gaussian linear model.</p>
 <div class="cell" data-hash="index_cache/html/linear_fd9a4d5c82695ecdf64e8e0c3fdd7b50">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>list2tibble <span class="ot">&lt;-</span> <span class="cf">function</span>(l){</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">tibble</span>(<span class="sc">!!!</span>l)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>simulation_linear <span class="ot">&lt;-</span> <span class="cf">function</span>(n, b0, b, std0, std){</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    std <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(std0<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> std<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> b0 <span class="sc">+</span> x <span class="sc">*</span> b <span class="sc">+</span> <span class="fu">rnorm</span>(n) <span class="sc">*</span> std</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x)</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    coef <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)<span class="sc">$</span>coef</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span><span class="fu">list</span>(<span class="at">n=</span>n, <span class="at">b0 =</span> b0, <span class="at">b=</span>b, <span class="at">std0 =</span> std0, <span class="at">b0hat =</span> coef[<span class="dv">1</span>, <span class="dv">1</span>], <span class="at">b0_shat=</span>coef[<span class="dv">1</span>, <span class="dv">2</span>], <span class="at">bhat =</span> coef[<span class="dv">2</span>,<span class="dv">1</span>], <span class="at">shat =</span> coef[<span class="dv">2</span>, <span class="dv">2</span>]) <span class="sc">|&gt;</span> <span class="fu">list2tibble</span>()</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(res)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>simrep_linear <span class="ot">&lt;-</span> <span class="cf">function</span>(k, std0){</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    purrr<span class="sc">::</span><span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span>k, <span class="sc">~</span><span class="fu">simulation_linear</span>(<span class="dv">100</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, std0, <span class="dv">1</span>))</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>cap <span class="ot">&lt;-</span> <span class="st">'The random intercept is not a problem for linear regression, the effect estimates will remain unbiased'</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>std0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">4.0</span>, <span class="fl">8.0</span>)</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(std0, <span class="sc">~</span><span class="fu">simrep_linear</span>(<span class="dv">100</span>, .x))</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>res <span class="sc">%&gt;%</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">covered =</span> (b <span class="sc">&lt;</span> bhat <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>shat) <span class="sc">&amp;</span> (b <span class="sc">&gt;</span> bhat <span class="sc">-</span> <span class="dv">2</span><span class="sc">*</span>shat)) <span class="sc">%&gt;%</span></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(std0) <span class="sc">%&gt;%</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">coverage=</span><span class="fu">mean</span>(covered)) <span class="sc">%&gt;%</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kbl</span>(<span class="at">caption=</span>cap) <span class="sc">%&gt;%</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable_classic</span>(<span class="at">full_width =</span> T, <span class="at">html_font =</span> <span class="st">"Cambria"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>list2tibble <span class="ot">&lt;-</span> <span class="cf">function</span>(l){</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">tibble</span>(<span class="sc">!!!</span>l)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>simulation_linear <span class="ot">&lt;-</span> <span class="cf">function</span>(n, b0, b, std0, std){</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    std <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(std0<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> std<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> b0 <span class="sc">+</span> x <span class="sc">*</span> b <span class="sc">+</span> <span class="fu">rnorm</span>(n) <span class="sc">*</span> std</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    coef <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)<span class="sc">$</span>coef</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span><span class="fu">list</span>(<span class="at">n=</span>n, <span class="at">b0 =</span> b0, <span class="at">b=</span>b, <span class="at">std0 =</span> std0, <span class="at">b0hat =</span> coef[<span class="dv">1</span>, <span class="dv">1</span>], <span class="at">b0_shat=</span>coef[<span class="dv">1</span>, <span class="dv">2</span>], <span class="at">bhat =</span> coef[<span class="dv">2</span>,<span class="dv">1</span>], <span class="at">shat =</span> coef[<span class="dv">2</span>, <span class="dv">2</span>]) <span class="sc">|&gt;</span> <span class="fu">list2tibble</span>()</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(res)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>simrep_linear <span class="ot">&lt;-</span> <span class="cf">function</span>(k, std0){</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    purrr<span class="sc">::</span><span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span>k, <span class="sc">~</span><span class="fu">simulation_linear</span>(<span class="dv">100</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, std0, <span class="dv">1</span>))</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>cap <span class="ot">&lt;-</span> <span class="st">'The random intercept is not a problem for linear regression, the effect estimates will remain unbiased'</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>std0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">4.0</span>, <span class="fl">8.0</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(std0, <span class="sc">~</span><span class="fu">simrep_linear</span>(<span class="dv">100</span>, .x))</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>res <span class="sc">%&gt;%</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">covered =</span> (b <span class="sc">&lt;</span> bhat <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>shat) <span class="sc">&amp;</span> (b <span class="sc">&gt;</span> bhat <span class="sc">-</span> <span class="dv">2</span><span class="sc">*</span>shat)) <span class="sc">%&gt;%</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(std0) <span class="sc">%&gt;%</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">coverage=</span><span class="fu">mean</span>(covered)) <span class="sc">%&gt;%</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kbl</span>(<span class="at">caption=</span>cap) <span class="sc">%&gt;%</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable_classic</span>(<span class="at">full_width =</span> T, <span class="at">html_font =</span> <span class="st">"Cambria"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 
@@ -324,38 +311,38 @@ y = \mu_0 + b x + \tilde\epsilon; \tilde\epsilon \sim N(0, \sigma^2_0 + \sigma^2
 </section>
 <section id="logistic-regression" class="level2">
 <h2 class="anchored" data-anchor-id="logistic-regression">Logistic regression</h2>
-<p>For logistic regression, and GLMs generally, it is a different story.</p>
+<p>For logistic regression, and GLMs generally, it is a different story. As the variance of the random intercept grows, we see worse behavior of the effect estimates.</p>
 <div class="cell" data-hash="index_cache/html/logistic_deb2d724ec888d29136985065d31b7eb">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>simulation_logistic <span class="ot">&lt;-</span> <span class="cf">function</span>(n, b0, b, std0){</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    logit <span class="ot">&lt;-</span> b0 <span class="sc">+</span> x <span class="sc">*</span> b <span class="sc">+</span> <span class="fu">rnorm</span>(n) <span class="sc">*</span> std0</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>logit)))</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family=</span><span class="st">'binomial'</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    coef <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)<span class="sc">$</span>coef</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span><span class="fu">list</span>(<span class="at">n=</span>n, <span class="at">b0 =</span> b0, <span class="at">b=</span>b, <span class="at">std0 =</span> std0, <span class="at">b0hat =</span> coef[<span class="dv">1</span>, <span class="dv">1</span>], <span class="at">b0_shat=</span>coef[<span class="dv">1</span>, <span class="dv">2</span>], <span class="at">bhat =</span> coef[<span class="dv">2</span>,<span class="dv">1</span>], <span class="at">shat =</span> coef[<span class="dv">2</span>, <span class="dv">2</span>]) <span class="sc">|&gt;</span> <span class="fu">list2tibble</span>()</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(res)</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>simrep <span class="ot">&lt;-</span> <span class="cf">function</span>(k, std0){</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    purrr<span class="sc">::</span><span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span>k, <span class="sc">~</span><span class="fu">simulation_logistic</span>(<span class="dv">100</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, std0))</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>std0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">4.0</span>, <span class="fl">8.0</span>)</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(std0, <span class="sc">~</span><span class="fu">simrep</span>(<span class="dv">100</span>, .x))</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>cap <span class="ot">&lt;-</span> <span class="st">'As the variance of the random intercept increases, the coverage rate of the 95% C.I. decreases'</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>res <span class="sc">%&gt;%</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">covered =</span> (b <span class="sc">&lt;</span> bhat <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>shat) <span class="sc">&amp;</span> (b <span class="sc">&gt;</span> bhat <span class="sc">-</span> <span class="dv">2</span><span class="sc">*</span>shat)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(std0) <span class="sc">%&gt;%</span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">coverage=</span><span class="fu">mean</span>(covered)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kbl</span>(<span class="at">caption=</span>cap) <span class="sc">%&gt;%</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable_classic</span>(<span class="at">full_width =</span> T, <span class="at">html_font =</span> <span class="st">"Cambria"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>simulation_logistic <span class="ot">&lt;-</span> <span class="cf">function</span>(n, b0, b, std0){</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    logit <span class="ot">&lt;-</span> b0 <span class="sc">+</span> x <span class="sc">*</span> b <span class="sc">+</span> <span class="fu">rnorm</span>(n) <span class="sc">*</span> std0</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>logit)))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family=</span><span class="st">'binomial'</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    coef <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)<span class="sc">$</span>coef</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span><span class="fu">list</span>(<span class="at">n=</span>n, <span class="at">b0 =</span> b0, <span class="at">b=</span>b, <span class="at">std0 =</span> std0, <span class="at">b0hat =</span> coef[<span class="dv">1</span>, <span class="dv">1</span>], <span class="at">b0_shat=</span>coef[<span class="dv">1</span>, <span class="dv">2</span>], <span class="at">bhat =</span> coef[<span class="dv">2</span>,<span class="dv">1</span>], <span class="at">shat =</span> coef[<span class="dv">2</span>, <span class="dv">2</span>]) <span class="sc">|&gt;</span> <span class="fu">list2tibble</span>()</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(res)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>simrep <span class="ot">&lt;-</span> <span class="cf">function</span>(k, std0){</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    purrr<span class="sc">::</span><span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span>k, <span class="sc">~</span><span class="fu">simulation_logistic</span>(<span class="dv">100</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, std0))</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>std0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">4.0</span>, <span class="fl">8.0</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(std0, <span class="sc">~</span><span class="fu">simrep</span>(<span class="dv">100</span>, .x))</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>cap <span class="ot">&lt;-</span> <span class="st">'As the variance of the random intercept increases, the coverage rate of the 95% C.I. decreases'</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>res <span class="sc">%&gt;%</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">covered =</span> (b <span class="sc">&lt;</span> bhat <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>shat) <span class="sc">&amp;</span> (b <span class="sc">&gt;</span> bhat <span class="sc">-</span> <span class="dv">2</span><span class="sc">*</span>shat)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(std0) <span class="sc">%&gt;%</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">coverage=</span><span class="fu">mean</span>(covered)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kbl</span>(<span class="at">caption=</span>cap) <span class="sc">%&gt;%</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable_classic</span>(<span class="at">full_width =</span> T, <span class="at">html_font =</span> <span class="st">"Cambria"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 
