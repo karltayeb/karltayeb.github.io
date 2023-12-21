@@ -175,11 +175,32 @@
     "text": "An explaination\n\\[\n\\begin{aligned}\nABF &= \\int \\frac{N(\\hat \\beta| \\beta, s^2)}{N(\\hat\\beta | 0, s^2)} p(\\beta) d\\beta\\\\\nBF &= \\int \\frac{p({\\bf y} | {\\bf x}, \\beta)}{p({\\bf y} | \\beta = 0)} p(\\beta) d\\beta\n\\end{aligned}\n\\]\nFirst, here is an example where there is a large discrepancy between the log ABF and log BF– over 20 log-likelihood units! We also note that including/excluding the intercept in glm doesn’t really make a dent.\n\n\nCode\nset.seed(2)\nsim <- simulate(1000)\nfit <- fit_glm(sim, prior_variance=1)\nfit_no_intercept <- fit_glm_no_intercept(sim)\n\n# show there is a discrepency ~20 log-likelihood unit\nwith(fit, compute_log_abf1(betahat, shat2, 1))\n\n\n[1] 71.33497\n\n\nCode\nwith(fit_no_intercept, compute_log_abf1(betahat, shat2, 1))\n\n\n[1] 71.46433\n\n\nCode\ncompute_vb_log_bf(sim, 1)\n\n\n[1] 93.52508\n\n\nUsing this simulated example we plot the likelihood ratio and approximate log-likelihood ratio (with respect to the null model \\(\\beta=0\\)) over the range of \\(\\beta\\). We plot the likelihood ratio in black, and plot the approximate likelihood ratio in red. We see that the likelihood ratios agree at \\(\\beta = 0\\)– this is not surprising because they should both be equal to \\(1\\) (or \\(0\\), on the log scale as shown in the plot).\nThe mode and the curvature of this likelihood ratio approximation are determined by the effect size and standard error, so the approximation is completely specified. We can see that this leaves a gap between the likelihood ratio and the approximate likelihood ratio near the mode. Assuming a flat prior on \\(\\beta\\), this is the region that will contribute most to the integral.\nWhile the likelihood is well approximated by a Gaussian near it’s mode, the quality of the Gaussian approximation is poor in the tails. As the sample size increases, \\(\\beta = 0\\) is more “in the tail”. So we see that the approximation to the likelihood ratio used in ABF is requiring the approximate likelihood ratio to agree with the exact likelihood ratio at some point in the tail– but this is not particularly relevant for getting a good approximation of the BF, as it is the area in the body of the distribution that contributes most to the integral.\nIn order for the ABF to perform well in large samples, the Gaussian approximation would need to improve in the tails faster than the point \\(\\beta=0\\) gets pushed into the tail. E.g. for the Gaussian approximation to be good, we’d want that the curvature estimated at the mode is also the curvature we’d estimate everywhere else (e.g. at \\(\\beta = 0\\)).\n\n\nCode\ncompare_lrs <- function(sim, prior_variance=1, k=1, plot_correction=F){\n  fit <- fit_glm(sim, prior_variance=1)\n  fit_no_intercept <- fit_glm_no_intercept(sim)\n  \n  # plot ll\n  ll <- function(b){with(sim, sum(y*x*b - log(1 + exp(x*b))))}\n  ll_vec <- function(b){purrr::map_dbl(b, ~ll(.x))}\n  asymptotic_ll <- function(b){dnorm(b, mean=fit$betahat, sd=sqrt(fit$shat2), log=T)}\n\n  ll0 <- ll(0)\n  asymptotic_ll0 <- asymptotic_ll(0)\n  \n  ll_mle <- ll(fit$betahat)\n  asymptotic_ll_mle <- asymptotic_ll(fit$betahat)\n  \n  mle = fit$betahat\n  xs <- seq(mle - k* abs(mle), mle + k* abs(mle), by=0.1)\n  \n  diff = (ll_mle - asymptotic_ll_mle) - ll0\n  ll_xs <- ll_vec(xs)\n  asymptotic_ll_xs <- asymptotic_ll(xs)\n  ll_prior <- dnorm(xs, 0, sd = sqrt(prior_variance), log = T)\n  \n  ylim <- range(asymptotic_ll_xs - asymptotic_ll0, ll_xs - ll0)\n  plot(xs,ll_xs - ll0, type='l', ylim = ylim,\n       xlab= 'beta', ylab='log likelihood ratio')\n  lines(xs, asymptotic_ll_xs - asymptotic_ll0, col='red')\n  \n  if(plot_correction){\n    lines(xs, asymptotic_ll_xs - asymptotic_ll_mle + (ll_mle - ll0), col='blue')\n  }\n  abline(h=0, lty=3)\n  abline(v=0, lty=3)\n  abline(v=fit$betahat)\n}\n\ncompare_lrs(sim, prior_variance = 1, k=1.5)\n\n\n\n\n\n\n\nCode\ncompare_lrs(sim, prior_variance = 1, k=50)\n\n\n\n\n\n\n\nCode\npar(mfrow=c(1, 4))\nsimulate(100, beta0 = 0.1) %>% compare_lrs(k=1.5)\nsimulate(1000, beta0 = 0.1) %>% compare_lrs(k=1.5)\nsimulate(10000, beta0 = 0.1) %>% compare_lrs(k=1.5)\nsimulate(100000, beta0 = 0.1) %>% compare_lrs(k=1.5)\n\n\n\n\n\n\nFamily of LR approximations\nWrite the likelihood ratio as \\[\nLR(\\beta_1, \\beta_2) = \\frac{\\mathcal {L}(\\beta_1)}{\\mathcal {L}(\\beta_2)}\n\\]\nLet \\(\\widehat {LR}(\\beta_1, \\beta_2)\\) be the approximate likelihood ratio under the normal approximation \\(\\beta \\sim N(\\hat \\beta, s^2)\\).\nThe approximation to the likelihood ratio against the null used in ABF is simply\n\\[\n\\widehat{LR}_{ABF}(\\beta) = \\widehat{LR}(\\beta, 0)\n\\] However if we note that\n\\[\nLR(\\beta, 0) = LR(\\beta, \\beta^*) \\times LR(\\beta^*, 0)\n\\]\nwe can derive a family of approximations for the likelihood ratio against the null\n\\[\n\\widehat{LR}_{\\beta^*}(\\beta) = \\widehat{LR}(\\beta, \\beta^*) LR(\\beta^*,0)\n\\] And note that \\(\\widehat{LR}_{ABF}\\) is a special case where \\(\\beta^*=0\\). We’ve seen that this choice makes the approximation good in the tail– which isn’t very important for getting an accurate approximate BF. Perhaps the best choice would be make the approximate LR match the exact LR at the MAP estimate. But a second good choice, and one that does not require knowledge of the prior could be to set \\(\\beta^* = \\beta_{MLE}\\). This choice is shown in blue on the updated plot\n\n\nCode\ncompare_lrs(sim, prior_variance = 1, k=1.5, plot_correction=T)\n\n\n\n\n\nWe can use the"
   },
   {
-    "objectID": "research/ibss_glm_estimating_prior_variance/index.html",
-    "href": "research/ibss_glm_estimating_prior_variance/index.html",
-    "title": "Estimating prior variance with asymptotic SER",
+    "objectID": "research/random_intercepts/index.html",
+    "href": "research/random_intercepts/index.html",
+    "title": "Random intercepts",
     "section": "",
-    "text": "Good where it counts?\nWe are interested in maximizing the evidence of the SER w.r.t the prior variance. Equivalently, we can think of maximizing the Bayes factor for the SER (that is, the ratio of the evidence of the single effect model vs the null model of no effect).\n\\[\nBF_{SER}(\\sigma_0^2) = \\sum \\pi_j BF_j(\\sigma_0^2)\n\\]\nIn practice we are using the asymptotic approximation. We approximation each univariate Bayes factor, \\(BF_j\\), with a Laplace approximation. In particular we take a quadratic approximation of the log-likelihood, and combine it with the normal prior. This gives us a method for approximating the MAP using only local information about the MLE (namely, the MLE \\(\\hat\\beta\\), the standard error \\(s^2\\), and the log-likelihood of the data under the MLE \\(\\log p ({\\bf y} | \\hat\\beta)\\)).\nThere are two things we should be concerned with. First, the quality of the posterior mean approximation. Second, the quality of the Bayes factors. In particular since we are maximizing over the prior variance, but we should not expect the quality of these approximations to be uniform for different settings of the prior variance.\n\nWhat settings of the prior variance lead to the best approximation quality? I expect that it will be for for large settings of the prior variance, where there is not much shrinkage the MAP is close to the MLE.\nHow does the optimizing the prior variance impact the coverage of the GLM-SER? In particular, we can see the the BF for the SER is an average of the BF for the univariate regressions. If there a large number of variables with little evidence of association, these will draw down the optimal setting of \\(\\sigma^2_0\\), and impose stronger shrinkage on the variables with strong evidence for an effect. On the other hand, if the univariate BF for the strongest effects are most sensitive to changes in \\(\\sigma^2_0\\) we might see that the optimal choice of the BF is driven by a few variables. We’ve been burned by non-uniform approximation quality before (with the Jaakkola Jordan bound)– we want to be careful to make sure that estimating the prior variance does not introduce similar problems.\n\n\n\nOptimal \\(\\sigma^2_0\\) in the univariate case\nNote we can equivalently optimize the ABF, rather than the Laplace ABF because these two approximations of the BF are just rescaled versions of one another.\n\\[\n\\hat \\sigma^2_0 = \\arg \\max_{\\sigma^2_0} N(\\hat\\beta | 0, s^2 + \\sigma^2_0)\n\\]\n\\(\\nu = s^2 + \\sigma^2_0\\) is maximized by \\(\\nu = \\hat\\beta^2\\), so for \\(\\hat\\beta^2 > s^2\\), we can take \\(\\hat \\sigma^2_0 = \\hat \\beta^2 - s^2\\). Otherwise, we run into the boundary and we should take \\(\\hat\\sigma^2_0 = 0\\).\n\n\nCode\n# log_abf is a function of prior variance\nlog_abf <- function(betahat, s2){\n  f <- function(prior_variance){\n    dnorm(betahat, 0, sd = sqrt(s2 + prior_variance), log = T) -\n      dnorm(betahat, 0, sd = sqrt(s2))\n  }\n  f2 <- function(x){}\n  return(f)\n}\n\npar(mfrow=c(1,2))\nbetahat <- 1\ns2 <- 0.1\nf1 <- log_abf(betahat, s2)\nplot(f1, xlim=c(0, 3), \n     ylab = 'log ABF', xlab = 'prior variance', main = '|z| > 1')\n\nbetahat <- 1\ns2 <- 1.01\nf2 <- log_abf(betahat, s2)\nplot(f2, xlim=c(0, 3),\n     ylab = 'log ABF', xlab = 'prior variance', main = '|z| > 1')\n\n\n\n\n\n\n\nOptimal \\(\\sigma^2_0\\) for SER\n$$\n\\[\\begin{aligned}\n\\hat \\sigma^2_0\n&= \\arg\\max_{\\sigma^2_0} \\sum_j \\pi_j ABF_j(\\sigma_0^2) \\\\\n&= \\arg\\max_{\\sigma^2_0} \\sum_j \\pi_j \\exp\\left\\{-\\frac{1}{2} \\left(\\log 2\\pi(s^2_j + \\sigma^2_0) + \\frac{\\hat\\beta^2_j}{s^2_j + \\sigma^2_0} \\right)\\right\\} \\\\\n\n\\end{aligned}\\]\n$$\nWe can optimize directly, e.g. using optim. Alternatively we can optimize a variational lower bound.\n\\[\n\\begin{aligned}\n\\log p(y)\n&\\geq \\mathbb E_q[\\log p (y | b, \\gamma) + \\log p(b | \\sigma^2_0) + \\log p(\\gamma)] + H(q(b, \\gamma)) \\\\\n&= \\mathbb E_q[\\log p (b | \\sigma^2_0)] = \\frac{1}{2} \\log \\tau - \\frac{\\tau}{2} \\sum_j \\alpha_j (\\mu_j^2 + \\sigma_j^2)\n\\end{aligned}\n\\]\nWhich has the update \\(\\frac{1}{\\tau^*} = \\sum_j \\alpha_j (\\mu_j^2 + \\sigma_j^2)\\). To fit the SER with the asymptotic approximation, we can compute the MLE, standard error, and log likelihood once for each of the \\(p\\) variables, then iteratively update \\(q(b, \\gamma; \\sigma^2_0)\\) and \\(\\sigma^2_0\\) until convergence.\nWe show three examples– one where the optimal \\(\\sigma^2_0\\) is 0 (because all the \\(z\\) scores are small), which exhibits slow convergence. The other \\(\\sigma^2_0 > 0\\), and we see fast convergence even though the evidence for the single effect model is weak– we get very close to optimal in 3 iterations. In the final example the effect is strong, and we also converge on the optimal setting of \\(\\sigma^2_0\\) quickly.\n\n\nCode\nlogsumexp <- function(x){\n  a <- max(x)\n  return(log(sum(exp(x - a))) + a)\n}\n\ncompute_posterior_mean <- function(betahat, s2, prior_variance){\n  tau0 <- 1 / prior_variance\n  tau <- 1/s2\n  \n  tau_post <- tau + tau0\n  mean_post <- (tau/tau_post) * betahat\n  post <- list(mean = mean_post, tau=tau_post)\n  return(post)\n}\n\ncompute_log_bf_ser <- function(betahat, s2, prior_variance, pi){\n  log_abf <- dnorm(betahat, 0, sd = sqrt(s2 + prior_variance), log = T) -\n    dnorm(betahat, 0, sd = sqrt(s2), log = T) \n  logsumexp(log_abf + log(pi))\n}\n\nfit_prior_variance_em <- function(betahat, s2, prior_variance, pi, maxit=20){\n  hist <- rep(0, maxit)\n  log_bf <- rep(0, maxit)\n  \n  hist[1] <- prior_variance\n  log_bf[1] <- compute_log_bf_ser(betahat, s2, prior_variance, pi)\n  for(i in 2:maxit){\n    # update alpha\n    log_abf <- dnorm(betahat, 0, sd = sqrt(s2 + prior_variance), log = T) -\n      dnorm(betahat, 0, sd = sqrt(s2), log = T)\n    alpha <- exp(log_abf - logsumexp(log_abf))\n    \n    # e step\n    post <- compute_posterior_mean(betahat, s2, prior_variance)\n    b2 <- post$mean^2 + 1/post$tau\n  \n    # m step, weighted because of heteroskedactic observations\n    prior_variance <- sum(alpha * b2)\n    hist[i] <- prior_variance\n    log_bf[i] <- compute_log_bf_ser(betahat, s2, prior_variance, pi)\n  }\n  \n  return(list(prior_variance = prior_variance, log_bf = log_bf, hist=hist))\n}\n\noptimize_prior_variance <- function(betahat, s2, pi){\n  f_opt <- function(prior_variance){\n    compute_log_bf_ser(betahat, s2, prior_variance, pi)\n  }\n  opt <- optimise(f_opt, c(0, 20), maximum = T)\n  return(opt)\n}\n\n\n\n\nCode\nplot_em <- function(p = 50, var = 0.25){\n  prior_variance <- 1\n  pi <- rep(1/p, p)\n  betahat <- rnorm(p) * sqrt(var)\n  s2 <- rbeta(p, 0.5, 0.5) + 0.1\n  \n  opt_res <- optimize_prior_variance(betahat, s2, pi)\n  em_res <- fit_prior_variance_em(betahat, s2, 1, pi, maxit = 20)\n  \n  par(mfrow = c(1,2))\n  plot(em_res$hist, ylim = range(em_res$hist, opt_res$maximum), xlab='Iter', ylab='prior variance')\n  abline(h=opt_res$maximum, lty=3)\n  \n  plot(em_res$log_bf, ylim = range(em_res$log_bf, opt_res$objective), xlab='Iter', ylab='log BF')\n  abline(h=opt_res$objective, lty=3)\n}\n\nset.seed(1); plot_em()\n\n\n\n\n\nCode\nset.seed(11); plot_em()\n\n\n\n\n\nCode\nset.seed(12); plot_em(var=3)\n\n\n\n\n\n\n\nCode\nplot_em <- function(p = 50){\n  # make sim\n  prior_variance <- 1\n  pi <- rep(1/p, p)\n  betahat <- rnorm(p) * sqrt(var)\n  s2 <- rbeta(p, 0.5, 0.5) + 0.1\n  \n  b1 <- microbenchmark::microbenchmark(\n    optimize_prior_variance(betahat, s2, pi),\n    unit = 'microseconds')\n  \n  b2 <- microbenchmark::microbenchmark(\n    fit_prior_variance_em(betahat, s2, 1, pi, maxit = 1),\n    unit = 'microseconds')\n  opt_res <- optimize_prior_variance(betahat, s2, pi)\n  em_res <- fit_prior_variance_em(betahat, s2, 1, pi, maxit = 1)\n  \n  par(mfrow = c(1,2))\n  plot(em_res$hist, ylim = range(em_res$hist, opt_res$maximum), xlab='Iter', ylab='prior variance')\n  abline(h=opt_res$maximum, lty=3)\n  \n  plot(em_res$log_bf, ylim = range(em_res$log_bf, opt_res$objective), xlab='Iter', ylab='log BF')\n  abline(h=opt_res$objective, lty=3)\n}\n\n\n\n\nError comparison\nNext we will look at the error in posterior mean and BF as a function of \\(\\sigma^2_0\\). For the BF comparison we can compute the exact BF via quadrature. For the posterior mean we can compare to the MAP and the posterior mean of the optimal Gaussian approximation (not necessarily the same).\n\nABF\nLaplace ABF\nExact log likelihood\n\nIn the example shown, the exact log BF and the Laplace ABF are both fairly insensitive to \\(\\sigma^2_0\\) across a range containing the maximum, and are both quiet close– and the approximation error is pretty uniform across reasonable choices of \\(\\sigma^2_0\\). That is encouraging!\n\n\nCode\nsigmoid <- function(x){1/(1 + exp(-x))}\n\nsimulate <- function(n, beta0=0, beta=1){\n  x <- rnorm(n)\n  logit <- beta0 + beta*x\n  y <- rbinom(n, 1, sigmoid(logit))\n  return(list(x=x, y=y, beta0=beta0, beta=beta))\n}\n\ncompute_exact_log_bf <- function(x, y, \n                                 betahat, shat2, intercepthat,\n                                 prior_variance=1){\n  f <- function(b){\n    logits <- x * b + intercepthat\n    sum(dbinom(x=y, size=1, prob=sigmoid(logits), log = T)) + \n      dnorm(b, 0, sqrt(prior_variance), log = T)\n  }\n  max <- f(betahat)\n  \n  f2 <- function(b){purrr::map_dbl(b, ~exp(f(.x) - max))}\n  \n  optim_range <- c(-2*abs(betahat), 2 *abs(betahat))\n  MAP <- optimize(f2, optim_range, maximum = T)$maximum\n  \n  lower <- MAP - sqrt(shat2) * 6\n  upper <- MAP + sqrt(shat2) * 6\n  quadres <- cubature::pcubature(f2, lower, upper, tol = 1e-10)\n  log_bf <- (log(quadres$integral) + max) - sum(dbinom(y, 1, mean(y), log=T))\n  return(log_bf)\n}\n\ncompute_bfs <- function(x, y, prior_variance){\n  fit <- glm(y ~ x, family='binomial')\n  intercepthat <- fit$coefficients[1]\n  betahat <- fit$coefficients[2]\n  shat2 <- summary(fit)$coef[2,2]^2\n  lr <- 0.5 * (fit$null.deviance - fit$deviance)\n  \n  # compute ABF\n  log_abf <- dnorm(betahat, 0, sqrt(prior_variance + shat2), log = TRUE) -\n    dnorm(betahat, 0, sqrt(shat2), log = TRUE)\n  \n  # compute liklihood ratio under asymptotic approximation\n  alr_mle <- dnorm(betahat, betahat, sqrt(shat2), log=T) -\n    dnorm(betahat, 0, sqrt(shat2), log=T)\n  \n  # corrected ABF\n  log_labf <- log_abf - alr_mle + lr\n  \n  # compute exact log BF\n  log_bf <- compute_exact_log_bf(x, y, \n                                 betahat, shat2, intercepthat,\n                                 prior_variance)\n  return(list(log_bf = log_bf, log_abf = log_abf, log_labf = log_labf))\n}\n\n\n\n\nCode\nset.seed(5)\nsim <- simulate(10000, beta = 1, beta0=-2)\nsigma0_grid <- seq(0.1, 2, by=0.05)\nbfs <- purrr::map_dfr(sigma0_grid, ~with(sim, compute_bfs(x, y, .x)))\nbfs$prior_variance <- sigma0_grid\n\n\npar(mfrow = c(1, 2))\n\nrange <- range(bfs$log_bf, bfs$log_labf)\n\n# plot exact BF\nplot(sigma0_grid, ylim = range, bfs$log_bf, type = 'l',\n     xlab = 'prior variance', ylab = 'logBF')\nabline(v=sigma0_grid[which.max(bfs$log_bf)], lwd=5)\n\n# plot laplace ABF\nlines(sigma0_grid, bfs$log_labf, type = 'l', col='blue')\nabline(v=sigma0_grid[which.max(bfs$log_labf)], col='blue', lty=3)\n\nlegend('bottomright', \n       legend = c('Exact BF', 'Laplace ABF'), \n       col=c('black', 'blue'),\n       lty = 1)\n\n\ndiffs <- bfs$log_bf - bfs$log_labf\nr2 <- range(c(diffs, -diffs))\nplot(sigma0_grid, diffs, ylim=r2, ylab = 'log BF - log LABF', xlab='Prior Variance', main='Laplace ABF error')\nabline(h=0)"
+    "text": "Code\nlibrary(dplyr)\n\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\n\nCode\nlibrary(tidyr)\nlibrary(kableExtra)\n\n\n\nAttaching package: 'kableExtra'\n\n\nThe following object is masked from 'package:dplyr':\n\n    group_rows\nWhat happens when you ignore the randomness in a random intercept model? Here is a quick demonstration to show that the behavior is very different for linear regression and logistic regression."
+  },
+  {
+    "objectID": "research/random_intercepts/index.html#linear-regression",
+    "href": "research/random_intercepts/index.html#linear-regression",
+    "title": "Random intercepts",
+    "section": "Linear regression",
+    "text": "Linear regression\nFor linear models if the intercept \\(b_0 \\sim N(\\mu_0, \\sigma^2_0)\\) then fitting the linear regression will just have the effect of having a larger residual variance. Standard statistical software estimates the residual variance, and for modest sample size compared to the number of features this can be done quite well.\n\\[\ny = b_0 + b x + \\tilde\\epsilon; \\tilde\\epsilon \\sim N(0, \\sigma^2_0 + \\sigma^2)\n\\]\n\\[\ny = \\mu_0 + b x + \\tilde\\epsilon; \\tilde\\epsilon \\sim N(0, \\sigma^2_0 + \\sigma^2)\n\\]\nSo we should expect OLS to give us unbiased estimate of the intercept and effect.\n\n\nCode\nlist2tibble <- function(l){\n    dplyr::tibble(!!!l)\n}\n\nsimulation_linear <- function(n, b0, b, std0, std){\n    std <- sqrt(std0^2 + std^2)\n    x <- rnorm(n)\n    y <- b0 + x * b + rnorm(n) * std\n    fit <- lm(y ~ x)\n    coef <- summary(fit)$coef\n    res <-list(n=n, b0 = b0, b=b, std0 = std0, b0hat = coef[1, 1], b0_shat=coef[1, 2], bhat = coef[2,1], shat = coef[2, 2]) |> list2tibble()\n    return(res)\n}\n\nsimrep_linear <- function(k, std0){\n    purrr::map_dfr(1:k, ~simulation_linear(100, -1, 1, std0, 1))\n}\n\ncap <- 'The random intercept is not a problem for linear regression, the effect estimates will remain unbiased'\n\nstd0 <- c(0, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0)\nres <- purrr::map_dfr(std0, ~simrep_linear(100, .x))\nres %>%\n    rowwise() %>%\n    mutate(covered = (b < bhat + 2*shat) & (b > bhat - 2*shat)) %>%\n    ungroup() %>%\n    group_by(std0) %>%\n    summarize(coverage=mean(covered)) %>%\n    kbl(caption=cap) %>%\n    kable_classic(full_width = T, html_font = \"Cambria\")\n\n\n\n\nThe random intercept is not a problem for linear regression, the effect estimates will remain unbiased\n \n  \n    std0 \n    coverage \n  \n \n\n  \n    0.00 \n    0.95 \n  \n  \n    0.25 \n    0.96 \n  \n  \n    0.50 \n    0.95 \n  \n  \n    1.00 \n    0.97 \n  \n  \n    2.00 \n    0.95 \n  \n  \n    4.00 \n    0.93 \n  \n  \n    8.00 \n    0.96"
+  },
+  {
+    "objectID": "research/random_intercepts/index.html#logistic-regression",
+    "href": "research/random_intercepts/index.html#logistic-regression",
+    "title": "Random intercepts",
+    "section": "Logistic regression",
+    "text": "Logistic regression\nFor logistic regression, and GLMs generally, it is a different story.\n\n\nCode\nsimulation_logistic <- function(n, b0, b, std0){\n    x <- rnorm(n)\n    logit <- b0 + x * b + rnorm(n) * std0\n    y <- rbinom(n, 1, 1 / (1 + exp(-logit)))\n    fit <- glm(y ~ x, family='binomial')\n    coef <- summary(fit)$coef\n    res <-list(n=n, b0 = b0, b=b, std0 = std0, b0hat = coef[1, 1], b0_shat=coef[1, 2], bhat = coef[2,1], shat = coef[2, 2]) |> list2tibble()\n    return(res)\n}\n\nsimrep <- function(k, std0){\n    purrr::map_dfr(1:k, ~simulation_logistic(100, -1, 1, std0))\n}\n\nstd0 <- c(0, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0)\n\nres <- purrr::map_dfr(std0, ~simrep(100, .x))\n\ncap <- 'As the variance of the random intercept increases, the coverage rate of the 95% C.I. decreases'\n\nres %>%\n    rowwise() %>%\n    mutate(covered = (b < bhat + 2*shat) & (b > bhat - 2*shat)) %>%\n    ungroup() %>%\n    group_by(std0) %>%\n    summarize(coverage=mean(covered)) %>%\n    kbl(caption=cap) %>%\n    kable_classic(full_width = T, html_font = \"Cambria\")\n\n\n\n\nAs the variance of the random intercept increases, the coverage rate of the 95% C.I. decreases\n \n  \n    std0 \n    coverage \n  \n \n\n  \n    0.00 \n    0.95 \n  \n  \n    0.25 \n    0.93 \n  \n  \n    0.50 \n    0.90 \n  \n  \n    1.00 \n    0.97 \n  \n  \n    2.00 \n    0.60 \n  \n  \n    4.00 \n    0.21 \n  \n  \n    8.00 \n    0.08"
+  },
+  {
+    "objectID": "research/quadrature_for_peaked_functions/index.html",
+    "href": "research/quadrature_for_peaked_functions/index.html",
+    "title": "Quadrature for peaked functions",
+    "section": "",
+    "text": "Up until now, we have been fixing the intercept at the MLE– which requires fitting the logistic regression anyways. To do a quadrature only approximation of the BF and posterior mean, we would need to do a 2d quadrature over both the effect and the intercept (with a flat prior)\nFor likelihoods that are very peaked, I think it is easy for quadrature rules to miss the most important parts of the integral. This continues to be true of adaptive quadrature methods. Adaptive quadratures typically divide the integration region into subintervals and perform a low-order quadrature on each subinterval. It then performs a a higher-order quadrature (ideally nested, i.e. reusing the evaluations from the low-order quadrature). If the difference between the low and high order quadrature is small the procedure stops, otherwise it subdivides the interval. If both evaluations miss the high-density peak (don’t evaluate the function at points in the peak), the integral will be severely underestimated. If the evaluation points include the high density regions, performance is recovered.\nIn short, it seems that performing quadrature well involves requires knowing where there is non-negligible density. When the likelihood is peaked, picking a quadrature rule that has evaluation points in the high density basically requires at least approximately optimizing the function.\n\nIn the below example we try to numerically integrate the density function for \\(N(0, \\sigma^2)\\) with \\(\\sigma = 0.01\\). This is super peaky, with almost all the density around 0. We call stats::integrate, which implements an adaptive quadrature rule, using various intervals of the form \\([-5 + \\epsilon, 5+\\epsilon]\\), for \\(\\epsilon = 0.05k, \\;\\; k \\in \\{0, \\dots, 19\\}\\) We see that for most settings the adaptive quadrature rule approximates the integral as evaluating to \\(0\\). Only a small number of intervals (e.g. \\(\\epsilon = 0\\)) do we have an evaluation point close enough to \\(0\\) to pick up the peak.\n\n\nCode\nmake_density_functions <- function(mean, sd){\n  f <- function(x){\n    dnorm(x, mean = mean, sd = sd)\n  }\n  return(f)\n}\n\nf <- make_density_functions(0, 0.01)\n\n# only some settings of the interval accurately approximate the interval\n# these happen to take quadrature points in the high denisty peak\neps <- seq(0.1, 1, by=0.05)\nfor(e in eps){\n  int <- integrate(f, -5 + e, 5 + e)\n  res <- paste('eps = ', e, ' I =', int$value, ' absolute error = ', int$abs.error, collapse = NULL)\n  print(res)\n}\n\n\n[1] \"eps =  0.1  I = 0.999999999999999  absolute error =  2.00000737316951e-07\"\n[1] \"eps =  0.15  I = 0.999999999999892  absolute error =  3.15982721577762e-05\"\n[1] \"eps =  0.2  I = 0.999999999999506  absolute error =  5.75015101922371e-05\"\n[1] \"eps =  0.25  I = 2.47857565447408e-12  absolute error =  4.82102731481746e-12\"\n[1] \"eps =  0.3  I = 1.00000000000018  absolute error =  5.60799437807659e-05\"\n[1] \"eps =  0.35  I = 1.40171384460606e-05  absolute error =  2.65009793238846e-05\"\n[1] \"eps =  0.4  I = 2.23240368349137e-08  absolute error =  4.29728852052684e-08\"\n[1] \"eps =  0.45  I = 1.35504815537514e-20  absolute error =  2.58390642318225e-20\"\n[1] \"eps =  0.5  I = 1  absolute error =  2.78510096202405e-08\"\n[1] \"eps =  0.55  I = 1.00000000000003  absolute error =  1.44958923085081e-05\"\n[1] \"eps =  0.6  I = 1.21967660615216e-05  absolute error =  2.3257702739113e-05\"\n[1] \"eps =  0.65  I = 2.27134937806163e-22  absolute error =  4.33117831277196e-22\"\n[1] \"eps =  0.7  I = 4.75672475153124e-22  absolute error =  0\"\n[1] \"eps =  0.75  I = 1.92254994128285e-05  absolute error =  3.63479760707719e-05\"\n[1] \"eps =  0.8  I = 1.77175730319243e-14  absolute error =  3.19744231092045e-14\"\n[1] \"eps =  0.85  I = 0.999999999999898  absolute error =  7.47222853081375e-06\"\n[1] \"eps =  0.9  I = 9.10781435973747e-21  absolute error =  1.72193507837645e-20\"\n[1] \"eps =  0.95  I = 4.16499572039637e-44  absolute error =  7.81290905495735e-44\"\n[1] \"eps =  1  I = 1.84550997515897e-18  absolute error =  3.4631142762742e-18\""
   },
   {
     "objectID": "research/constrained_multinomial_stickbreaking/index.html",
@@ -228,7 +249,7 @@
     "href": "research.html",
     "title": "Research Notes",
     "section": "",
-    "text": "Constrained multinomial stick-breaking\n\n\n\n\n\nMultinomial stickbreaking is an easy\n\n\n\n\n\n\nApr 1, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nEstimating prior variance with asymptotic SER\n\n\n\n\n\nWhen fitting the single effect regression (SER), we often want to take an empricial Bayes approach and estimate the prior variance of the effect. However, when we are using the asymptotic approximation, the quality of the approximation may vary for different choices of the prior variance. Here, we describe EB/Type-II maximum likelihood approach of maximizing the prior variance. We discuss the impact of the varying approximation quality.\n\n\n\n\n \n\n\n\n\n\n\nImplementation polynomial approximation VB\n\n\n\n\n\nRough implementation of of approximate VB regression, where we approximate the data likelihood with a polynomial. We implement a mean field gaussian variational approximation. We demonstrate the method on Gaussian linear model (no approximation), and Bernoulli-logit (logistic regression) and Poisson-log (poisson regression) models with varying approximation degree.\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nMode seeking in mean field VB for RSS + sparse prior\n\n\n\n\n\nUsing polynomial approximations to perform Bayesian regression\n\n\n\n\n\n\nApr 1, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nMultinomial stick-breaking\n\n\n\n\n\nExploration of multinomial stickbreaking\n\n\n\n\n\n\nMar 19, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nPolynomial approximation SuSiE\n\n\n\n\n\nWe extend the sum of single effects regression to support arbitrary likelihood and link function by representing (approximately) the log likelihood of each observations as a polynomial in the linear prediction. Once this approximation is made we can treat inference in multiple likelihoods with a uniform inference procedure. Furthermore, we can make the polynomial approximation arbitrarily precise by increasing the degree of the approximation.\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nPolynomial approximation for variational Bayes\n\n\n\n\n\nUsing polynomial approximations to perform Bayesian regression\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nWakefield ABF Accuracy\n\n\n\n\n\nWe noticed that the error in Wakefield’s ABF grows with increasing sample size. This is surprising, because at these large sample sizes asymptotic normality kicks in. The issue can be more clearly seen by considering the ABF as an integral over an approximation to the likelihood ratio. The approximation used in the ABF ensure that the approximate likelihood ratio at \\(0\\) is 1, but that the curvature and mode of the approximation are determined by the asymptotic distribution of the MLE. This leads to a gap in the approximate likelihood ratio and the exact likelihood ratio around the mode. As the normal approximation becomes more peaked, the accuracy of the ABF is increasingly determined by the quality of the likelihood ratio approximation in a small neighborhood around the mode which is off by this gap, which appears to grow with sample size.\n\n\n\n\n\n\nApr 25, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\nNo matching items"
+    "text": "Constrained multinomial stick-breaking\n\n\n\n\n\nMultinomial stickbreaking is an easy\n\n\n\n\n\n\nApr 1, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nImplementation polynomial approximation VB\n\n\n\n\n\nRough implementation of of approximate VB regression, where we approximate the data likelihood with a polynomial. We implement a mean field gaussian variational approximation. We demonstrate the method on Gaussian linear model (no approximation), and Bernoulli-logit (logistic regression) and Poisson-log (poisson regression) models with varying approximation degree.\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nMode seeking in mean field VB for RSS + sparse prior\n\n\n\n\n\nUsing polynomial approximations to perform Bayesian regression\n\n\n\n\n\n\nApr 1, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nMultinomial stick-breaking\n\n\n\n\n\nExploration of multinomial stickbreaking\n\n\n\n\n\n\nMar 19, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nPolynomial approximation SuSiE\n\n\n\n\n\nWe extend the sum of single effects regression to support arbitrary likelihood and link function by representing (approximately) the log likelihood of each observations as a polynomial in the linear prediction. Once this approximation is made we can treat inference in multiple likelihoods with a uniform inference procedure. Furthermore, we can make the polynomial approximation arbitrarily precise by increasing the degree of the approximation.\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nPolynomial approximation for variational Bayes\n\n\n\n\n\nUsing polynomial approximations to perform Bayesian regression\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nQuadrature for peaked functions\n\n\n\n\n\n\n\n\n\n\n\n\nJun 28, 2023\n\n\n\n\n\n\n\n\nRandom intercepts\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\nWakefield ABF Accuracy\n\n\n\n\n\nWe noticed that the error in Wakefield’s ABF grows with increasing sample size. This is surprising, because at these large sample sizes asymptotic normality kicks in. The issue can be more clearly seen by considering the ABF as an integral over an approximation to the likelihood ratio. The approximation used in the ABF ensure that the approximate likelihood ratio at \\(0\\) is 1, but that the curvature and mode of the approximation are determined by the asymptotic distribution of the MLE. This leads to a gap in the approximate likelihood ratio and the exact likelihood ratio around the mode. As the normal approximation becomes more peaked, the accuracy of the ABF is increasingly determined by the quality of the likelihood ratio approximation in a small neighborhood around the mode which is off by this gap, which appears to grow with sample size.\n\n\n\n\n\n\nApr 25, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -242,7 +263,7 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "About this site\n\n1 + 1\n\n[1] 2"
+    "text": "Hi! I’m Karl Tayeb. I’m a PhD Student at the University of Chicago working with (Matthew Stephens)[https://stephenslab.uchicago.edu/] and Yoav Gilad. Before starting graduate school I\nThis is my research website. For now, that means a collection of notes that are useful to me. Feel free to look around."
   },
   {
     "objectID": "presentations/committee_meeting_june23/committee_meeting_june23.html#aim-0",
@@ -579,5 +600,236 @@
     "title": "Committee Meeting",
     "section": "Opportunities",
     "text": "Opportunities\n\nIs there a faster way to perform “expected polynomial shift” operation?\nOther computationally convenient ways to approximation \\(\\log p(y | \\psi)\\)?"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#last-domino-constructing-base-approximation",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#last-domino-constructing-base-approximation",
+    "title": "Gilad Lab WIP",
+    "section": "Last domino: constructing base approximation",
+    "text": "Last domino: constructing base approximation\n\n\nRecall: if we find a good polynomial approximation to the log-likelihood for each observation we can cheaply approximate inference in the non-conjugate model\nPrevious strategy: Chebyshev interpolating polynomials can approximately minimize \\(||f - \\hat f||_{\\infty}\\) on a target interval.\nProblem: interpolating polynomials are not guarunteed to have negative leading coefficient (a requirement for this approach)\nWhat is a general strategy for computing legal polynomial approximations?"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#susie-model",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#susie-model",
+    "title": "Gilad Lab WIP",
+    "section": "SuSiE: model",
+    "text": "SuSiE: model\n\\[\n\\begin{aligned}\ny &\\sim N(X\\beta, \\sigma^2_0) \\\\\n\\beta &= \\sum_l b_l \\gamma_l \\\\\nb_l &\\sim N(0, \\sigma^2_0)\\\\\n\\gamma_l &\\sim \\text{Multinomial}(1, \\pi)\n\\end{aligned}\n\\]"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#variational-inference",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#variational-inference",
+    "title": "Gilad Lab WIP",
+    "section": "Variational inference",
+    "text": "Variational inference\nInference as an optimization problem:\n\\[\\begin{align}\np(\\beta | {\\bf y}, X) = \\arg \\max_q F(q),\n\\quad F(q) := \\mathbb E_q \\left[ \\log p ({\\bf y} | X, \\beta) \\right] - KL[q || p]\n\\end{align}\\]\n\n\\[\\begin{align}\nF(q)\n&= \\mathbb E_q \\left[ \\log p ({\\bf y} | X, \\beta) \\right] - KL[q || p] \\\\\n&= \\mathbb E_q \\left[ \\log p ({\\bf y},  \\beta | X) \\right] + H(q) \\\\\n&= \\left(\\mathbb E_q \\left[ \\log p ({\\bf y},  \\beta | X) - Z \\right] + H(q) \\right) + Z \\\\\n&= - KL[q || p_{post}] + Z\n\\end{align}\\]\n\n\nWe’ll write the variational objective for SER \\(F_{SER}(q; {\\bf y}, X, \\sigma_0)\\)"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#susie-variational-approximation",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#susie-variational-approximation",
+    "title": "Gilad Lab WIP",
+    "section": "SuSiE: variational approximation",
+    "text": "SuSiE: variational approximation\nRestrict \\(q\\) to some family \\(\\mathcal Q\\)\n\\[\\begin{align}\nq^*(\\beta) = \\arg \\max_{q \\in \\mathcal Q} F(q)\n\\end{align}\\]\nSuSiE uses \\(\\mathcal Q = \\{q : q(\\beta) = \\prod_l q_l(\\beta_l)\\}\\)\n\n\\[\nF_{SuSiE}(q; X, {\\bf y}) = \\mathbb E_{q} \\left[\n      -\\frac{1}{2\\sigma^2}||{\\bf y} - {\\bf X} \\beta_{-l} - X\\beta_l||^2_2)\n  \\right] + KL[q || p_{SuSiE}] + C(\\sigma)\n\\]"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#susie-coordinate-ascent-ibss",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#susie-coordinate-ascent-ibss",
+    "title": "Gilad Lab WIP",
+    "section": "SuSiE: coordinate ascent (IBSS)",
+    "text": "SuSiE: coordinate ascent (IBSS)\nDefine the residual \\({\\bf r}_l = {\\bf y} - X\\beta_{-l}\\)\n\n\\[\n\\begin{aligned}\nF_{SuSiE}(q_l; q_{-l}, X, {\\bf y})\n&= \\mathbb E_{q_l} \\left[\n  \\mathbb E_{q_{-l}} \\left[\n      -\\frac{1}{2\\sigma^2}||{\\bf y} - {\\bf X} \\beta_{-l} - X\\beta_l||^2_2)\n  \\right]\n\\right] - KL[q || p] \\\\\n&= \\mathbb E_{q_l} \\left[\n  \\mathbb E_{q_{-l}} \\left[\n      -\\frac{1}{2\\sigma^2}|| {\\bf r}_l - X\\beta_l||^2_2)\n  \\right]\n\\right] - KL[q_l || p_l]  + C_1 \\\\\n&= \\mathbb E_{q_l} \\left[ \\color{blue}{\n    -\\frac{1}{2\\sigma^2} \\left(|| \\mathbb E_{q_{-l}} {\\bf r}_l- X\\beta_l||^2_2 + \\mathbb V ||r_l||^2_2 \\right)}\n\\right] - KL[q_l || p_l]  + C_1\\\\\n&= \\mathbb E_{q_l} \\left[\n    -\\frac{1}{2\\sigma^2} || \\mathbb E_{q_{-l}} {\\bf r}_l- X\\beta_l||^2_2]\n\\right] - KL[q_l || p_l]  + C_2  \\\\\n&= F_{SER}(q_l; X, \\mathbb E_{q{-l}}{\\bf r}_l) + C_2\n\\end{aligned}\n\\]\n\n\nKey: coordinate updates in \\(\\mathcal Q\\) reduce to solving an SER"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#generalized-ibss-gibss",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#generalized-ibss-gibss",
+    "title": "Gilad Lab WIP",
+    "section": "Generalized IBSS (GIBSS)",
+    "text": "Generalized IBSS (GIBSS)\n\n\nHeuristic approach for applying SuSiE to non-Gaussian models\nIdea: apply IBSS, using expected predictions as fixed offsets\n\n\n\n\\[\\begin{align}\nF_{SuSiE}(q)\n&= \\mathbb E_q[\\log p({\\bf y} | X, \\beta_l, \\beta_{-l})] - \\sum_l KL[q_l || p_l] \\\\\n&= \\mathbb E_{q_l}[ \\mathbb E_{q_{-l}}[\\log p({\\bf y} | X, \\beta_l, \\beta_{-l})]] - \\sum_l KL[q_l || p_l] + C_1 \\\\\n&\\color{purple}{\\approx \\mathbb E_{q_l}[\\log p({\\bf y} | X, \\beta_l, \\bar \\beta_{-l})] - KL[q_l || p_l] + C_2} \\\\\n&= F_{SER}(q_l; {\\bf y}, X, \\bar \\beta_{-l}) + C_2\n\\end{align}\\]"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#why-should-this-work",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#why-should-this-work",
+    "title": "Gilad Lab WIP",
+    "section": "Why should this work?",
+    "text": "Why should this work?\n\\[\n\\begin{aligned}\nF_{SuSiE}(q)\n&= \\mathbb E_q[\\log p({\\bf y} | X, \\beta_l, \\beta_{-l})] - \\sum_l KL[q_l || p_l] \\\\\n&\\color{purple}{\\approx \\mathbb E_{q_l}[\\log p({\\bf y} | X, \\beta_l, \\bar \\beta_{-l})] - KL[q_l || p_l] + C_2} \\\\\n\\end{aligned}\n\\]\n\n\nIf \\(\\log p( {\\bf y} | X, \\beta)\\) is quadratic in \\(\\beta\\) (Gaussian) there \\(\\color{purple}\\approx\\) is \\(=\\)\nInformally, approximation is good if \\(\\log p( {\\bf y} | X, \\beta)\\) is well approximated by a quadratic function in \\(\\beta\\).\nReally we care about \\(\\psi = X\\beta\\)"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#algorithm-single-effect-regression",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#algorithm-single-effect-regression",
+    "title": "Gilad Lab WIP",
+    "section": "Algorithm: Single effect regression",
+    "text": "Algorithm: Single effect regression\nRequire a function \\(G\\) which computes the BF and posterior mean of a Bayesian univariate regression\n\\[\\begin{align}\n{\\bf y} \\sim 1 + {\\bf x} + {\\bf o} \\\\\nb \\sim N(0, \\sigma^2)\n\\end{align}\\]"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#advantage-and-limitations",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#advantage-and-limitations",
+    "title": "Gilad Lab WIP",
+    "section": "Advantage and limitations",
+    "text": "Advantage and limitations\n\n\nAdvantages\n\nSeems to work well!\nHighly modular: just need to implement the univariate regression\n\n\n\n\nDisadvantages\n\nHeuristic– not optimizing a clear objective function\nDoes not properly account for uncertainty in \\(\\beta_{-l}\\), only uses posterior mean\n\n\n\n\nOpportunities\n\nCan we analyze the approximation error?\nCan we make guarantees on GIBSS performance asymptotically?"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#sources-of-error",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#sources-of-error",
+    "title": "Gilad Lab WIP",
+    "section": "Sources of error",
+    "text": "Sources of error\n\n\nGIBSS with exact SER\n\nTreating random effects as fixed effects (only need to pass posterior means)\n\n\n\n\nGIBSS with asymptotic approximation\n\nAsymptotic approximation of posterior means (only need to compute MLE and std. errors)\nApproximation of BFs"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#algorithm-gibss",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#algorithm-gibss",
+    "title": "Gilad Lab WIP",
+    "section": "Algorithm: GIBSS",
+    "text": "Algorithm: GIBSS"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#simulations-logistic-gibss-l5",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#simulations-logistic-gibss-l5",
+    "title": "Gilad Lab WIP",
+    "section": "Simulations: logistic-GIBSS \\(L=5\\)",
+    "text": "Simulations: logistic-GIBSS \\(L=5\\)\nMuch better performance compared to direct VB approach"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#lasso-simulation",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#lasso-simulation",
+    "title": "Gilad Lab WIP",
+    "section": "Lasso simulation",
+    "text": "Lasso simulation\nFit lasso to each gene list, simulate new gene lists from lasso fit (x20) - Gene sets: MSigDb Hallmark + C2 - ~7500 genes, ~4500 gene sets"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#lasso-simulation-cs-summary",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#lasso-simulation-cs-summary",
+    "title": "Gilad Lab WIP",
+    "section": "Lasso simulation CS summary",
+    "text": "Lasso simulation CS summary\nSome of the CSs are large (uninformative)\n\n\n\n“Confident” discoveries 260/527 vs lasso 460 effects\nSuSiE has good CS coverage ~94%\nLasso has high FP rate ~34%\n\n\n\n\n\n\n\n# Causal x CS size\n\n\n1\n\n\n2\n\n\n3\n\n\n4\n\n\n5\n\n\n6\n\n\n7\n\n\n8\n\n\n9\n\n\n12\n\n\n\n\n\n\n0\n\n\n17\n\n\n3\n\n\n1\n\n\n0\n\n\n0\n\n\n0\n\n\n1\n\n\n0\n\n\n0\n\n\n0\n\n\n\n\n1\n\n\n244\n\n\n6\n\n\n4\n\n\n2\n\n\n2\n\n\n0\n\n\n1\n\n\n0\n\n\n1\n\n\n0\n\n\n\n\n2\n\n\n0\n\n\n14\n\n\n1\n\n\n0\n\n\n0\n\n\n1\n\n\n0\n\n\n1\n\n\n0\n\n\n1\n\n\n\n\n3\n\n\n0\n\n\n0\n\n\n0\n\n\n1\n\n\n0\n\n\n2\n\n\n0\n\n\n0\n\n\n0\n\n\n0\n\n\n\n\n4\n\n\n0\n\n\n0\n\n\n0\n\n\n0\n\n\n1\n\n\n1\n\n\n0\n\n\n0\n\n\n0\n\n\n0"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#gibss-for-logistic-regression",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#gibss-for-logistic-regression",
+    "title": "Gilad Lab WIP",
+    "section": "GIBSS for logistic regression",
+    "text": "GIBSS for logistic regression\nGoal: demonstrate improvement from using Laplace ABF over ABF in GIBSS for settings commonly found in case-control GWAS\n\nImplication: Naive application of “summary stat” based finemapping methods not appropriate for e.g. logistic regression, GLMs, GLMMs."
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#realistic-simulation-plan",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#realistic-simulation-plan",
+    "title": "Gilad Lab WIP",
+    "section": "Realistic simulation plan",
+    "text": "Realistic simulation plan\nUKBB genotype data\n\nSimulate from UKBB imputed genotypes\nSelect 50k individual per UKBB, keep SNPs with MAF > 1% in sample\n\nSimulation parameters\n\n\n\\[\n\\begin{aligned}\ny_i \\sim Bernoulli(p_i) \\\\\n\\log \\frac{p_i}{1 - p_i} = \\beta_{0i} + \\beta x_i\\\\\n\\beta_{0i} \\sim N(b_0, \\sigma^2_0) \\\\\n\\beta \\sim N(0, \\sigma^2)\n\\end{aligned}\n\\]\n\n\nRandom intercept models genetic contributions at un-linked loci, larger \\(\\sigma^2_0\\) means focal SNP explains smaller fraction of \\(h^2\\)\n\\(\\sigma^2\\) should be selected to reflect un-normalized effect sizes in GWAS\nTune \\(b_0\\), \\(\\sigma^2_0\\) to reflect case-control ratios and polygenecity of trait"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#this-simulation",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#this-simulation",
+    "title": "Gilad Lab WIP",
+    "section": "This simulation",
+    "text": "This simulation\n\n\n\\[\n\\begin{aligned}\ny_i \\sim Bernoulli(p_i) \\\\\n\\log \\frac{p_i}{1 - p_i} = \\beta_{0i} + \\beta x_i\\\\\n\\beta_{0i} \\sim N(b_0, \\sigma^2_0) \\\\\n\\beta \\sim N(0, \\sigma^2)\n\\end{aligned}\n\\]\n\n\nRandom intercept models genetic contributions at un-linked loci, larger \\(\\sigma^2_0\\) means focal SNP explains smaller fraction of \\(h^2\\)\n\\(\\sigma^2\\) should be selected to reflect un-normalized effect sizes in GWAS\nTune \\(b_0\\), \\(\\sigma^2_0\\) to reflect case-control ratios and polygenecity of trait\n\n\n\n\n\\(\\sigma^2_0 = 0\\) (fixed intercept)\nSelect causal SNP to have MAF in \\((0.2, 0.25)\\)\nTuned \\(b_0\\) to give frequency of cases to approx. \\(1 - 10\\%\\)\n50 replicates on one region of chromosome 1."
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#logistic-susie-abf-vs-laplace",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#logistic-susie-abf-vs-laplace",
+    "title": "Gilad Lab WIP",
+    "section": "Logistic SuSiE ABF vs Laplace",
+    "text": "Logistic SuSiE ABF vs Laplace\n\n\n\n95% CS coverage\n\n\nMethod\nCoverage\n\n\n\n\nabf\n0.953\n\n\nlaplace_abf\n0.977\n\n\n\n\n\n{fig-align=“right”, height=10%}"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#gibss-for-survival-analysis",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#gibss-for-survival-analysis",
+    "title": "Gilad Lab WIP",
+    "section": "GIBSS for survival analysis",
+    "text": "GIBSS for survival analysis\n\n\nYunqi has been investigating specifically the application of SuSiE for survival analysis.\n\n‘Non-standard’: optimization of partial likelihood to get MLE and standard error, censored data\nFits within the GIBSS framework!\n\n\n\n\n\n\n\nIndependent\n\n\n\n\n\n\n\nCorrelated (real genotypes)"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#survival-susie-vs-bvsnlp",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#survival-susie-vs-bvsnlp",
+    "title": "Gilad Lab WIP",
+    "section": "Survival SuSiE vs BVSNLP",
+    "text": "Survival SuSiE vs BVSNLP\n\n\n\n\n\nSurvival SuSiE without ABF correction\n\n\n\n\n\n\n\nSurvival SuSiE with ABF correction"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#overview",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#overview",
+    "title": "Gilad Lab WIP",
+    "section": "Overview",
+    "text": "Overview\n\nGIBSS requires computing the BF and posterior mean for each variable\nStandard statistical software for computing MLE\nFor large sample sizes, we can leverage asymptotic normality of the MLE to approximate posterior mean and BF."
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#posterior-mean",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#posterior-mean",
+    "title": "Gilad Lab WIP",
+    "section": "Posterior mean",
+    "text": "Posterior mean\n\\[\n\\begin{aligned}\n\\hat \\beta | \\beta, s^2 &\\sim N(\\beta, s^2) \\\\\n\\beta &\\sim N(0, \\sigma^2)\n\\end{aligned}\n\\]\n\n\\[\n\\beta | \\hat \\beta, s^2 \\sim N \\left(\n\\frac{\\sigma^2}{s^2 + \\sigma^2} \\hat\\beta, \\left(\\frac{1}{s^2} + \\frac{1}{\\sigma^2}\\right)^{-1}\n\\right)\n\\]"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#approximating-the-the-bf",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#approximating-the-the-bf",
+    "title": "Gilad Lab WIP",
+    "section": "Approximating the the BF",
+    "text": "Approximating the the BF\n\\[BF = \\int \\color{red}{\\frac{ p(\\mathcal {\\bf y} | {\\bf x}, \\beta)}{p({\\bf y} | \\beta = 0)}} N(\\beta | 0, \\sigma^2) d\\beta\\]\nApproximate the likelihood ratio in a way that’s easy to integrate\n\\[\nLR(\\beta_1, \\beta_2) = \\frac{p(\\mathcal {\\bf y} | {\\bf x}, \\beta)}{p({\\bf y} | \\beta=0)}\n\\]"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#wakefields-asymptotic-bf",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#wakefields-asymptotic-bf",
+    "title": "Gilad Lab WIP",
+    "section": "Wakefields asymptotic BF",
+    "text": "Wakefields asymptotic BF\nAsymptotically, \\(\\hat \\beta | \\beta, s^2 \\sim N(\\beta, s^2)\\). Then\n\\[\nLR(\\beta, 0)\n= \\frac{p(y | \\hat\\beta, \\beta) p(\\hat\\beta | \\beta)}{p(y | \\hat\\beta, \\beta = 0) p(\\hat\\beta | \\beta = 0)}\n\\approx \\color{red}{\\frac{p(y | \\hat\\beta)}{p(y | \\hat\\beta)}} \\frac{p(\\hat\\beta | \\beta)}{ p(\\hat\\beta | \\beta = 0)} \\approx \\frac{N(\\hat\\beta| \\beta, s^2)}{N(\\hat\\beta| 0, s^2)} = \\widehat{LR}_{ABF}(\\beta, 0).\n\\]\n\nIntegrating over the prior gives Wakefield’s asymptotic Bayes Factor (ABF)\n\\[\nABF = \\int \\widehat{LR}_{ABF}(\\beta, 0) N(\\beta | 0, \\sigma^2_0) d\\beta = \\frac{N(\\hat\\beta | 0, s^2 + \\sigma^2_0)}{N(\\hat\\beta | 0, s^2)}\n\\]"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#a-problem-with-abf",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#a-problem-with-abf",
+    "title": "Gilad Lab WIP",
+    "section": "A problem with ABF",
+    "text": "A problem with ABF\n\n\\(LR(\\beta, 0) \\approx \\widehat {LR}_{ABF}(\\beta, 0)\\)\n\\(LR(0, 0) = \\widehat {LR}_{ABF}(0, 0) = 1\\)\nThe asymptotic approximation may not be a good in the tails, an issue for \\(\\hat\\beta/s >> 0\\)"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#adjusting-the-abf",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#adjusting-the-abf",
+    "title": "Gilad Lab WIP",
+    "section": "Adjusting the ABF",
+    "text": "Adjusting the ABF\nIdea: use the asymptotic approximation where it is good\n\\[\n\\begin{aligned}\nLR(\\beta, 0)\n&= LR(\\beta, \\hat{\\beta}) LR(\\hat{\\beta}, 0) \\\\\n&\\approx \\widehat{LR}_{ABF}(\\beta, \\hat\\beta)LR(\\hat\\beta, 0) \\\\\n&= \\widehat{LR}_{Lap}(\\hat\\beta, 0)\n\\end{aligned}\n\\]\n\nRequires an extra piece of information: \\(LR(\\hat\\beta, 0)\\)"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#corrected-abflaplace-approximation",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#corrected-abflaplace-approximation",
+    "title": "Gilad Lab WIP",
+    "section": "Corrected ABF/Laplace approximation",
+    "text": "Corrected ABF/Laplace approximation\n\nRequires knowledge of the LR of the MLE against the null.\nCan dramatically improve approximation of the BF"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#comparison-of-logbf",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#comparison-of-logbf",
+    "title": "Gilad Lab WIP",
+    "section": "Comparison of logBF",
+    "text": "Comparison of logBF"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#comparison-of-logbf-1",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#comparison-of-logbf-1",
+    "title": "Gilad Lab WIP",
+    "section": "Comparison of logBF",
+    "text": "Comparison of logBF"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#abf-correction-reorders-pips",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#abf-correction-reorders-pips",
+    "title": "Gilad Lab WIP",
+    "section": "ABF Correction reorders PIPs",
+    "text": "ABF Correction reorders PIPs"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#laplace-approximation",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#laplace-approximation",
+    "title": "Gilad Lab WIP",
+    "section": "Laplace approximation",
+    "text": "Laplace approximation\nFor some non-negative function \\(f: \\mathbb R \\rightarrow \\mathbb R^+\\), want to compute the integral\n\\[I = \\int f(x) dx,\\]\n\nDefine \\(h(x) = \\log f(x)\\), expand around the maximizer of \\(h\\), \\(x^*\\)\n\\[\\hat h (x) = h(x^*) + \\frac{1}{2} h^{''}(x^*)(x-x^*)^2\\]\n\n\nApproximate with the Gaussian integral\n\\[ \\hat I = \\int \\exp{\\hat h(x))} dx = \\exp{\\hat h(x^*)} \\left(-\\frac{2\\pi}{h^{''}(x^*)}\\right)^{1/2}\\] . . .\nPotential next step: saddle point approximations?"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#takeaways",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#takeaways",
+    "title": "Gilad Lab WIP",
+    "section": "Takeaways",
+    "text": "Takeaways\n\nLaplace approximation of the BF better than ABF for variable selection\nAddition information available from standard statistical software for GLMs\nPoor performance of ABF raises concerns about using SuSiE-RSS for summary statistics from non-Gaussian models\nGIBSS + asymptotic approximation looks like a good recipe for GLMs"
+  },
+  {
+    "objectID": "presentations/gilad_lab_july23/committee_meeting_june23.html#fast-implementation",
+    "href": "presentations/gilad_lab_july23/committee_meeting_june23.html#fast-implementation",
+    "title": "Gilad Lab WIP",
+    "section": "Fast implementation",
+    "text": "Fast implementation\nProblem\n\nGIBSS requires evaluating many univariate regression\nGLMs fit via IRLS (equivalently, Newton-Raphson with step-size \\(\\gamma = 1\\)). \\(\\beta_t = \\beta_{t-1} - \\gamma H^{-1}_{t-1} g_{t-1}\\)\n\\(p\\) 2d optimization problems that can be carried out in parallel\n\nImplementation\n\nImplemented in Python using Google’s jax (numpy, with automatic differentiation, JIT compilation, and vectorization)\nNewton-Raphson with halving step-size\nEasy to extend to many GLMs (or any regression with twice-differentiable log-likelihood)– just define a log_likelihood function.\nsusiepy package at http://github.com/karltayeb/susiepy\n\nOpen questions for optimizing implementation\n\nCoordinate ascent faster on machine compared to full Newton updates?\nAvoid fitting intercept for each variable separately?\nAvoid checking for likelihood increase\nExploit sparsity in \\(X\\) for faster implementation?\nPartial updates of “inner loop” while fitting GIBBS"
   }
 ]
