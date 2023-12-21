@@ -21,6 +21,7 @@ format:
 
 execute:
   cache: true
+  freeze: true # never re-render
 
 bibliography: 
   - library.bib

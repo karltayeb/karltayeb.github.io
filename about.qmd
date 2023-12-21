@@ -2,8 +2,6 @@
 title: "About"
 ---
 
-About this site
+Hi! I'm Karl Tayeb. I'm a PhD Student at the University of Chicago working with (Matthew Stephens)[https://stephenslab.uchicago.edu/] and Yoav Gilad. Before starting graduate school I 
 
-```{r}
-1 + 1
-```
+This is my research website. For now, that means a collection of notes that are useful to me. Feel free to look around.
