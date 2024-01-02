@@ -1,0 +1,22 @@
+[
+  {
+    "listing": "/research.html",
+    "items": [
+      "/research/linear_wakefield_logistic_wakefield/index.html",
+      "/research/bf2d/bf2d.html",
+      "/research/constrained_multinomial_stickbreaking/index.html",
+      "/research/ibss_glm_estimating_prior_variance/index.html",
+      "/research/polynomial_regression_vb/index.html",
+      "/research/kegg_dz_pathway_example/index.html",
+      "/research/logistic_regression_marginal_effects_exploration/lr_marginal_effects_exploration.html",
+      "/research/map_vs_amap/map_vs_amap.html",
+      "/research/mode_matching_rss_vb/index.html",
+      "/research/multinomial_stickbreaking/index.html",
+      "/research/polynomial_susie/index.html",
+      "/research/polynomial_approximation/index.html",
+      "/research/quadrature_for_peaked_functions/index.html",
+      "/research/random_intercepts/index.html",
+      "/research/logistic_abf_accuracy/index.html"
+    ]
+  }
+]
