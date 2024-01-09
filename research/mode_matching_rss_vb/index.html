@@ -259,7 +259,7 @@ ELBO(q_j) &amp;= \mathbb E_{q_{-j}} \squarb{\log p(\hat z| z, R) + \log p(z_j) -
 \end{aligned}
 \]</span></p>
 <p>Then <span class="math inline">\(q(b_l | \gamma_l = 1) = N(\frac{\nu_j}{\tau_j}, \tau^{-1}_j)\)</span> Where <span class="math inline">\(\nu_j = \hat z_j - \sum_{i\neq j} R_{ij} \alpha_i \mu_i\)</span>, and <span class="math inline">\(\tau_j = 1 + \sigma^{-2}_0\)</span>.</p>
-<p>It’s easy to see that the best choice for <span class="math inline">\(q(b_l | \gamma_l = 0)\)</span> is the prior, since all fo the data terms disappear, also noted here [<span class="citation" data-cites="titsiasDoublyStochasticVariational">(<a href="#ref-titsiasDoublyStochasticVariational" role="doc-biblioref">Titsias and Lázaro-Gredilla, n.d.</a>)</span>]</p>
+<p>It’s easy to see that the best choice for <span class="math inline">\(q(b_l | \gamma_l = 0)\)</span> is the prior, since all fo the data terms disappear, also noted here [<span class="citation" data-cites="titsiasDoublyStochasticVariational">(<a href="#ref-titsiasDoublyStochasticVariational" role="doc-biblioref">1</a>)</span>]</p>
 <p>And <span class="math inline">\(q(\gamma_j) = Bernoulli(\alpha_j)\)</span>, where <span class="math inline">\(\log \left(\frac{\alpha_j}{1 - \alpha_j}\right) = \hat z \mu_j - \frac{1}{2} \left[\mu^2_j + \sigma^2_j + 2 \mu_j \sum_{i\neq j} R_{ij} \mu_i \alpha_i \right] + \log\left(\frac{\pi}{1 - \pi}\right)\)</span>.</p>
 <section id="simulation" class="level3">
 <h3 class="anchored" data-anchor-id="simulation">Simulation</h3>
@@ -405,9 +405,9 @@ ELBO(q_j) &amp;= \mathbb E_{q_{-j}} \squarb{\log p(\hat z| z, R) + \log p(z_j) -
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" role="doc-bibliography">
 <div id="ref-titsiasDoublyStochasticVariational" class="csl-entry" role="doc-biblioentry">
-Titsias, Michalis K, and Miguel Lázaro-Gredilla. n.d. <span>“Doubly <span>Stochastic Variational Bayes</span> for Non-<span>Conjugate Inference</span>.”</span>
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Titsias MK, Lázaro-Gredilla M. Doubly <span>Stochastic Variational Bayes</span> for non-<span>Conjugate Inference</span>. </div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

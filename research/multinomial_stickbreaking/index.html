@@ -248,8 +248,8 @@ div.csl-indent {
 <p><span class="math display">\[
 \int_{B} \sigma(\eta(z ; B)) dB
 \]</span></p>
-<p>There is plenty of work on bounding softmax with functions that are easier to integrate <span class="citation" data-cites="bouchardEfficientBoundsSoftmax titsiasrcauebOnevsEachApproximationSoftmax2016">(<a href="#ref-bouchardEfficientBoundsSoftmax" role="doc-biblioref">Bouchard, n.d.</a>; <a href="#ref-titsiasrcauebOnevsEachApproximationSoftmax2016" role="doc-biblioref">Titsias RC AUEB 2016</a>)</span>, but it is hard problem to get anlytic bounds that are easy to work.</p>
-<p>There is also quite a bit of work developing bounds for the sigmoid function (softmax with <span class="math inline">\(K=2\)</span>, usually people describe softmax as a generalization of sigmoid to <span class="math inline">\(K &gt; 2\)</span>). In particular, techniques for constructing local approximations are popular in variational inference <span class="citation" data-cites="jaakkolaVariationalApproachBayesian saulMeanFieldLearning1998">(<a href="#ref-jaakkolaVariationalApproachBayesian" role="doc-biblioref">Jaakkola and Jordan, n.d.</a>; <a href="#ref-saulMeanFieldLearning1998" role="doc-biblioref">Saul and Jordan 1998</a>)</span>. These local approximations are tight at a point, but the quality of the bound decays as you get far from that point. Thus, these approximation techniques require selecting/optimizing at what point the bound is tight.</p>
+<p>There is plenty of work on bounding softmax with functions that are easier to integrate <span class="citation" data-cites="bouchardEfficientBoundsSoftmax titsiasrcauebOnevsEachApproximationSoftmax2016">(<a href="#ref-bouchardEfficientBoundsSoftmax" role="doc-biblioref">1</a>,<a href="#ref-titsiasrcauebOnevsEachApproximationSoftmax2016" role="doc-biblioref">2</a>)</span>, but it is hard problem to get anlytic bounds that are easy to work.</p>
+<p>There is also quite a bit of work developing bounds for the sigmoid function (softmax with <span class="math inline">\(K=2\)</span>, usually people describe softmax as a generalization of sigmoid to <span class="math inline">\(K &gt; 2\)</span>). In particular, techniques for constructing local approximations are popular in variational inference <span class="citation" data-cites="jaakkolaVariationalApproachBayesian saulMeanFieldLearning1998">(<a href="#ref-jaakkolaVariationalApproachBayesian" role="doc-biblioref">3</a>,<a href="#ref-saulMeanFieldLearning1998" role="doc-biblioref">4</a>)</span>. These local approximations are tight at a point, but the quality of the bound decays as you get far from that point. Thus, these approximation techniques require selecting/optimizing at what point the bound is tight.</p>
 <p>We’re operating under the assumption that it is easier to construct good bounds for the sigmoid function compared to the softmax function. We are going to explore a construction of the Categorical/Multinomial distribution that let us utilize these bounds.</p>
 </section>
 <section id="multinomial-stick-breaking" class="level2">
@@ -271,7 +271,7 @@ div.csl-indent {
 <p><span class="math display">\[
 \text{Multinomial}({\bf y}; n, \pi) = \prod_{k=1}^{K-1} \text{Binomial}(y_k; n_k, p_k)
 \]</span></p>
-<p>Where <span class="math inline">\(n_k = n - \sum_{j &lt; k} y_j\)</span> counts the number of remaining trials, conditional on the first <span class="math inline">\(k-1\)</span> draws. This constructing is not new, it has been proposed by several authors <span class="citation" data-cites="khanStickBreakingLikelihoodCategorical2012 lindermanDependentMultinomialModels">(<a href="#ref-khanStickBreakingLikelihoodCategorical2012" role="doc-biblioref">Khan et al. 2012</a>; <a href="#ref-lindermanDependentMultinomialModels" role="doc-biblioref">Linderman, Johnson, and Adams, n.d.</a>)</span>.</p>
+<p>Where <span class="math inline">\(n_k = n - \sum_{j &lt; k} y_j\)</span> counts the number of remaining trials, conditional on the first <span class="math inline">\(k-1\)</span> draws. This constructing is not new, it has been proposed by several authors <span class="citation" data-cites="khanStickBreakingLikelihoodCategorical2012 lindermanDependentMultinomialModels">(<a href="#ref-khanStickBreakingLikelihoodCategorical2012" role="doc-biblioref">5</a>,<a href="#ref-lindermanDependentMultinomialModels" role="doc-biblioref">6</a>)</span>.</p>
 <p>To do multinomial regression we will write <span class="math inline">\(\nu_k = \beta_k^T {\bf z}\)</span>. <span class="math inline">\(nu_k\)</span> gives the log odds of selecting category <span class="math inline">\(k\)</span> given that we did not select category <span class="math inline">\(1, \dots, k-1\)</span>.</p>
 </section>
 <section id="stick-breaking-for-variational-inference" class="level2">
@@ -321,24 +321,24 @@ div.csl-indent {
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" role="doc-bibliography">
 <div id="ref-bouchardEfficientBoundsSoftmax" class="csl-entry" role="doc-biblioentry">
-Bouchard, Guillaume. n.d. <span>“Efficient <span>Bounds</span> for the <span>Softmax Function</span> and <span>Applications</span> to <span>Approximate Inference</span> in <span>Hybrid</span> Models,”</span> 9.
-</div>
-<div id="ref-jaakkolaVariationalApproachBayesian" class="csl-entry" role="doc-biblioentry">
-Jaakkola, Tommi S, and Michael I Jordan. n.d. <span>“A Variational Approach to <span>Bayesian</span> Logistic Regression Models and Their Extensions.”</span> <em>Sixth International Workshop on Artificial Intelligence and Statistics</em>, 283–94.
-</div>
-<div id="ref-khanStickBreakingLikelihoodCategorical2012" class="csl-entry" role="doc-biblioentry">
-Khan, Mohammad, Shakir Mohamed, Benjamin Marlin, and Kevin Murphy. 2012. <span>“A <span>Stick-Breaking Likelihood</span> for <span>Categorical Data Analysis</span> with <span>Latent Gaussian Models</span>.”</span> In <em>Proceedings of the <span>Fifteenth International Conference</span> on <span>Artificial Intelligence</span> and <span>Statistics</span></em>, 610–18. <span>PMLR</span>. <a href="https://proceedings.mlr.press/v22/khan12.html">https://proceedings.mlr.press/v22/khan12.html</a>.
-</div>
-<div id="ref-lindermanDependentMultinomialModels" class="csl-entry" role="doc-biblioentry">
-Linderman, Scott, Matthew Johnson, and Ryan P Adams. n.d. <span>“Dependent <span>Multinomial Models Made Easy</span>: <span>Stick-Breaking</span> with the <span class="nocase">Polya-gamma Augmentation</span>,”</span> 9.
-</div>
-<div id="ref-saulMeanFieldLearning1998" class="csl-entry" role="doc-biblioentry">
-Saul, Lawrence, and Michael Jordan. 1998. <span>“A <span>Mean Field Learning Algorithm</span> for <span>Unsupervised Neural Networks</span>.”</span> In <em>Learning in <span>Graphical Models</span></em>, edited by Michael I. Jordan, 541–54. <span>Dordrecht</span>: <span>Springer Netherlands</span>. <a href="https://doi.org/10.1007/978-94-011-5014-9_20">https://doi.org/10.1007/978-94-011-5014-9_20</a>.
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Bouchard G. Efficient <span>Bounds</span> for the <span>Softmax Function</span> and <span>Applications</span> to <span>Approximate Inference</span> in <span>Hybrid</span> models. :9. </div>
 </div>
 <div id="ref-titsiasrcauebOnevsEachApproximationSoftmax2016" class="csl-entry" role="doc-biblioentry">
-Titsias RC AUEB, Michalis. 2016. <span>“One-Vs-<span>Each Approximation</span> to <span>Softmax</span> for <span>Scalable Estimation</span> of <span>Probabilities</span>.”</span> In <em>Advances in <span>Neural Information Processing Systems</span></em>. Vol. 29. <span>Curran Associates, Inc.</span> <a href="https://proceedings.neurips.cc/paper/2016/hash/814a9c18f5abff398787c9cfcbf3d80c-Abstract.html">https://proceedings.neurips.cc/paper/2016/hash/814a9c18f5abff398787c9cfcbf3d80c-Abstract.html</a>.
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">Titsias RC AUEB M. One-vs-<span>Each Approximation</span> to <span>Softmax</span> for <span>Scalable Estimation</span> of <span>Probabilities</span>. In: Advances in <span>Neural Information Processing Systems</span> [Internet]. <span>Curran Associates, Inc.</span>; 2016 [cited 2022 Oct 4]. Available from: <a href="https://proceedings.neurips.cc/paper/2016/hash/814a9c18f5abff398787c9cfcbf3d80c-Abstract.html">https://proceedings.neurips.cc/paper/2016/hash/814a9c18f5abff398787c9cfcbf3d80c-Abstract.html</a></div>
+</div>
+<div id="ref-jaakkolaVariationalApproachBayesian" class="csl-entry" role="doc-biblioentry">
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">Jaakkola TS, Jordan MI. A variational approach to <span>Bayesian</span> logistic regression models and their extensions. Sixth International Workshop on Artificial Intelligence and Statistics. :283–94. </div>
+</div>
+<div id="ref-saulMeanFieldLearning1998" class="csl-entry" role="doc-biblioentry">
+<div class="csl-left-margin">4. </div><div class="csl-right-inline">Saul L, Jordan M. A <span>Mean Field Learning Algorithm</span> for <span>Unsupervised Neural Networks</span>. In: Jordan MI, editor. Learning in <span>Graphical Models</span> [Internet]. <span>Dordrecht</span>: <span>Springer Netherlands</span>; 1998 [cited 2022 Dec 24]. p. 541–54. Available from: <a href="http://link.springer.com/10.1007/978-94-011-5014-9_20">http://link.springer.com/10.1007/978-94-011-5014-9_20</a></div>
+</div>
+<div id="ref-khanStickBreakingLikelihoodCategorical2012" class="csl-entry" role="doc-biblioentry">
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">Khan M, Mohamed S, Marlin B, Murphy K. A <span>Stick-Breaking Likelihood</span> for <span>Categorical Data Analysis</span> with <span>Latent Gaussian Models</span>. In: Proceedings of the <span>Fifteenth International Conference</span> on <span>Artificial Intelligence</span> and <span>Statistics</span> [Internet]. <span>PMLR</span>; 2012 [cited 2023 Jan 19]. p. 610–8. Available from: <a href="https://proceedings.mlr.press/v22/khan12.html">https://proceedings.mlr.press/v22/khan12.html</a></div>
+</div>
+<div id="ref-lindermanDependentMultinomialModels" class="csl-entry" role="doc-biblioentry">
+<div class="csl-left-margin">6. </div><div class="csl-right-inline">Linderman S, Johnson M, Adams RP. Dependent <span>Multinomial Models Made Easy</span>: <span>Stick-Breaking</span> with the <span class="nocase">Polya-gamma Augmentation</span>. :9. </div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

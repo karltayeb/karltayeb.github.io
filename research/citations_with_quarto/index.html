@@ -6,8 +6,12 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Karl Tayeb">
+<meta name="dcterms.date" content="2024-01-03">
+<meta name="keywords" content="quarto">
+<meta name="description" content="A quick demo on how I set up citations on this website">
 
-<title>Karl’s Website - About</title>
+<title>Karl’s Website - Citations with quarto</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,25 +24,44 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -60,7 +83,7 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="nav-fixed">
@@ -70,7 +93,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Karl’s Website</span>
     </a>
   </div>
@@ -80,15 +103,15 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html">
+    <a class="nav-link" href="../../index.html">
  <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./about.html" aria-current="page">
+    <a class="nav-link" href="../../about.html">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./research.html">
+    <a class="nav-link" href="../../research.html">
  <span class="menu-text">Research Notes</span></a>
   </li>  
 </ul>
@@ -109,14 +132,31 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">About</h1>
+<h1 class="title">Citations with quarto</h1>
 </div>
 
+<div>
+  <div class="description">
+    A quick demo on how I set up citations on this website
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Karl Tayeb </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 3, 2024</p>
+    </div>
+  </div>
   
     
   </div>
@@ -124,12 +164,20 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<p>Hi! I’m Karl Tayeb. I’m a PhD Student at the University of Chicago working with <a href="https://stephenslab.uchicago.edu/">Matthew Stephens</a> and Yoav Gilad. Before UChicago I was at Johns Hopkins working with Alexis Battle.</p>
-<p>This is my research website. For now, that means a collection of notes that are useful to me. Feel free to look around.</p>
+<p>I use Zotero to manage my references. I have my entire library automatically dumped into a <code>library.bib</code> file on my computer. I created a symbolic link to this library in the root directory of my quarto website by calling <code>ln -s /Users/karltayeb/Documents/biblatex/library.bib .</code></p>
+<p>Then I added <code>bibliography: library.bib</code></p>
+<p>to the <code>_quarto.yml</code> file which controls global options for the website. Now we can add references by there citation key using <code>@citekey</code></p>
+<p>E.g. here is a paper <span class="citation" data-cites="arvanitisRedefiningTissueSpecificity2022">(<a href="#ref-arvanitisRedefiningTissueSpecificity2022" role="doc-biblioref">1</a>)</span></p>
+<p>This works site-wide. Also note you can change citation style using <code>csl</code> option. Personally I like Vancouver format since the citations just appear as numbers which is less disruptive when reading. Particularly in this setting, where we can hover over the citation to get more information I think it is a good online format.</p>
 
 
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" role="doc-bibliography">
+<div id="ref-arvanitisRedefiningTissueSpecificity2022" class="csl-entry" role="doc-biblioentry">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Arvanitis M, Tayeb K, Strober BJ, Battle A. Redefining tissue specificity of genetic regulation of gene expression in the presence of allelic heterogeneity. Am J Hum Genet [Internet]. 2022 Feb 3 [cited 2022 Jun 8];109(2):223–39. Available from: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8874223/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8874223/</a></div>
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

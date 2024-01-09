@@ -1,63 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://karltayeb.github.io/research/citations_with_quarto/index.html</loc>
+    <lastmod>2024-01-09T13:35:44.075Z</lastmod>
+  </url>
+  <url>
     <loc>https://karltayeb.github.io/research/polynomial_approximation/index.html</loc>
-    <lastmod>2024-01-02T20:08:17.842Z</lastmod>
+    <lastmod>2024-01-09T13:35:45.201Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/research/gibss_polygenic_scenario/index.html</loc>
+    <lastmod>2024-01-09T13:35:46.140Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/polynomial_regression_vb/index.html</loc>
-    <lastmod>2024-01-02T20:08:19.467Z</lastmod>
+    <lastmod>2024-01-09T13:35:47.419Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/mode_matching_rss_vb/index.html</loc>
-    <lastmod>2024-01-02T20:08:21.720Z</lastmod>
+    <lastmod>2024-01-09T13:35:49.491Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/polynomial_susie/index.html</loc>
-    <lastmod>2024-01-02T20:08:23.694Z</lastmod>
+    <lastmod>2024-01-09T13:35:51.629Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/logistic_abf_accuracy/index.html</loc>
-    <lastmod>2024-01-02T20:08:24.840Z</lastmod>
+    <lastmod>2024-01-09T13:35:52.898Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/random_intercepts/index.html</loc>
-    <lastmod>2024-01-02T20:08:25.939Z</lastmod>
-  </url>
-  <url>
-    <loc>https://karltayeb.github.io/research/quadrature_for_peaked_functions/index.html</loc>
-    <lastmod>2024-01-02T20:08:26.800Z</lastmod>
+    <lastmod>2024-01-09T13:35:54.337Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/constrained_multinomial_stickbreaking/index.html</loc>
-    <lastmod>2024-01-02T20:08:29.954Z</lastmod>
+    <lastmod>2024-01-09T13:35:59.119Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/multinomial_stickbreaking/index.html</loc>
-    <lastmod>2024-01-02T20:08:30.952Z</lastmod>
+    <lastmod>2024-01-09T13:36:00.475Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research.html</loc>
-    <lastmod>2024-01-02T20:08:31.738Z</lastmod>
+    <lastmod>2024-01-09T13:36:01.413Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/index.html</loc>
-    <lastmod>2024-01-02T20:08:32.348Z</lastmod>
+    <lastmod>2024-01-09T13:36:02.430Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/about.html</loc>
-    <lastmod>2024-01-02T20:08:32.985Z</lastmod>
+    <lastmod>2024-01-09T13:36:04.872Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/presentations/gilad_lab_january24/gilad_lab_january24.html</loc>
-    <lastmod>2024-01-02T20:08:33.705Z</lastmod>
+    <lastmod>2024-01-09T13:36:06.760Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/presentations/committee_meeting_june23/committee_meeting_june23.html</loc>
-    <lastmod>2024-01-02T20:08:34.643Z</lastmod>
+    <lastmod>2024-01-09T13:36:08.249Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/presentations/gilad_lab_july23/committee_meeting_june23.html</loc>
-    <lastmod>2024-01-02T20:08:35.553Z</lastmod>
+    <lastmod>2024-01-09T13:36:10.006Z</lastmod>
   </url>
 </urlset>
