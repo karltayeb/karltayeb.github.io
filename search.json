@@ -7,6 +7,13 @@
     "text": "I use Zotero to manage my references. I have my entire library automatically dumped into a library.bib file on my computer. I created a symbolic link to this library in the root directory of my quarto website by calling ln -s /Users/karltayeb/Documents/biblatex/library.bib .\nThen I added bibliography: library.bib\nto the _quarto.yml file which controls global options for the website. Now we can add references by there citation key using @citekey\nE.g. here is a paper (1)\nThis works site-wide. Also note you can change citation style using csl option. Personally I like Vancouver format since the citations just appear as numbers which is less disruptive when reading. Particularly in this setting, where we can hover over the citation to get more information I think it is a good online format.\n\n\n\n\nReferences\n\n1. Arvanitis M, Tayeb K, Strober BJ, Battle A. Redefining tissue specificity of genetic regulation of gene expression in the presence of allelic heterogeneity. Am J Hum Genet [Internet]. 2022 Feb 3 [cited 2022 Jun 8];109(2):223–39. Available from: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8874223/"
   },
   {
+    "objectID": "research/shift_invariant_prior/index.html",
+    "href": "research/shift_invariant_prior/index.html",
+    "title": "X-shift invariant prior for logistic regresion",
+    "section": "",
+    "text": "Consider the univariate logistic regression\n\\[\\begin{align}\n\\psi = b_0 + b_1 x \\\\\ny \\sim \\text{Binomial}(1, \\sigma(\\psi))\\\\\n\\begin{bmatrix}b_0 \\\\ b_1\\end{bmatrix} \\sim g\n\\end{align}\\]\nWe want \\(p(\\mathbf{b}| y, X) = p(\\mathbf{b}| y, \\tilde X)\\) where \\(\\tilde X = X + \\mathbf{c}\\mathbf{1}^T\\) for some \\(\\mathbf{c}\\in \\mathbb{R}^p\\)\nIn a meeting with Matthew on 2023-01-10 I mistakenly thought that \\(\\nabla^2_\\mathbf{b}\\log p(y | \\mathbf{b}, X)\\) does not change, but that is clearly not the case.\n\\[\\begin{align}\n\\nabla^2_\\mathbf{b}\\log p(y | \\mathbf{b}, X) &= X^T D X \\\\\nD &= \\text{diag}(\\sigma(\\psi_i)(1 - \\sigma(\\psi_i))) \\\\\n\\psi &= \\mathbf{b}^T \\mathbf{x}_i\n\\end{align}\\]\nInstead it’s that \\(\\left[\\nabla^2_\\mathbf{b}\\log p(y | \\mathbf{b}, X)\\right]^{-1}_{11}\\) for shifts in \\(\\mathbf{x}\\). In the example below we see that the MLE and stderr are unchanged for the effect, all the change is absorbed into the intercept.\nLet \\(X = [\\mathbf{1}, \\mathbf{x}]\\) and \\(\\tilde X = [\\mathbf{1}, \\mathbf{x}+ \\mathbf{1}c]\\). Note that the linear predictions at the MLE do not change since we can map parameters of the first regression problem to parameters of the second \\((b_0, b_1) \\mapsto (b_0 + b_1 c, b_1)\\). Then \\(D = \\tilde D\\)\nWrite \\(\\delta = \\mathbf{1}^T D \\mathbf{1}\\), \\(\\gamma = \\mathbf{x}^T D \\mathbf{x}\\) and \\(a = \\mathbf{x}^T D \\mathbf{1}\\)\n\n\nCode\nx <- rnorm(1000)\ny <- rbinom(1000, 1, 1/(1 + exp(-x)))\n\nx2 <- x + 10\n\nfit <- glm(y ~ x, family='binomial')\nfit2 <- glm(y ~ x2, family='binomial')\n\nsummary(fit)$coef\n\n\n              Estimate Std. Error    z value     Pr(>|z|)\n(Intercept) 0.03216293 0.07176779  0.4481527 6.540430e-01\nx           1.19888202 0.09080725 13.2024919 8.488004e-40\n\n\nCode\nsummary(fit2)$coef\n\n\n              Estimate Std. Error   z value     Pr(>|z|)\n(Intercept) -11.956657 0.90645402 -13.19058 9.941294e-40\nx2            1.198882 0.09080725  13.20249 8.488004e-40\n\n\n\\[\\begin{align}\n(\\tilde X ^T D \\tilde X)^{-1}\n&= \\begin{bmatrix}\\delta & a + \\delta \\mu \\\\ a + \\delta \\mu & \\delta \\mu + \\gamma + 2 a \\mu + \\mu^2 \\delta \\end{bmatrix}^{-1}\n&= \\frac{1}{\\delta\\gamma - a^2} \\begin{bmatrix}\\delta \\mu + \\gamma + 2 a \\mu + \\mu^2 \\delta  & - a - \\delta \\mu \\\\ - a - \\delta \\mu &  \\delta  \\end{bmatrix}\n\\end{align}\\]"
+  },
+  {
     "objectID": "research/polynomial_approximation/index.html",
     "href": "research/polynomial_approximation/index.html",
     "title": "Polynomial approximation for variational Bayes",
@@ -131,6 +138,34 @@
     "title": "Implimenting polynomial approximation VB",
     "section": "Higher degree polynomial posterior \\(q\\)",
     "text": "Higher degree polynomial posterior \\(q\\)\nIn the above implementation we compute a polynomial proportional to the posterior density, but reduce this to a Gaussian approximation by taking a Laplace approximation.\nThat is we want to compute\n\\[\n\\mathbb E [b^j] = \\int_{\\mathbb R} b^j q(b)\n\\]\nWhich we approximate by\n\\[\n\\mathbb E [b^j] \\approx \\int_{\\mathbb R} b^j q_{\\text{gauss}}(b)\n\\]\nWhere \\(q_{\\text{gauss}}\\) is the Gaussian distribution that minimizes the divergence to \\(q_{\\text{gauss}} = \\arg \\min_{q_g} KL(q_g ||q)\\).\nIt would be better if we could compute the moments of \\(q(b_l) \\propto \\exp\\{\\sum_k \\eta_k b_l^k\\}\\). We define the log normalizing constant \\(A({\\bf \\eta}) = \\log \\int \\exp\\{\\sum_{k=0}^K \\eta_k b_l^k\\} db\\). Let \\(f(b) = \\sum_{k=0}^K \\eta_k b^k - A(\\eta)\\) so that \\(q(b) = \\exp\\{f(b)}\\).\nBecause \\(q\\) is in an exponential family, we know that \\(\\nabla_{\\eta} A(\\eta) = \\mathbb E[T(x)] = [1, \\mathbb E[b], \\mathbb E[b^2], \\dots, \\mathbb E[b^K]]\\). Is there an easy way to compute the gradient of \\(A\\)?"
+  },
+  {
+    "objectID": "research/gseasusie_working_example/indx.html",
+    "href": "research/gseasusie_working_example/indx.html",
+    "title": "Minimal working example for GSEA SuSiE",
+    "section": "",
+    "text": "This was supposed to be a minimal working example, but when Matthew ran it he got different results than me. When I ran it again this morning I got results that agreed with his. So now this document is meant to diagnose what went wrong!\nThe MLE for the univariate doesn’t exist when the observations. When \\(X\\) is binary (e.g. in GSEA) if all of the genes in the gene set are in the gene list we can always improve the likelihood by increasing the effect size. Similarly if none of the genes in the gene set are in the gene list, we can always improve the likelihood by decreasing the effect size. When we fit the GLM in these cases using fastglm it will return a large effect size (e.g. \\(\\hat \\beta = 14\\)) and very large standard error \\(\\hat s \\approx 20,000\\). Consequently we get a \\(z\\)-score close to zero, but the reported likelihood ratio (LR) can be very large, and may depends on the stopping criteria from the GLM fitting procedure. Also note that when \\(y_i = 0 \\;\\forall i \\text{ s.t. } x_i=0\\) the data are completely separable and the LR becomes unbounded. However, more often in our setting we will have that there is a limiting value for the LR given by the likelihood of the data in the intercept only model excluding the data where \\(x_i=1\\) and including the observations where \\(x_i = 1\\) (I thinks this is correct, but I need to check).\n\nFailing example\n\n\nCode\nlibrary(tictoc)\n\n# devtools::install_github('karltayeb/logisticsusie')\n# devtools::install_github('karltayeb/gseasusie')\n\n##### Minimal working example\nc1 <- gseasusie::load_msigdb_geneset_x('C1')\n\n\nloading gene set from msigdbr: C1\n\n\nAdding missing grouping variables: `geneSet`\n\n\nCode\n# sample random 5k background genes\nset.seed(0)\nbackground <- sample(rownames(c1$X), 5000)\n\n# sample GSs to enrich, picked b0 so list is ~ 500 genes\nenriched_gs <- sample(colnames(c1$X), 3)\nb0 <- -2.2\nb <- 3 *abs(rnorm(length(enriched_gs)))\nlogit <- b0 + (c1$X[background, enriched_gs] %*% b)[,1]\ny1 <- rbinom(length(logit), 1, 1/(1 + exp(-logit)))\nlist1 <- background[y1==1]\n\n# gene set matrix restricted to background, keep non-empty gene sets\nX <- c1$X[background,]\nX <- X[, Matrix::colSums(X) > 1]\n\n\n\n\nCode\n# GIBSS fit\ntic()\nfit <- logisticsusie::generalized_ibss(X, y1, L=10, estimate_prior_variance = F, maxit=10)\n\n\n47.875 sec elapsed\n\n\nCode\ntoc()\n\n\n47.887 sec elapsed\n\n\n\n\nCode\nfit$prior_variance\n\n\n L1  L2  L3  L4  L5  L6  L7  L8  L9 L10 \n  1   1   1   1   1   1   1   1   1   1 \n\n\nCode\nfit$cs\n\n\n$L1\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L2\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L3\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L4\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L5\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L6\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L7\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L8\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L9\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L10\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n\n\n\n\nData augmenation\nWe append \\((1, 0, 1, 0)\\) to the end of \\(y\\) and \\((a, a, 0, 0)\\) to each column of \\(X\\). We show the augmentation strategy for \\(a = 1, 10\\). Perhaps a better alternative is to add a very small \\(l_2\\) penalty to the effect size \\(\\beta\\). It turns out in this simulation 2 of the causal gene sets are completely enriched.\n\n\nCode\naugment_binary_data <- function(X, y, xval=1){\n  p <- ncol(X)\n\n  Xaug <- rbind(X, matrix(rep(c(xval, xval, 0, 0), p), nrow=4))\n  yaug <- c(y, c(1, 0, 1, 0))\n  return(list(X=Xaug, y = yaug))\n}\n\npar(mfrow=c(1, 3))\n\ncausal_idx <- which(colnames(X) %in% enriched_gs)\nbad_points <- (Matrix::t(X) %*% y1)[, 1] == 0 #(z < 0.001) & (serfit$lr > 1)\ngood_points <- !bad_points\n\nserfit <- logisticsusie::fit_glm_ser(X, y1, estimate_prior_variance = T)\nlabf <- with(serfit, logisticsusie:::compute_log_labf(betahat, shat2, lr, 1.))\nz <- serfit$betahat/sqrt(serfit$shat2)^2\n\nplot(labf[good_points], z[good_points], xlim=range(labf), ylim=range(z), \n     xlab='logBF (Laplace Approximation)', ylab = 'z-score', main='Original Data')\npoints(labf[bad_points], z[bad_points], col='red')\npoints(labf[causal_idx], z[causal_idx], col='blue', pch = 22)\n\n\naugmented_data <- augment_binary_data(X, y1, 1.)\nserfitaug <- with(augmented_data, logisticsusie::fit_glm_ser(X, y, estimate_prior_variance=T))\nlabf <- with(serfitaug, logisticsusie:::compute_log_labf(betahat, shat2, lr, 1.))\nz <- with(serfitaug, betahat/sqrt(shat2)^2)\nplot(labf[good_points], z[good_points], xlim=range(labf), ylim=range(z), \n     xlab='logBF (Laplace Approximation)', ylab = 'z-score', main='Augmented Data, a=1')\npoints(labf[bad_points], z[bad_points], col='red')\npoints(labf[causal_idx], z[causal_idx], col='blue', pch = 22)\n\n\naugmented_data <- augment_binary_data(X, y1, 10.)\nserfitaug <- with(augmented_data, logisticsusie::fit_glm_ser(X, y, estimate_prior_variance=T))\nlabf <- with(serfitaug, logisticsusie:::compute_log_labf(betahat, shat2, lr, 1.))\nz <- with(serfitaug, betahat/sqrt(shat2)^2)\nplot(labf[good_points], z[good_points], xlim=range(labf), ylim=range(z), \n     xlab='logBF (Laplace Approximation)', ylab = 'z-score', main='Augmented Data, a=10')\npoints(labf[bad_points], z[bad_points], col='red')\npoints(labf[causal_idx], z[causal_idx], col='blue', pch = 22)\n\n\n\n\n\n\n\nGIBSS with data augmentation\n\n\nCode\n# GIBSS fit\ntic()\naugmented_data <- logisticsusie::augment_binary_data(X, y1, 1.)\nfit <- with(augmented_data, logisticsusie::generalized_ibss(X, y, L=5, estimate_prior_variance=T, maxit=10))\n\n\nWarning in ibss_from_ser(X, y, L = L, ser_function = ser_fun, ...): Maximum\nnumber of iterations reached\n\n\n107.082 sec elapsed\n\n\nCode\nfit$prior_variance\n\n\n      L1       L2       L3       L4       L5 \n38.32500 28.67109 81.14890  0.00000  0.00000 \n\n\nCode\ntoc()\n\n\n107.094 sec elapsed\n\n\n\n\nCode\ncausal_idx <- which(colnames(X) %in% enriched_gs)\nprint(causal_idx)\n\n\n[1]  16  66 194\n\n\nCode\nfit$cs\n\n\n$L1\nCS = {66} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L2\nCS = {16} \n alpha = {1} \n size = 1, coverage = 1, requested = 0.95\n$L3\nCS = {67, 68, 75, 239, 106, 14, ...} \n alpha = {0.11, 0.09, 0.04, 0.04, 0.03, 0.03, ...} \n size = 62, coverage = 0.95, requested = 0.95\n$L4\nCS = {107, 9, 133, 131, 75, 239, ...} \n alpha = {0.01, 0, 0, 0, 0, 0, ...} \n size = 275, coverage = 0.952, requested = 0.95\n$L5\nCS = {107, 9, 133, 131, 75, 239, ...} \n alpha = {0.01, 0, 0, 0, 0, 0, ...} \n size = 275, coverage = 0.952, requested = 0.95\n\n\n\n\nCode\nall(fit$cs$L3$cs %in% which(bad_points))\n\n\n[1] TRUE\n\n\n\nWhen the estimated prior variance is \\(0\\) the Laplace approximation of the BF reduced to the LR, so the variables are just ranked by their LR.\nWe estimate a very large prior variance of the third effect, but the CS is very diffuse. The 3rd effect includes all of the other completely enriched gene sets.\n\n\n\nCode\nknitr::knit_exit()\n\n\n\n\nCode\nfit <- logisticsusie::fit_glm_ser(X, y1, estimate_prior_variance = T)\n\n\n\n\nCode\n# GIBSS fit\nserfun <- purrr::partial(logisticsusie::uvbser, max_iter=2)\n\nser1 <- logisticsusie::uvbser(X, y1, max_iter = 20)\n\no <-( X %*% (ser1$mu * ser1$alpha))[,1]\nser2 <- logisticsusie::uvbser(X, y1, o = o,  max_iter = 20)\n\ntic()\nfit2 <- logisticsusie::ibss_from_ser(X, y1, L=5, maxit=2, ser_function = serfun)\ntoc()\n\n\n\n\nCode\ncausal_idx <- which(colnames(X) %in% enriched_gs)\nprint(causal_idx)\nfit$cs\n\n\n\n\nCode\n#' wrapper for VEB.boost to fit logistic susie\n#' and tidy up output to be consistent with other susie-type outputs\nfit_logistic_susie_veb_boost = function(X, y, L=10, ...){\n  veb.fit = VEB.Boost::veb_boost_stumps(\n    X, y, family = 'binomial',\n    include_stumps=FALSE,\n    max_log_prior_var=35,\n    scale_X = 'NA',\n    growMode = 'NA',\n    changeToConstant=F,\n    k=L, ...\n  )\n  \n  alpha <- t(do.call(cbind, lapply(veb.fit$leaves, function(x) x$learner$currentFit$alpha)))\n  mu <- t(do.call(cbind, lapply(veb.fit$leaves, function(x) x$learner$currentFit$mu)))\n  mu2 <- t(do.call(cbind, lapply(veb.fit$leaves, function(x) x$learner$currentFit$sigma2_post)))\n  mu2 <- mu2 + mu^2\n  prior_variance <- purrr::map_dbl(veb.fit$leaves, function(x) x$learner$currentFit$V)\n  elbo <- veb.fit$ELBO_progress[[2]]\n  res <- list(alpha=alpha, mu=mu, mu2=mu2, elbo=elbo, veb.fit=veb.fit, prior_variance=prior_variance)\n  class(res) <- 'susie'\n  \n  colnames(res$alpha) <- colnames(X)\n  colnames(res$mu) <- colnames(X)\n  res$pip <- susieR::susie_get_pip(res)\n  names(res$pip) <- colnames(X)\n  res$sets <- susieR::susie_get_cs(res, X=X)\n  return(res)\n}\n\ntic()\nvebfit <- fit_logistic_susie_veb_boost(X, y1, L=10)\ntoc()\n\n\n\n\nCode\n# JJ approximation-- VEB boost\ntic()\nveb_ser <- fit_logistic_susie_veb_boost(X, y1, L=1)\nlogisticsusie::compute_cs(veb_ser$alpha[1,])\ntoc()\n\n# JJ approximation other implementation\ntic()\njj_ser <- logisticsusie::binser(X, y1, estimate_prior_variance = F, prior_variance=veb_ser$prior_variance)\nlogisticsusie::compute_cs(jj_ser$alpha)\ntoc()\n\n# veb and my implementation agree \npar(mfrow = c(1, 2))\nplot(veb_ser$mu, jj_ser$mu); abline(0, 1, col='red')\nplot(log(veb_ser$alpha), log(jj_ser$alpha)); abline(0, 1, col='red')\n\n# SER fit with Laplace\nserfit <- logisticsusie::generalized_ibss(X, y1, L=1, estimate_prior_variance = F, maxit=1)\n\nplot(veb_ser$mu, serfit$mu); abline(0, 1, col='red')\n\n# JJ approximation other implementation\ntic()\njj_ser2 <- logisticsusie::binser(X, y1, estimate_prior_variance = F, prior_variance=serfit$prior_variance)\nlogisticsusie::compute_cs(jj_ser2$alpha)\ntoc()\n\n# There is a difference between the GIBSS implementation and VB\npar(mfrow = c(1, 2))\nplot(serfit$mu, jj_ser2$mu); abline(0, 1, col='red')\nplot(log(serfit$alpha), log(jj_ser2$alpha)); abline(0, 1, col='red')\n\n# the ones that don't agree are completely separated-- the MLE does not exist.\n# these may also inflate the estimated prior variance the VB approach?\n# are are we underestimating the prior variance in the Laplace approximation?\nweird <- (abs(serfit$mu[1,]) < 0.001) * (abs(jj_ser2$mu) > 0.001)\nmax((Matrix::t(X[,weird]) %*% y1)[,1])\n\n\n# repeat with augmented data\nXaug <- rbind(X, matrix(rep(c(1, 1, 0, 0), ncol(X)), nrow=4))\ny1aug <- c(y1, c(1, 0, 1, 0))\n\n# JJ approximation-- VEB boost\ntic()\nveb_ser_aug <- fit_logistic_susie_veb_boost(Xaug, y1aug, L=1)\nlogisticsusie::compute_cs(veb_ser_aug$alpha[1,])\ntoc()\n\n# JJ approximation other implementation\ntic()\njj_ser_aug <- logisticsusie::binser(Xaug, y1aug, estimate_prior_variance = F, prior_variance=veb_ser$prior_variance)\nlogisticsusie::compute_cs(jj_ser_aug$alpha)\ntoc()\n\n# veb and my implementation agree \npar(mfrow = c(1, 2))\nplot(veb_ser_aug$mu, jj_ser_aug$mu); abline(0, 1, col='red')\nplot(log(veb_ser_aug$alpha), log(jj_ser_aug$alpha)); abline(0, 1, col='red')\n\n# SER fit with Laplace\nserfit_aug <- logisticsusie::generalized_ibss(Xaug, y1aug, L=1, estimate_prior_variance = F, maxit=1)\n\n# JJ approximation other implementation\ntic()\njj_ser2_aug <- logisticsusie::binser(Xaug, y1aug, estimate_prior_variance = F, prior_variance=serfit$prior_variance)\nlogisticsusie::compute_cs(jj_ser2_aug$alpha)\ntoc()\n\n# There is a difference between the GIBSS implementation and VB\npar(mfrow = c(1, 2))\nplot(serfit_aug$mu, jj_ser2_aug$mu); abline(0, 1, col='red')\nplot(log(serfit_aug$alpha), log(jj_ser2_aug$alpha)); abline(0, 1, col='red')"
+  },
+  {
+    "objectID": "research/logistic_ser_comparisons/indx.html",
+    "href": "research/logistic_ser_comparisons/indx.html",
+    "title": "Logistic SER comparison",
+    "section": "",
+    "text": "VEB.Boost: from VEB.Boost package\nJaakkola-Jodan approximation logisticsusie::binser\nUnivariate Jaakkola-Jordan approximation logisticsusie::uvbser\nLaplace approximation"
+  },
+  {
+    "objectID": "research/logistic_ser_comparisons/indx.html#discrepency-between-vebboost-and-my-implementation",
+    "href": "research/logistic_ser_comparisons/indx.html#discrepency-between-vebboost-and-my-implementation",
+    "title": "Logistic SER comparison",
+    "section": "Discrepency between VEBBoost and my implementation",
+    "text": "Discrepency between VEBBoost and my implementation\n\n\nCode\n# JJ approximation-- VEB boost\ntic()\nveb_ser <- fit_logistic_susie_veb_boost(X, y1, L=1)\nlogisticsusie::compute_cs(veb_ser$alpha[1,])\ntoc()\n\n# JJ approximation other implementation\ntic()\njj_ser <- logisticsusie::binser(X, y1, estimate_prior_variance = F, prior_variance=veb_ser$prior_variance)\nlogisticsusie::compute_cs(jj_ser$alpha)\ntoc()\n\n# veb and my implementation agree \npar(mfrow = c(1, 2))\nplot(veb_ser$mu, jj_ser$mu); abline(0, 1, col='red')\nplot(log(veb_ser$alpha), log(jj_ser$alpha)); abline(0, 1, col='red')"
+  },
+  {
+    "objectID": "research/logistic_ser_comparisons/indx.html#laplace",
+    "href": "research/logistic_ser_comparisons/indx.html#laplace",
+    "title": "Logistic SER comparison",
+    "section": "Laplace",
+    "text": "Laplace\nNote that when \\(\\sigma^2 \\rightarrow 0\\) the Laplace approximation of the BF converges to the likelihood ratio between the MLE and null model, which is \\(\\geq 1\\).\n\n\nCode\n# SER fit with Laplace\nserfit <- logisticsusie::generalized_ibss(X, y1, L=1, estimate_prior_variance = F, maxit=1)\n\ntic()\nserfit2 <- logisticsusie::generalized_ibss(X[, 1:100], y1, L=1, estimate_prior_variance = F, maxit=1)\nserfiteb <- logisticsusie::generalized_ibss(X[, 1:100], y1, L=1, estimate_prior_variance = T, maxit=1)\n\nuvbserfit2 <- logisticsusie::uvbser(X[, 1:100], y1, estimate_prior_variance = T, tol=1e-2)\nuvbserfit <- logisticsusie::uvbser(X[, 1:100], y1, estimate_prior_variance = F)\n\ntoc()\n\nplot(veb_ser$mu, serfit$mu); abline(0, 1, col='red')\n\n# JJ approximation other implementation\ntic()\njj_ser2 <- logisticsusie::binser(X, y1, estimate_prior_variance = F, prior_variance=serfit$prior_variance)\nlogisticsusie::compute_cs(jj_ser2$alpha)\ntoc()\n\n# There is a difference between the GIBSS implementation and VB\npar(mfrow = c(1, 2))\nplot(serfit$mu, jj_ser2$mu); abline(0, 1, col='red')\nplot(log(serfit$alpha), log(jj_ser2$alpha)); abline(0, 1, col='red')\n\n# the ones that don't agree are completely separated-- the MLE does not exist.\n# these may also inflate the estimated prior variance the VB approach?\n# are are we underestimating the prior variance in the Laplace approximation?\nweird <- (abs(serfit$mu[1,]) < 0.001) * (abs(jj_ser2$mu) > 0.001)\nmax((Matrix::t(X[,weird]) %*% y1)[,1])\n\n\n# repeat with augmented data\nXaug <- rbind(X, matrix(rep(c(1, 1, 0, 0), ncol(X)), nrow=4))\ny1aug <- c(y1, c(1, 0, 1, 0))\n\n# JJ approximation-- VEB boost\ntic()\nveb_ser_aug <- fit_logistic_susie_veb_boost(Xaug, y1aug, L=1)\nlogisticsusie::compute_cs(veb_ser_aug$alpha[1,])\ntoc()\n\n# JJ approximation other implementation\ntic()\njj_ser_aug <- logisticsusie::binser(Xaug, y1aug, estimate_prior_variance = F, prior_variance=veb_ser$prior_variance)\nlogisticsusie::compute_cs(jj_ser_aug$alpha)\ntoc()\n\n# veb and my implementation agree \npar(mfrow = c(1, 2))\nplot(veb_ser_aug$mu, jj_ser_aug$mu); abline(0, 1, col='red')\nplot(log(veb_ser_aug$alpha), log(jj_ser_aug$alpha)); abline(0, 1, col='red')\n\n# SER fit with Laplace\nserfit_aug <- logisticsusie::generalized_ibss(Xaug, y1aug, L=1, estimate_prior_variance = F, maxit=1)\n\n# JJ approximation other implementation\ntic()\njj_ser2_aug <- logisticsusie::binser(Xaug, y1aug, estimate_prior_variance = F, prior_variance=serfit$prior_variance)\nlogisticsusie::compute_cs(jj_ser2_aug$alpha)\ntoc()\n\n# There is a difference between the GIBSS implementation and VB\npar(mfrow = c(1, 2))\nplot(serfit_aug$mu, jj_ser2_aug$mu); abline(0, 1, col='red')\nplot(log(serfit_aug$alpha), log(jj_ser2_aug$alpha)); abline(0, 1, col='red')"
   },
   {
     "objectID": "research/mode_matching_rss_vb/index.html",
@@ -284,7 +319,7 @@
     "href": "research.html",
     "title": "Research Notes",
     "section": "",
-    "text": "Citations with quarto\n\n\n\n\n\nA quick demo on how I set up citations on this website\n\n\n\n\n\n\nJan 3, 2024\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nConstrained multinomial stick-breaking\n\n\n\n\n\nMultinomial stickbreaking is an easy\n\n\n\n\n\n\nApr 1, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nImplementation polynomial approximation VB\n\n\n\n\n\nRough implementation of of approximate VB regression, where we approximate the data likelihood with a polynomial. We implement a mean field gaussian variational approximation. We demonstrate the method on Gaussian linear model (no approximation), and Bernoulli-logit (logistic regression) and Poisson-log (poisson regression) models with varying approximation degree.\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nLogistic SER coverage under polygenic model\n\n\n\n\n\nWe are interested in knowing if the inferences under the logistic SER are biased when phenotypes are simulated under a polygenic model. In these simulations we simulate one causal variant in the locus, and model unlinked genetic effects with a random intercept. The SER fits the ordinary/marginal regression model at each step, without accounting for this extra variability in liability. Nonetheless, we see good coverage of the credible sets.\n\n\n\n\n\n\nJan 9, 2024\n\n\n\n\n\n\n\n\nMode seeking in mean field VB for RSS + sparse prior\n\n\n\n\n\nUsing polynomial approximations to perform Bayesian regression\n\n\n\n\n\n\nApr 1, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nMultinomial stick-breaking\n\n\n\n\n\nExploration of multinomial stickbreaking\n\n\n\n\n\n\nMar 19, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nPolynomial approximation SuSiE\n\n\n\n\n\nWe extend the sum of single effects regression to support arbitrary likelihood and link function by representing (approximately) the log likelihood of each observations as a polynomial in the linear prediction. Once this approximation is made we can treat inference in multiple likelihoods with a uniform inference procedure. Furthermore, we can make the polynomial approximation arbitrarily precise by increasing the degree of the approximation.\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nPolynomial approximation for variational Bayes\n\n\n\n\n\nUsing polynomial approximations to perform Bayesian regression\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nRandom intercepts\n\n\n\n\n\nDemonstrate the behavior of fitting linear and logistic regression to data generated from a random intercept mode. OLS gives unbiased estimates for the Gaussian linear model, but the estimated effects are biased in the GLM.\n\n\n\n\n\n\nDec 21, 2023\n\n\n\n\n\n\n\n\nWakefield ABF Accuracy\n\n\n\n\n\nWe noticed that the error in Wakefield’s ABF grows with increasing sample size. This is surprising, because at these large sample sizes asymptotic normality kicks in. The issue can be more clearly seen by considering the ABF as an integral over an approximation to the likelihood ratio. The approximation used in the ABF ensure that the approximate likelihood ratio at \\(0\\) is 1, but that the curvature and mode of the approximation are determined by the asymptotic distribution of the MLE. This leads to a gap in the approximate likelihood ratio and the exact likelihood ratio around the mode. As the normal approximation becomes more peaked, the accuracy of the ABF is increasingly determined by the quality of the likelihood ratio approximation in a small neighborhood around the mode which is off by this gap, which appears to grow with sample size.\n\n\n\n\n\n\nApr 25, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\nNo matching items"
+    "text": "Citations with quarto\n\n\n\n\n\nA quick demo on how I set up citations on this website\n\n\n\n\n\n\nJan 3, 2024\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nConstrained multinomial stick-breaking\n\n\n\n\n\nMultinomial stickbreaking is an easy\n\n\n\n\n\n\nApr 1, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nImplementation polynomial approximation VB\n\n\n\n\n\nRough implementation of of approximate VB regression, where we approximate the data likelihood with a polynomial. We implement a mean field gaussian variational approximation. We demonstrate the method on Gaussian linear model (no approximation), and Bernoulli-logit (logistic regression) and Poisson-log (poisson regression) models with varying approximation degree.\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nLogistic SER comparison\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\nLogistic SER coverage under polygenic model\n\n\n\n\n\nWe are interested in knowing if the inferences under the logistic SER are biased when phenotypes are simulated under a polygenic model. In these simulations we simulate one causal variant in the locus, and model unlinked genetic effects with a random intercept. The SER fits the ordinary/marginal regression model at each step, without accounting for this extra variability in liability. Nonetheless, we see good coverage of the credible sets.\n\n\n\n\n\n\nJan 9, 2024\n\n\n\n\n\n\n\n\nMinimal working example for GSEA SuSiE\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\nMode seeking in mean field VB for RSS + sparse prior\n\n\n\n\n\nUsing polynomial approximations to perform Bayesian regression\n\n\n\n\n\n\nApr 1, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nMultinomial stick-breaking\n\n\n\n\n\nExploration of multinomial stickbreaking\n\n\n\n\n\n\nMar 19, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nPolynomial approximation SuSiE\n\n\n\n\n\nWe extend the sum of single effects regression to support arbitrary likelihood and link function by representing (approximately) the log likelihood of each observations as a polynomial in the linear prediction. Once this approximation is made we can treat inference in multiple likelihoods with a uniform inference procedure. Furthermore, we can make the polynomial approximation arbitrarily precise by increasing the degree of the approximation.\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nPolynomial approximation for variational Bayes\n\n\n\n\n\nUsing polynomial approximations to perform Bayesian regression\n\n\n\n\n\n\nMar 15, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nRandom intercepts\n\n\n\n\n\nDemonstrate the behavior of fitting linear and logistic regression to data generated from a random intercept mode. OLS gives unbiased estimates for the Gaussian linear model, but the estimated effects are biased in the GLM.\n\n\n\n\n\n\nDec 21, 2023\n\n\n\n\n\n\n\n\nWakefield ABF Accuracy\n\n\n\n\n\nWe noticed that the error in Wakefield’s ABF grows with increasing sample size. This is surprising, because at these large sample sizes asymptotic normality kicks in. The issue can be more clearly seen by considering the ABF as an integral over an approximation to the likelihood ratio. The approximation used in the ABF ensure that the approximate likelihood ratio at \\(0\\) is 1, but that the curvature and mode of the approximation are determined by the asymptotic distribution of the MLE. This leads to a gap in the approximate likelihood ratio and the exact likelihood ratio around the mode. As the normal approximation becomes more peaked, the accuracy of the ABF is increasingly determined by the quality of the likelihood ratio approximation in a small neighborhood around the mode which is off by this gap, which appears to grow with sample size.\n\n\n\n\n\n\nApr 25, 2023\n\n\nKarl Tayeb\n\n\n\n\n\n\n\n\nX-shift invariant prior for logistic regresion\n\n\n\n\n\nwhat prior makes the posterior invariant to shifts in the covariates?\n\n\n\n\n\n\nJan 16, 2024\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -299,6 +334,328 @@
     "title": "About",
     "section": "",
     "text": "Hi! I’m Karl Tayeb. I’m a PhD Student at the University of Chicago working with Matthew Stephens and Yoav Gilad. Before UChicago I was at Johns Hopkins working with Alexis Battle.\nThis is my research website. For now, that means a collection of notes that are useful to me. Feel free to look around."
+  },
+  {
+    "objectID": "presentations/template/presentation.html#plan",
+    "href": "presentations/template/presentation.html#plan",
+    "title": "Generalizing SuSiE",
+    "section": "Plan",
+    "text": "Plan\n\nTalk about our current approach, GIBSS\nTalk about (generalized) additive models"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#ibss",
+    "href": "presentations/template/presentation.html#ibss",
+    "title": "Generalizing SuSiE",
+    "section": "IBSS",
+    "text": "IBSS\n\nAlgorithm 1 from (1)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#generalized-ibss",
+    "href": "presentations/template/presentation.html#generalized-ibss",
+    "title": "Generalizing SuSiE",
+    "section": "Generalized IBSS",
+    "text": "Generalized IBSS\n\nGLM \\(\\mu(x) = \\mathbb E[Y |X = x]\\). \\(g(\\mu(x)) = \\sum_l \\psi_l = \\sum_l x^T \\beta_l\\)\nIdea: plug in point estimates \\({\\hat\\psi} _j, j\\neq l\\) to estimate \\(\\psi_l\\)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#variational-objective",
+    "href": "presentations/template/presentation.html#variational-objective",
+    "title": "Generalizing SuSiE",
+    "section": "Variational Objective",
+    "text": "Variational Objective\nlog joint:\n\\[\\begin{align}\nF(\\beta_1, \\dots, \\beta_L) &= \\log p(y | \\sum_l(\\psi_l)) + \\sum_{l=1}^L\\log p(\\psi_l), \\\\\n\\psi_l &= X \\beta_l, \\\\\n\\beta_l &\\sim g_l\n\\end{align}\\]\nELBO:\n\\[\\begin{align}\n\\mathcal F(q_1, \\dots, q_L) &= \\mathbb E_q \\left[ F(\\beta_1, \\dots \\beta_L) \\right] + \\sum_l H(q_l) \\\\\nq(\\beta_1, \\dots, \\beta_L) &= \\prod q_l(\\beta_l)\n\\end{align}\\]"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#gibss-as-a-first-order-approximation-to-cavi",
+    "href": "presentations/template/presentation.html#gibss-as-a-first-order-approximation-to-cavi",
+    "title": "Generalizing SuSiE",
+    "section": "GIBSS as a first order approximation to CAVI",
+    "text": "GIBSS as a first order approximation to CAVI\nExponential family \\(f(y | \\eta) \\propto \\exp \\{y \\eta - A(\\eta) \\}\\), \\(A\\) convex. Additive model: \\(\\eta = \\sum \\eta_l\\)\n\\[\\begin{align}\n\\mathbb E_q[\\log f(y | \\eta)]\n&= \\mathbb E_{q_l} [\\mathbb E_{q_{-l}}[\\log f(y | \\eta_l + \\eta_{-l})] | \\eta_l] \\\\\n&\\leq \\mathbb E_{q_l} [\\mathbb E_{q_{-l}}[\\log f(y | \\eta_l + \\bar\\eta_{-l}) + \\nabla \\log f_{\\eta_{-l}}(\\bar \\eta_{-l})) (\\eta_{-l} - \\bar \\eta_{-l})] | \\eta_l] \\\\\n&= \\mathbb E_{q_l} [\\log f(y | \\eta_l + \\bar\\eta_{-l})] \\\\\n\\end{align}\\]\nNotes:\n\nFor exponential families, we upper bound the ELBO for each coordinate update, a bit awkward.\nWe use a different approximation at each step, not clear if the algorithm converges."
+  },
+  {
+    "objectID": "presentations/template/presentation.html#generalized-ser",
+    "href": "presentations/template/presentation.html#generalized-ser",
+    "title": "Generalizing SuSiE",
+    "section": "Generalized SER",
+    "text": "Generalized SER"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#approximating-generalized-ser",
+    "href": "presentations/template/presentation.html#approximating-generalized-ser",
+    "title": "Generalizing SuSiE",
+    "section": "Approximating Generalized SER",
+    "text": "Approximating Generalized SER"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#additive-effects-model",
+    "href": "presentations/template/presentation.html#additive-effects-model",
+    "title": "Generalizing SuSiE",
+    "section": "Additive effects model",
+    "text": "Additive effects model\n\\[\\begin{align}\n{\\bf y} | \\mu & \\sim N(\\mu, \\sigma^2) \\\\\n\\mu &= \\sum_l \\mu_l \\\\\n\\mu_l &\\sim g_l\n\\end{align}\\]\nSuSiE is the special case where \\(g_l \\sim SER\\)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#backfitting-in-the-additive-regression-model",
+    "href": "presentations/template/presentation.html#backfitting-in-the-additive-regression-model",
+    "title": "Generalizing SuSiE",
+    "section": "Backfitting in the additive regression model",
+    "text": "Backfitting in the additive regression model\n\n(2)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#rationale-for-maximum-likelihood-estimation",
+    "href": "presentations/template/presentation.html#rationale-for-maximum-likelihood-estimation",
+    "title": "Generalizing SuSiE",
+    "section": "Rationale for maximum likelihood estimation",
+    "text": "Rationale for maximum likelihood estimation\n\nFig 1. reproduced from (3)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#additive-effects-model-1",
+    "href": "presentations/template/presentation.html#additive-effects-model-1",
+    "title": "Generalizing SuSiE",
+    "section": "Additive effects model",
+    "text": "Additive effects model\n\n(1)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#generalized-additive-model",
+    "href": "presentations/template/presentation.html#generalized-additive-model",
+    "title": "Generalizing SuSiE",
+    "section": "Generalized additive model",
+    "text": "Generalized additive model\n\\(g\\) the canonical link function, \\(\\mathbb E[y] = g^{-1}(\\eta)\\)\n\\[\\begin{align}\ny | \\eta &\\sim p_{g^{-1}(\\eta)} \\\\\n\\eta &= \\sum_l \\eta_l \\\\\n\\eta_l &\\sim g_l\n\\end{align}\\]"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#generalized-local-scoring",
+    "href": "presentations/template/presentation.html#generalized-local-scoring",
+    "title": "Generalizing SuSiE",
+    "section": "Generalized local scoring",
+    "text": "Generalized local scoring\n\n(2)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#comparison-to-gibss",
+    "href": "presentations/template/presentation.html#comparison-to-gibss",
+    "title": "Generalizing SuSiE",
+    "section": "Comparison to GIBSS",
+    "text": "Comparison to GIBSS\n\nGeneralized local scoring iteratively updates weights, and fits the weighted additive model\nGIBSS performs IRLS for each variable, fixing \\(L-1\\) additive components\nEstimates don’t"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#variational-objective-1",
+    "href": "presentations/template/presentation.html#variational-objective-1",
+    "title": "Generalizing SuSiE",
+    "section": "Variational Objective",
+    "text": "Variational Objective\nlog joint:\n\\[\\begin{align}\nF(\\beta_1, \\dots, \\beta_L) &= \\log p(y | \\sum_l(\\psi_l)) + \\sum_{l=1}^L\\log p(\\psi_l), \\\\\n\\psi_l &= X \\beta_l, \\\\\n\\beta_l &\\sim g_l\n\\end{align}\\]\nELBO:\n\\[\\begin{align}\n\\mathcal F(q_1, \\dots, q_L) &= \\mathbb E_q \\left[ F(\\beta_1, \\dots \\beta_L) \\right] + \\sum_l H(q_l) \\\\\nq(\\beta_1, \\dots, \\beta_L) &= \\prod q_l(\\beta_l)\n\\end{align}\\]"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#mode-rather-than-mean",
+    "href": "presentations/template/presentation.html#mode-rather-than-mean",
+    "title": "Generalizing SuSiE",
+    "section": "Mode rather than mean?",
+    "text": "Mode rather than mean?\n\\[\\begin{align}\nF(\\beta_1, \\dots, \\beta_L) &= \\log p(y | \\sum_l(\\psi_l)) + \\sum_{l=1}^L\\log p(\\psi_l), \\\\\n\\end{align}\\]\n\\[\\begin{align}\n\\beta_l^* = \\arg\\max_{\\beta_l}  F(\\beta_1, \\dots, \\beta_L)\n\\end{align}\\]\nNotes:\n\nConverges to a mode of the posterior.\nJust iterative stepwise regression with fixed \\(L\\).\nSeems undesirable to include \\(\\beta_l\\) for effects with weak evidence.\nResembles CAVI when \\(q(\\gamma_l)\\) is concentrated on highly correlated variables.\nCan still report SER posteriors for each effect \\(l\\)."
+  },
+  {
+    "objectID": "presentations/template/presentation.html#laplace-vs-wakefield-review",
+    "href": "presentations/template/presentation.html#laplace-vs-wakefield-review",
+    "title": "Generalizing SuSiE",
+    "section": "Laplace vs Wakefield (Review)",
+    "text": "Laplace vs Wakefield (Review)\n\nFigure 1: Wakefield’s ABF can be order of magnitude off when the \\(z\\)-score is large"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#problems-with-wakefield-review",
+    "href": "presentations/template/presentation.html#problems-with-wakefield-review",
+    "title": "Generalizing SuSiE",
+    "section": "Problems with Wakefield (Review)",
+    "text": "Problems with Wakefield (Review)\n\\[\n\\text{ABF} = \\sqrt{\\frac{V+W}{V}} \\exp (- \\frac{z^2}{2} \\frac{W}{V + W})\n\\]"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#susie-rss-and-the-wakefield-bf",
+    "href": "presentations/template/presentation.html#susie-rss-and-the-wakefield-bf",
+    "title": "Generalizing SuSiE",
+    "section": "SuSiE-RSS and the Wakefield BF",
+    "text": "SuSiE-RSS and the Wakefield BF\n\nRecall that Wakefield’s ABF is not accurate when the \\(z\\)-score is large\nApplying SuSiE-RSS to summary statistics from some other model besides Gaussian linear model"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#how-large-do-the-z-scores-need-to-be",
+    "href": "presentations/template/presentation.html#how-large-do-the-z-scores-need-to-be",
+    "title": "Generalizing SuSiE",
+    "section": "How large do the \\(z\\)-scores need to be?",
+    "text": "How large do the \\(z\\)-scores need to be?"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#a",
+    "href": "presentations/template/presentation.html#a",
+    "title": "Generalizing SuSiE",
+    "section": "A",
+    "text": "A\n\\[\\begin{align}\n\\mathcal F(q_1, \\dots, q_L) = \\mathbb E_q \\left[ F(\\beta_1, \\dots \\beta_L) \\right] + \\sum_l H(q_l)\n\\end{align}\\]\nCoordinate ascent on \\((\\beta_l)\\). For SuSiE, at each step fit an SER, but only return the posterior mode of the SER, rather than the mean. Essentially stepwise selection, but reports a posterior distribution for each effect. ## Backfitting\nMaximize the expected log likelihood\n\\[\n\\begin{align}\n\\mathbb E[ l(\\hat{\\eta}(X), Y)] = \\max_{\\eta} \\mathbb E[l(\\eta(X), Y)]\n\\end{align}\n\\]"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#overview",
+    "href": "presentations/template/presentation.html#overview",
+    "title": "Generalizing SuSiE",
+    "section": "Overview",
+    "text": "Overview\n\nPublication plan:\n\nGeneralized SuSiE via IBSS, emphasis on fine-mapping for non-Gaussian models\nGSEA with logistic SuSiE"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#fine-mapping-under-the-multivariate-gaussian-model",
+    "href": "presentations/template/presentation.html#fine-mapping-under-the-multivariate-gaussian-model",
+    "title": "Generalizing SuSiE",
+    "section": "Fine-mapping under the multivariate Gaussian model",
+    "text": "Fine-mapping under the multivariate Gaussian model\nMost fine-mapping methods assume summary statistics from marginal association studies are normally distributed, with covariance determined by LD 1\n\\[\\begin{align*}\n\\hat{ {\\bf z} }  \\sim N({\\bf z}, R)\n\\end{align*}\\]\nStatistical property of OLS– what if the marginal effects are coming from somewhere else?\nsee (4), (5), (6), (7)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#what-do-we-want-to-accomplish",
+    "href": "presentations/template/presentation.html#what-do-we-want-to-accomplish",
+    "title": "Generalizing SuSiE",
+    "section": "What do we want to accomplish?",
+    "text": "What do we want to accomplish?\n\nEstablish when there is a problem with fine-mapping with summary stats from non-Gaussian models\n(Hopefully) find that these situations are not uncommon\n(Hopefully) demonstrate that GIBSS offers improvement in these situations\n(Fallback) advise people to fine map with summary statistics from linear models"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#three-horse-race",
+    "href": "presentations/template/presentation.html#three-horse-race",
+    "title": "Generalizing SuSiE",
+    "section": "Three horse race",
+    "text": "Three horse race\n\n\n\n\n\n\n\n\nMethod\nNotes\nSummary stats\n\n\n\n\nGeneralized IBSS\n“correct” model, hueristic algorithm\nNo\n\n\nLogistic + RSS\nad-hoc, actually used (8,9)\nYes\n\n\nLinear + RSS\nmis-specified model, correct algorithm\nYes"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#gibss-overview",
+    "href": "presentations/template/presentation.html#gibss-overview",
+    "title": "Generalizing SuSiE",
+    "section": "GIBSS overview",
+    "text": "GIBSS overview\n\nCompute univariate effect estimates using regression of choice, must return MLE and stderr\nCompute/approximate BFs and posterior means: Laplace, quadrature, etc.\nUse predictions as fixed offsets when updating next effect\nIterate until convergence (we don’t know if it converges)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#key-questions",
+    "href": "presentations/template/presentation.html#key-questions",
+    "title": "Generalizing SuSiE",
+    "section": "Key questions",
+    "text": "Key questions\n\nGeneralized IBSS vs Logistic RSS\n\n\\(L=1\\) case reduces to IBSS-Laplace vs IBSS-ABF\nGIBSS-Laplace should be strictly better, but by how much, and when?\n\\(L > 1\\) all bets are off with Logistic RSS\n\nLinear SuSiE vs Logistic RSS\n\nHelpful to look at \\(L=1\\) case, Linear + Wakefield vs Logistic + Wakefield\nIn GWAS linear regression is often a good approximation to logistic regression\n\nLinear SuSiE vs Generalized IBSS\n\nWhen does linear SuSiE give reliable results?\nWhen does GIBSS provide and advantage?"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#potential-problems",
+    "href": "presentations/template/presentation.html#potential-problems",
+    "title": "Generalizing SuSiE",
+    "section": "Potential problems",
+    "text": "Potential problems\nLogistic + RSS\n\nCovariate of marginal \\(z\\)-scores do not correspond with LD\nUnder appreciated source of “LD Mismatch?”\nFollow-up: what is the correct covariance matrix?\nInherits problems from using ABF– not the most accurate\n\nLogistic GIBSS\n\nMarginal effect estimates are biased when there is a large genetic component"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#correlation-of-marginal-effects-in-logistic-regression",
+    "href": "presentations/template/presentation.html#correlation-of-marginal-effects-in-logistic-regression",
+    "title": "Generalizing SuSiE",
+    "section": "Correlation of marginal effects in logistic regression:",
+    "text": "Correlation of marginal effects in logistic regression:\n\nSimulate \\(\\begin{bmatrix}x_1 \\\\ x_2 \\end{bmatrix} \\sim N(\\begin{bmatrix}0 \\\\ 0 \\end{bmatrix}, \\begin{bmatrix}1 & \\rho \\\\ \\rho & 1 \\end{bmatrix})\\)\nSimulate \\(y\\) under a logistic model \\(y \\sim Bin(1, \\sigma(\\psi)), \\; \\psi := b_0 + b x_1\\)\n\\(cor(z_1, z_2) \\neq \\rho \\implies\\) LD matrix is the wrong covariance matrix"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#correlation-of-marginal-effects-cont",
+    "href": "presentations/template/presentation.html#correlation-of-marginal-effects-cont",
+    "title": "Generalizing SuSiE",
+    "section": "Correlation of marginal effects (cont)",
+    "text": "Correlation of marginal effects (cont)\nAn under-appreciated source of “LD mismatch”?\n\\(n = 500\\), \\(b_0 = -1\\), \\(b = 0, 1, 2, 3\\) 1\n\nmore simulations settings here"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#laplace-vs-wakefield-review-1",
+    "href": "presentations/template/presentation.html#laplace-vs-wakefield-review-1",
+    "title": "Generalizing SuSiE",
+    "section": "Laplace vs Wakefield (Review)",
+    "text": "Laplace vs Wakefield (Review)\n\nFigure 2: Wakefield’s ABF can be order of magnitude off when the \\(z\\)-score is large"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#problems-with-wakefield-review-1",
+    "href": "presentations/template/presentation.html#problems-with-wakefield-review-1",
+    "title": "Generalizing SuSiE",
+    "section": "Problems with Wakefield (Review)",
+    "text": "Problems with Wakefield (Review)\n!()[resources/abf_biased.png]\n!()[resources/abf_eq.png]"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#susie-rss-and-the-wakefield-bf-1",
+    "href": "presentations/template/presentation.html#susie-rss-and-the-wakefield-bf-1",
+    "title": "Generalizing SuSiE",
+    "section": "SuSiE-RSS and the Wakefield BF",
+    "text": "SuSiE-RSS and the Wakefield BF\n\nRecall that Wakefield’s ABF is not accurate when the \\(z\\)-score is large\nApplying SuSiE-RSS to summary statistics from some other model besides Gaussian linear model"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#how-large-do-the-z-scores-need-to-be-1",
+    "href": "presentations/template/presentation.html#how-large-do-the-z-scores-need-to-be-1",
+    "title": "Generalizing SuSiE",
+    "section": "How large do the \\(z\\)-scores need to be?",
+    "text": "How large do the \\(z\\)-scores need to be?"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#biased-effect-estimates-and-bfs",
+    "href": "presentations/template/presentation.html#biased-effect-estimates-and-bfs",
+    "title": "Generalizing SuSiE",
+    "section": "Biased effect estimates (and BFs)",
+    "text": "Biased effect estimates (and BFs)\nSimulation: one causal variant in the locus that explains \\(1\\%\\) of heritability of liability. \\(h^2 = 0.1, 0.2, 0.5, 0.9\\)\n\\[\\begin{align*}\ny \\sim Bin(1, \\sigma(\\psi)) \\\\\n\\psi = b_0 + b x + \\epsilon \\\\\n\\epsilon \\sim N(0, \\sigma^2)\n\\end{align*}\\]"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#biased-effect-estimates-and-bfs-1",
+    "href": "presentations/template/presentation.html#biased-effect-estimates-and-bfs-1",
+    "title": "Generalizing SuSiE",
+    "section": "Biased effect estimates (and BFs)",
+    "text": "Biased effect estimates (and BFs)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#biased-effect-estimates-and-bfs-2",
+    "href": "presentations/template/presentation.html#biased-effect-estimates-and-bfs-2",
+    "title": "Generalizing SuSiE",
+    "section": "Biased effect estimates (and BFs)",
+    "text": "Biased effect estimates (and BFs)\n\n95% C.I. for different \\(h^2\\)"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#biased-effect-estimates-and-bfs-3",
+    "href": "presentations/template/presentation.html#biased-effect-estimates-and-bfs-3",
+    "title": "Generalizing SuSiE",
+    "section": "Biased effect estimates (and BFs)",
+    "text": "Biased effect estimates (and BFs)\n\nFor phenotypes with substantial \\(h^2\\) of liability, restricting our attention to a single locus will lead to biased effect estimates\nRemark: linear model doesn’t struggle with this issue because in practice we estimate the residual variance (or set conservatively)\nRemark:basically a random intercept model, but this seems a little different than the usual motivation for mixed model approaches."
+  },
+  {
+    "objectID": "presentations/template/presentation.html#real-data-analsis",
+    "href": "presentations/template/presentation.html#real-data-analsis",
+    "title": "Generalizing SuSiE",
+    "section": "Real data analsis",
+    "text": "Real data analsis\n\nQ: if we reun SuSiE, GIBSS, Logistic + RSS on real case-control GWAS do we get qualitatively different results?\nDon’t know ground truth, hard to tell what is performing better\nReplication failure rate (RFR) among PIPs proposed in (10) may support claim that using GIBSS > Linear + RSS > Logistic + RSS\n\n\n\nOther ideas?\nDo you know of imbalanced case-control GWAS, survival GWAS, etc. GWAS on count based phenotypes, etc to test out?"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#simulation",
+    "href": "presentations/template/presentation.html#simulation",
+    "title": "Generalizing SuSiE",
+    "section": "Simulation",
+    "text": "Simulation\n\\[\n\\begin{align*}\ny_i &\\sim Bin\\left(1, \\sigma \\left(b_0 + \\sum_{j=1}^q b_j x_{ij} + \\delta\\right)\\right)\\\\\nb &\\sim N(0, \\sigma^2) \\\\\n\\delta &\\sim N(0, \\nu - q \\sigma^2)\\\\\n\\end{align*}\n\\]\n\n\n\n\n\n\n\nValue\nDescription\n\n\n\n\n\\(X\\)\nStandardized genotypes\n\n\n\\(\\sigma^2\\)\nVariance of standardized effects, i.e. \\(b \\sim N(0, \\sigma^2)\\)\n\n\n\\(q\\)\nNumber of causal variants in locus\n\n\n\\(\\rho\\)\nFraction of variance of genetic component in-locus\n\n\n\\(k\\)\nFraction of cases (determines \\(b_0\\))\n\n\n\\(q\\sigma^2\\)\n(Expected) variance of genetic component in-locus\n\n\n\\(\\nu\\)\n\\(q \\sigma^2/\\rho\\), (expected) variance of genetic component\n\n\n\\(h^2\\)\n\\(\\nu / (\\nu + \\pi^2/3)\\), (expected) heritability of liability 1\n\n\n\n\n\n\nLiability threshold model, borrowed from (11)\n\n\nsee (11), and make sure this makes sense!"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#examples-where-susie-is-applied-to-non-gaussian-linear-summary-stats",
+    "href": "presentations/template/presentation.html#examples-where-susie-is-applied-to-non-gaussian-linear-summary-stats",
+    "title": "Generalizing SuSiE",
+    "section": "Examples where SuSiE is applied to non-Gaussian linear summary stats",
+    "text": "Examples where SuSiE is applied to non-Gaussian linear summary stats\n(8), Alzheimers meta analysis combining linear and logistic association studies (9) logistic-mixed model SAIGE + SuSiE"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#when-does-logistic-wakefield-perform-poorly",
+    "href": "presentations/template/presentation.html#when-does-logistic-wakefield-perform-poorly",
+    "title": "Generalizing SuSiE",
+    "section": "When does Logistic + Wakefield perform poorly?",
+    "text": "When does Logistic + Wakefield perform poorly?\n\n\n\naccidentally wiped the simulations, need to regenerate\napparently"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#dealing-with-intercept-covariates",
+    "href": "presentations/template/presentation.html#dealing-with-intercept-covariates",
+    "title": "Generalizing SuSiE",
+    "section": "Dealing with intercept + covariates",
+    "text": "Dealing with intercept + covariates\nA few options:\n\nEstimate in outer loop, treat as a fixed offset while estimating SERs\nRe-estimate covariate effects for each variable\nFound that reestimating intercept was helpful"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#univariate-bf",
+    "href": "presentations/template/presentation.html#univariate-bf",
+    "title": "Generalizing SuSiE",
+    "section": "Univariate BF",
+    "text": "Univariate BF\n\nLimiting BF"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#limiting-bf",
+    "href": "presentations/template/presentation.html#limiting-bf",
+    "title": "Generalizing SuSiE",
+    "section": "Limiting BF",
+    "text": "Limiting BF\nIdea put a normal prior on all covariates \\(\\begin{bmatrix} \\alpha \\\\ \\beta \\end{bmatrix} \\sim N(\\begin{bmatrix} 0 \\\\ 0 \\end{bmatrix}, \\begin{bmatrix} I_{p-1} \\tau_0^{-1} & 0 \\\\ 0 & \\tau_1^{-1} \\end{bmatrix}\\) and compute Laplace approximation to the BF. Take \\(\\tau_0 \\rightarrow 0+\\).\n\nQ: How variable is the scaling factor? Can we get away with just using the univariate BF?"
+  },
+  {
+    "objectID": "presentations/template/presentation.html#better-quadrature-rule",
+    "href": "presentations/template/presentation.html#better-quadrature-rule",
+    "title": "Generalizing SuSiE",
+    "section": "Better quadrature rule",
+    "text": "Better quadrature rule\nGauss-Hermite quadrature\n\\[\nI = \\int f(x) e^{-x^2} dx \\approx \\sum_{i=1}^n w_i f(x_i)\n\\]\n\\((x_i)_{i=1}^n\\) are the roots of the Hermite polynomial \\(H_n(x)\\), \\(w_i = \\frac{2^{n-1} n! \\sqrt{\\pi}}{n^2 H_{n-1}^2 (x_i)}\\)\n\n\\[\nI = \\int f(x) dx = \\int \\left[\\frac{f(x)}{q(x)} \\right] q(x) dx, \\;\\; q(x) = N(x | \\mu, \\sigma^2)\\;  \\text{s.t.}\\;  \\frac{f}{q} \\approx 1\n\\]\n\nAsymptotically correct\nOtherwise, integrating a function with little variation where the integrand has mass\nUpshot: very accurate integrals with e.g. \\(n = 8, 16\\).\n\n(note: change of variable + scaling factor to apply the \\(n\\) point Hermite quadrature rule)"
   },
   {
     "objectID": "presentations/gilad_lab_january24/gilad_lab_january24.html#overview",

@@ -2,66 +2,82 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://karltayeb.github.io/research/citations_with_quarto/index.html</loc>
-    <lastmod>2024-01-09T13:35:44.075Z</lastmod>
+    <lastmod>2024-02-12T15:55:11.191Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/research/shift_invariant_prior/index.html</loc>
+    <lastmod>2024-02-12T15:55:12.547Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/polynomial_approximation/index.html</loc>
-    <lastmod>2024-01-09T13:35:45.201Z</lastmod>
+    <lastmod>2024-02-12T15:55:13.877Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/gibss_polygenic_scenario/index.html</loc>
-    <lastmod>2024-01-09T13:35:46.140Z</lastmod>
+    <lastmod>2024-02-12T15:55:14.873Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/polynomial_regression_vb/index.html</loc>
-    <lastmod>2024-01-09T13:35:47.419Z</lastmod>
+    <lastmod>2024-02-12T15:55:16.079Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/research/gseasusie_working_example/indx.html</loc>
+    <lastmod>2024-02-12T15:55:17.047Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/research/logistic_ser_comparisons/indx.html</loc>
+    <lastmod>2024-02-12T15:55:20.832Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/mode_matching_rss_vb/index.html</loc>
-    <lastmod>2024-01-09T13:35:49.491Z</lastmod>
+    <lastmod>2024-02-12T15:55:21.786Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/polynomial_susie/index.html</loc>
-    <lastmod>2024-01-09T13:35:51.629Z</lastmod>
+    <lastmod>2024-02-12T15:55:23.511Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/logistic_abf_accuracy/index.html</loc>
-    <lastmod>2024-01-09T13:35:52.898Z</lastmod>
+    <lastmod>2024-02-12T15:55:24.560Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/random_intercepts/index.html</loc>
-    <lastmod>2024-01-09T13:35:54.337Z</lastmod>
+    <lastmod>2024-02-12T15:55:25.662Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/constrained_multinomial_stickbreaking/index.html</loc>
-    <lastmod>2024-01-09T13:35:59.119Z</lastmod>
+    <lastmod>2024-02-12T15:55:29.577Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research/multinomial_stickbreaking/index.html</loc>
-    <lastmod>2024-01-09T13:36:00.475Z</lastmod>
+    <lastmod>2024-02-12T15:55:30.509Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/research.html</loc>
-    <lastmod>2024-01-09T13:36:01.413Z</lastmod>
+    <lastmod>2024-02-12T15:55:31.335Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/index.html</loc>
-    <lastmod>2024-01-09T13:36:02.430Z</lastmod>
+    <lastmod>2024-02-12T15:55:31.942Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/about.html</loc>
-    <lastmod>2024-01-09T13:36:04.872Z</lastmod>
+    <lastmod>2024-02-12T15:55:32.533Z</lastmod>
+  </url>
+  <url>
+    <loc>https://karltayeb.github.io/presentations/template/presentation.html</loc>
+    <lastmod>2024-02-12T15:55:33.447Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/presentations/gilad_lab_january24/gilad_lab_january24.html</loc>
-    <lastmod>2024-01-09T13:36:06.760Z</lastmod>
+    <lastmod>2024-02-12T15:55:34.255Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/presentations/committee_meeting_june23/committee_meeting_june23.html</loc>
-    <lastmod>2024-01-09T13:36:08.249Z</lastmod>
+    <lastmod>2024-02-12T15:55:35.141Z</lastmod>
   </url>
   <url>
     <loc>https://karltayeb.github.io/presentations/gilad_lab_july23/committee_meeting_june23.html</loc>
-    <lastmod>2024-01-09T13:36:10.006Z</lastmod>
+    <lastmod>2024-02-12T15:55:35.993Z</lastmod>
   </url>
 </urlset>

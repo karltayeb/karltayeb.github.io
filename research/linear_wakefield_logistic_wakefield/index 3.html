@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="We compare the exact BF from a logistic regression (computed via quadrature) to (a) a Laplace approximation of the BF for logistic regression (b) the Wakefield approximation for logistic regression and (c) the Wakefield approximation for linear regression.">
+
+<title>Karl’s Website - Bayes Factor Comparisons</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Karl’s Website</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../research.html">
+ <span class="menu-text">Research Notes</span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#a-case-where-linear-wakefield-is-better-than-logistic-wakefield" id="toc-a-case-where-linear-wakefield-is-better-than-logistic-wakefield" class="nav-link active" data-scroll-target="#a-case-where-linear-wakefield-is-better-than-logistic-wakefield">A case where Linear-Wakefield is better than Logistic-Wakefield</a></li>
+  <li><a href="#linear-wakefield-varying-the-intercept" id="toc-linear-wakefield-varying-the-intercept" class="nav-link" data-scroll-target="#linear-wakefield-varying-the-intercept">Linear-Wakefield: varying the intercept</a></li>
+  <li><a href="#large-effect-simulations" id="toc-large-effect-simulations" class="nav-link" data-scroll-target="#large-effect-simulations">Large effect simulations</a></li>
+  <li><a href="#analysis" id="toc-analysis" class="nav-link" data-scroll-target="#analysis">Analysis</a>
+  <ul class="collapse">
+  <li><a href="#more-taylor-approximations" id="toc-more-taylor-approximations" class="nav-link" data-scroll-target="#more-taylor-approximations">More Taylor approximations</a></li>
+  <li><a href="#ser-simulations" id="toc-ser-simulations" class="nav-link" data-scroll-target="#ser-simulations">SER Simulations</a></li>
+  <li><a href="#strong-effect" id="toc-strong-effect" class="nav-link" data-scroll-target="#strong-effect">Strong effect</a></li>
+  </ul></li>
+  <li><a href="#comparison-of-log-likelihoods" id="toc-comparison-of-log-likelihoods" class="nav-link" data-scroll-target="#comparison-of-log-likelihoods">Comparison of log likelihoods</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Bayes Factor Comparisons</h1>
+</div>
+
+<div>
+  <div class="description">
+    We compare the exact BF from a logistic regression (computed via quadrature) to (a) a Laplace approximation of the BF for logistic regression (b) the Wakefield approximation for logistic regression and (c) the Wakefield approximation for linear regression.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-1_df40376af0b27da204f5845411b03ae5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>simulate <span class="ot">&lt;-</span> <span class="cf">function</span>(n, intercept, beta){</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    logit <span class="ot">&lt;-</span> intercept <span class="sc">+</span> x <span class="sc">*</span> beta</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    prob <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>logit))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, prob)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">x=</span>x, <span class="at">y=</span>y, <span class="at">logit=</span>logit, <span class="at">intercept=</span>intercept, <span class="at">beta=</span>beta))</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>compute_log_abf <span class="ot">&lt;-</span> <span class="cf">function</span>(fit, sigma2){</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    smry <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    betahat <span class="ot">&lt;-</span> smry<span class="sc">$</span>coef[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    shat <span class="ot">&lt;-</span> smry<span class="sc">$</span>coef[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    log_abf <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(betahat, <span class="dv">0</span>, <span class="fu">sqrt</span>(shat<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> sigma2), <span class="at">log=</span>T) <span class="sc">-</span> <span class="fu">dnorm</span>(betahat, <span class="dv">0</span>, shat, <span class="at">log=</span>T)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(log_abf)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>compute_log_labf <span class="ot">&lt;-</span> <span class="cf">function</span>(fit, sigma2){</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    log_abf <span class="ot">&lt;-</span> <span class="fu">compute_log_abf</span>(fit, sigma2)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    lr <span class="ot">&lt;-</span> <span class="fu">with</span>(fit, <span class="fl">0.5</span> <span class="sc">*</span> (null.deviance <span class="sc">-</span> deviance))</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    smry <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    betahat <span class="ot">&lt;-</span> smry<span class="sc">$</span>coef[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    shat <span class="ot">&lt;-</span> smry<span class="sc">$</span>coef[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    lr2 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(betahat, <span class="dv">0</span>, shat, <span class="at">log=</span>T) <span class="sc">-</span> <span class="fu">dnorm</span>(betahat, betahat, shat, <span class="at">log=</span>T)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    log_labf <span class="ot">&lt;-</span> log_abf <span class="sc">+</span> lr2 <span class="sc">+</span> lr</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(log_labf)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>compute_log_labf2 <span class="ot">&lt;-</span> <span class="cf">function</span>(fit, sigma2){</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    lr <span class="ot">&lt;-</span> <span class="fu">with</span>(fit, <span class="fl">0.5</span> <span class="sc">*</span> (null.deviance <span class="sc">-</span> deviance))</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    smry <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    betahat <span class="ot">&lt;-</span> smry<span class="sc">$</span>coef[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    shat <span class="ot">&lt;-</span> smry<span class="sc">$</span>coef[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    log_labf <span class="ot">&lt;-</span> lr <span class="sc">+</span> <span class="fu">dnorm</span>(betahat, <span class="dv">0</span>, <span class="fu">sqrt</span>(shat<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> sigma2))</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(log_labf)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>compute_bf_quad_quite <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">quietly</span>(logisticsusie<span class="sc">:::</span>fit_quad_1d_fixed_int)</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>compute_log_bf <span class="ot">&lt;-</span> <span class="cf">function</span>(sim, fit, sigma2, <span class="at">n=</span><span class="dv">2</span><span class="sc">^</span><span class="dv">10</span>){</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    b0 <span class="ot">&lt;-</span> fit<span class="sc">$</span>coef[<span class="dv">1</span>]</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    ll <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">compute_bf_quad_quite</span>(x, y, b0, <span class="fu">sqrt</span>(sigma2), <span class="at">n=</span>n)<span class="sc">$</span>result)</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    ll0 <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">sum</span>(<span class="fu">dbinom</span>(y, <span class="dv">1</span>, <span class="fu">mean</span>(y), <span class="at">log=</span>T)))</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(ll <span class="sc">-</span> ll0)</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-hash="index_cache/html/sim-demo_2ae2fdc1f5b30ceccc8267d3e8e749a4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate</span>(<span class="dv">5000</span>, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">1</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>linear_fit <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family=</span><span class="st">'gaussian'</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>logistic_fit <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family=</span><span class="st">'binomial'</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">compute_log_abf</span>(linear_fit, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 167.4864</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compute_log_abf</span>(logistic_fit, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 140.6568</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compute_log_labf</span>(logistic_fit, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 165.6742</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compute_log_bf</span>(sim, logistic_fit, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 165.4011</code></pre>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_8d7730b21a9673df14b79ef1ac0cb216">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>replicate_simulations <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">reps=</span><span class="dv">100</span>, <span class="at">sigma2 =</span> <span class="dv">1</span>, ...){</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  args <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(args)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  sims <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span>reps, <span class="sc">~</span>rlang<span class="sc">::</span><span class="fu">exec</span>(simulate, <span class="sc">!!!</span>args))</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  linear_fits <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(sims, <span class="sc">~</span><span class="fu">with</span>(.x, <span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family=</span><span class="st">'gaussian'</span>)))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  logistic_fits <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(sims, <span class="sc">~</span><span class="fu">with</span>(.x, <span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family=</span><span class="st">'binomial'</span>)))</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  linear_wakefield <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    linear_fits, <span class="sc">~</span><span class="fu">compute_log_abf</span>(.x, sigma2))</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  logistic_wakefield <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    logistic_fits, <span class="sc">~</span><span class="fu">compute_log_abf</span>(.x, sigma2))</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  logistic_laplace <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    logistic_fits, <span class="sc">~</span><span class="fu">compute_log_labf</span>(.x, sigma2))</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  logistic_quadrature <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map2_dbl</span>(</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    sims, logistic_fits, <span class="sc">~</span><span class="fu">compute_log_bf</span>(.x, .y, sigma2))</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">linear_wakefield =</span> linear_wakefield,</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">logistic_wakefield =</span> logistic_wakefield,</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>             <span class="at">logistic_laplace =</span> logistic_laplace,</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>             <span class="at">logistic_quadrature =</span> logistic_quadrature) <span class="sc">%&gt;%</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">sim =</span> sims)</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>plot_sim_bfs <span class="ot">&lt;-</span> <span class="cf">function</span>(sims){</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(sims, {</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>      <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>      <span class="fu">plot</span>(logistic_quadrature, linear_wakefield, <span class="at">main=</span><span class="st">'Linear-Wakefield'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">plot</span>(logistic_quadrature, logistic_wakefield, <span class="at">main=</span><span class="st">'Logistic-Wakefield'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>      <span class="fu">plot</span>(logistic_quadrature, logistic_laplace, <span class="at">main=</span><span class="st">'Logistic-Laplace'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="a-case-where-linear-wakefield-is-better-than-logistic-wakefield" class="level2">
+<h2 class="anchored" data-anchor-id="a-case-where-linear-wakefield-is-better-than-logistic-wakefield">A case where Linear-Wakefield is better than Logistic-Wakefield</h2>
+<div class="cell" data-hash="index_cache/html/sim1_6d62bdc5d8031fdf00c0084cd535267e">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sim1 <span class="ot">&lt;-</span> <span class="fu">replicate_simulations</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">reps =</span> <span class="dv">100</span>, <span class="at">sigma2 =</span> <span class="dv">1</span>, <span class="at">n=</span><span class="dv">500</span>, <span class="at">intercept=</span><span class="sc">-</span><span class="dv">3</span>, <span class="at">beta=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$n
+[1] 500
+
+$intercept
+[1] -3
+
+$beta
+[1] 1</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_sim_bfs</span>(sim1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/sim1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="linear-wakefield-varying-the-intercept" class="level2">
+<h2 class="anchored" data-anchor-id="linear-wakefield-varying-the-intercept">Linear-Wakefield: varying the intercept</h2>
+<p>Here are three simulation where the effect size is small <span class="math inline">\(0.1\)</span> and we vary the intercept, so that the log odds for each individual are <span class="math inline">\(N(-3, 0.1^2)\)</span>, <span class="math inline">\(N(0, 0.1^2)\)</span> and <span class="math inline">\(N(3, 0.1^2)\)</span>.</p>
+<p>The case of <span class="math inline">\(N(0, 0.1^2)\)</span> is where we expect linear regression to perform the best. We do see that the Linear-Wakefield log BFs are highly correlated with the exact log BFs, but off by a constant factor. In this case, the <em>relative</em> values of the BFs are preserved.</p>
+<p>When we shift the intercept, we see that the Linear-Wakefield BFs become less of a good fit– the absolute and relative errors become larger.</p>
+<div class="cell" data-hash="index_cache/html/sim2-4_8e35a737ff2a34905ccb73f55b2d8906">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sim2 <span class="ot">&lt;-</span> <span class="fu">replicate_simulations</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">reps =</span> <span class="dv">100</span>, <span class="at">sigma2 =</span> <span class="dv">1</span>, <span class="at">n=</span><span class="dv">500</span>, <span class="at">intercept=</span><span class="sc">-</span><span class="dv">3</span>, <span class="at">beta=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$n
+[1] 500
+
+$intercept
+[1] -3
+
+$beta
+[1] 0.1</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_sim_bfs</span>(sim2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/sim2-4-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>sim3 <span class="ot">&lt;-</span> <span class="fu">replicate_simulations</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">reps =</span> <span class="dv">100</span>, <span class="at">sigma2 =</span> <span class="dv">1</span>, <span class="at">n=</span><span class="dv">500</span>, <span class="at">intercept=</span><span class="dv">0</span>, <span class="at">beta=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$n
+[1] 500
+
+$intercept
+[1] 0
+
+$beta
+[1] 0.1</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_sim_bfs</span>(sim3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/sim2-4-2.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>sim4 <span class="ot">&lt;-</span> <span class="fu">replicate_simulations</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">reps =</span> <span class="dv">100</span>, <span class="at">sigma2 =</span> <span class="dv">1</span>, <span class="at">n=</span><span class="dv">500</span>, <span class="at">intercept=</span><span class="dv">3</span>, <span class="at">beta=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$n
+[1] 500
+
+$intercept
+[1] 3
+
+$beta
+[1] 0.1</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_sim_bfs</span>(sim4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/sim2-4-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="large-effect-simulations" class="level2">
+<h2 class="anchored" data-anchor-id="large-effect-simulations">Large effect simulations</h2>
+<p>When the effect is very large we see dramatic failrue of Logistic-Wakefield. Notably, Logistic-Laplace performs fairly well, and although Linear-Wakefield is off by orders of magnitude, it does a better job of maintaining the relative sizes of the BFs.</p>
+<div class="cell" data-hash="index_cache/html/sim5_d3d241d44d83d488b81a21378993f4d1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>sim5 <span class="ot">&lt;-</span> <span class="fu">replicate_simulations</span>(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">reps =</span> <span class="dv">100</span>, <span class="at">sigma2 =</span> <span class="dv">1</span>, <span class="at">n=</span><span class="dv">500</span>, <span class="at">intercept=</span><span class="dv">3</span>, <span class="at">beta=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$n
+[1] 500
+
+$intercept
+[1] 3
+
+$beta
+[1] 5</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_sim_bfs</span>(sim5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/sim5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="analysis" class="level2">
+<h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
+<p>The log likelihood under the logistic model is given by</p>
+<p><span class="math display">\[
+\log p(y | \psi = \beta_0 + x\beta) = y\psi - \log (1 + \exp(\psi))
+\]</span></p>
+<p>In the linear model, with a fixed residual variance <span class="math inline">\(\sigma^2\)</span></p>
+<p><span class="math display">\[
+\log p(y | \psi, \sigma^2) = -\frac{1}{2} \left(\frac{y - \psi}{\sigma}\right)^2
+\]</span></p>
+<p>The non-linear <span class="math inline">\(\log (1 + \exp(\psi))\)</span> is close to <span class="math inline">\(0\)</span> when <span class="math inline">\(\psi &lt;&lt; 0\)</span> and <span class="math inline">\(\log(1 + \exp(\psi)) \approx \psi\)</span> when <span class="math inline">\(\psi &gt;&gt; 0\)</span>.</p>
+<p>A 2nd order Taylor expansion about 0 gives</p>
+<p><span class="math display">\[
+\log (1 + exp(\psi)) \approx \log(2) + \frac{1}{2}\psi + \frac{1}{8}\psi^2
+\]</span></p>
+<p>Visually indistinguishable from <span class="math inline">\(\log(1 + \exp(\psi))\)</span> on <span class="math inline">\((-1, 1)\)</span>.</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-3_454c1267623c0e318c96dfbf8b422c80">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="cf">function</span>(x){<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(x))}</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>taylor <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">+</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">8</span> <span class="sc">*</span> x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(f, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(taylor, <span class="at">add=</span>T, <span class="at">col=</span><span class="st">'red'</span>, <span class="at">xlim=</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>), <span class="at">lty=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Completing the square we have:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log p(y | \psi, \sigma^2)
+&amp;= y\psi - \log (1 + \exp(\psi)) \\
+&amp;\approx  y\psi - \log(2) - \frac{1}{2}\psi - \frac{1}{8}\psi^2 \\
+&amp;\approx - \frac{1}{8} (\psi - \xi)^2 + C(y); \quad \xi := 4 \times (y - \frac12)
+\end{aligned}
+\]</span></p>
+<p>This suggests we should get similar results to Logistic-Wakefield using the linear model to fit <span class="math inline">\(\xi \sim x\)</span> with fixed residual variance <span class="math inline">\(\sigma^2 = 4\)</span></p>
+<p>Below we repeat the <span class="math inline">\(\psi \sim N(0, 0.1^2)\)</span> simulation, this time fitting linear regression with a known residual variance <span class="math inline">\(\sigma^2 = 4\)</span>, and with data <span class="math inline">\(\xi = 4 \times (y - \frac{1}{2})\)</span> (of course, we could rescale the priors, but this seems easier).</p>
+<div class="cell" data-hash="index_cache/html/adjusted_linear_functions_78816f94cda47426e70c97908653156e">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>compute_wakefield2 <span class="ot">&lt;-</span> <span class="cf">function</span>(sim, var, sigma2){</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(sim, {</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> y <span class="sc">-</span> <span class="fu">mean</span>(y)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> x <span class="sc">-</span> <span class="fu">mean</span>(x)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    xx <span class="ot">&lt;-</span> <span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    bhat <span class="ot">&lt;-</span> <span class="fu">sum</span>(x <span class="sc">*</span> y) <span class="sc">/</span> xx</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    shat2 <span class="ot">&lt;-</span> var <span class="sc">/</span> xx</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    z <span class="ot">&lt;-</span> bhat <span class="sc">/</span> <span class="fu">sqrt</span>(shat2)</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    log_abf <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">*</span> (<span class="fu">log</span>(shat2) <span class="sc">-</span> <span class="fu">log</span>(sigma2 <span class="sc">+</span> shat2)) <span class="sc">+</span> z<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span><span class="dv">2</span> <span class="sc">*</span> sigma2 <span class="sc">/</span> (sigma2 <span class="sc">+</span> shat2)</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    log_abf</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>modify_sim <span class="ot">&lt;-</span> <span class="cf">function</span>(sim){</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>  xi <span class="ot">&lt;-</span> <span class="dv">4</span> <span class="sc">*</span> (sim<span class="sc">$</span>y <span class="sc">-</span> <span class="fl">0.5</span>)</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>  sim<span class="sc">$</span>y <span class="ot">&lt;-</span> xi</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(sim)</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>compute_wakefield_var4 <span class="ot">&lt;-</span> <span class="cf">function</span>(sim){</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>  sim <span class="sc">%&gt;%</span> <span class="fu">modify_sim</span>() <span class="sc">%&gt;%</span> <span class="fu">compute_wakefield2</span>(<span class="dv">4</span>, <span class="dv">1</span>)</span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-hash="index_cache/html/adjusted_linear_c1d4df7c35f1a1c4a3726f98521c77d2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>sim3_new_linear <span class="ot">&lt;-</span> sim3 <span class="sc">%&gt;%</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">linear4_wakefield =</span> <span class="fu">compute_wakefield_var4</span>(sim))</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sim3_new_linear<span class="sc">$</span>logistic_wakefield, sim3_new_linear<span class="sc">$</span>linear4_wakefield, <span class="at">main=</span><span class="st">'Transformed'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sim3_new_linear<span class="sc">$</span>logistic_wakefield, sim3_new_linear<span class="sc">$</span>linear_wakefield, <span class="at">main=</span><span class="st">'Original'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/adjusted_linear-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>At other simulation settings, this particular adjustment does not work. E.g. the <span class="math inline">\(N(-3, 0.1^2)\)</span> simulation does not have imporved linear BFs by making the adjustment. That shouldn’t be surprising, we are saying that the linear model with this transformation of the data would be a good approximation if the log-odds concentrate around <span class="math inline">\(0\)</span>, which is not the case for this simulation.</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-4_1dd90d6a2d8a2b75eca9a0327245f568">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sim4_adjusted_linear<span class="ot">&lt;-</span> sim4 <span class="sc">%&gt;%</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">linear4_wakefield =</span> <span class="fu">compute_wakefield_var4</span>(sim))</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  sim4_adjusted_linear<span class="sc">$</span>logistic_wakefield,</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  sim4_adjusted_linear<span class="sc">$</span>linear4_wakefield, <span class="at">main=</span><span class="st">'Transformed'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  sim4_adjusted_linear<span class="sc">$</span>logistic_wakefield,</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  sim4_adjusted_linear<span class="sc">$</span>linear_wakefield, <span class="at">main=</span><span class="st">'Original'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Now, what we’ve described here is a <em>particular</em> quadratic approximation, the one we get by using a 2nd order Taylor approximation about <span class="math inline">\(\psi = 0\)</span>.</p>
+<p>The linear model get’s to estimate the residual variance. If we fix the residual variance, we find that we can get pretty bad results! Interestingly, by allowing the linear model to estimate the residual variance we can get sensible results.</p>
+<p>A note: all the points in these plots are <em>at the same simulation setting</em>. In the case of the SER, some (many) variants will have not effect, and some will have potentially large effect. The quality of the linear approximation may vary here.</p>
+<div class="cell" data-hash="index_cache/html/linear_fixed_residual_f7972e368f2e011d1e18c761ff13566e">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>compute_wakefield3 <span class="ot">&lt;-</span> <span class="cf">function</span>(sim, sigma2){</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family=</span><span class="st">'gaussian'</span>))</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  V <span class="ot">&lt;-</span> <span class="fu">var</span>(fit<span class="sc">$</span>residuals)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">compute_wakefield2</span>(sim, V, sigma2)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>sim1 <span class="ot">&lt;-</span> sim1 <span class="sc">%&gt;%</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">a =</span> <span class="fu">compute_wakefield2</span>(sim, <span class="fl">0.25</span>, <span class="dv">1</span>),</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">b =</span> <span class="fu">compute_wakefield2</span>(sim, <span class="fl">0.1</span>, <span class="dv">1</span>),</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">c =</span> <span class="fu">compute_wakefield2</span>(sim, <span class="fl">0.01</span>, <span class="dv">1</span>),</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">d =</span> <span class="fu">compute_wakefield3</span>(sim, <span class="dv">1</span>)</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(sim1, {</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>))</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(logistic_quadrature, a, <span class="at">main =</span> <span class="st">'sigma2 = 0.25'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(logistic_quadrature, b, <span class="at">main =</span> <span class="st">'sigma2 = 0.1'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(logistic_quadrature, c, <span class="at">main =</span> <span class="st">'sigma2 = 0.01'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(logistic_quadrature, d, <span class="at">main =</span> <span class="st">'sigma2_hat'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/linear_fixed_residual-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="more-taylor-approximations" class="level3">
+<h3 class="anchored" data-anchor-id="more-taylor-approximations">More Taylor approximations</h3>
+<p>Can we think of estimating the residual variance as somehow optimizing over</p>
+<p><span class="math display">\[(\sigma, \sigma^2_0) \in \mathcal S \subset \mathbb R_{\geq0} \times R_{\geq0}\]</span> For some subset <span class="math inline">\(\mathcal S\)</span>? In other words, I think that maybe a choice of residual variance corresponds to a Taylor approximation of the logistic model at <em>some</em> point <span class="math inline">\(x^*\)</span> with some choice of prior variance <span class="math inline">\(\tilde \sigma^2_0\)</span>. If most observations are well approximated (e.g.&nbsp;if <span class="math inline">\(\psi_i\)</span> are all sufficiently close to <span class="math inline">\(x^*\)</span>), then we should expect the linear model to do well.</p>
+<p><span class="math inline">\(f(x) := \log (1 + exp(x))\)</span></p>
+<p><span class="math display">\[
+f(x) \approx f(x^*) + \sigma(x^*)(x - x^*) + \frac{1}{2} \sigma(x^*)\sigma(-x^*)(x - x^*)^2
+\]</span></p>
+<p>Let <span class="math inline">\(\sigma^* = \sigma(x^*)\)</span> and <span class="math inline">\(d^* = \sigma(x^*)\sigma(-x^*)\)</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\log p(y | \psi, \sigma^2)
+&amp;= y\psi - f(\psi) \\
+&amp;\approx  y\psi - \left( f(x^*) + \sigma^*(\psi - x^*) + \frac{1}{2} d^*(\psi - x^*)^2 \right) \\
+&amp;\approx - \frac{1}{2} d^* \left( \psi - \xi \right)^2 + C; \quad \xi:=   \frac{(y - \sigma^* + x^*)}{d^*}
+\end{aligned}
+\]</span></p>
+<p>We can think of each Taylor approximation as a linear regression on a rescaled <span class="math inline">\(y\)</span> with a specific residual variance. This rescaling changes the scale of the effect estimate, and implicitly, the prior on the effect.</p>
+<p>Going the other way, we can interpret Linear-Wakefield with an estimated residual variance <span class="math inline">\(\hat \sigma^2\)</span> and prior variance <span class="math inline">\(\sigma^2_0\)</span> as an approximation to logistic BF with a different prior variance <span class="math inline">\(\tilde \sigma^2_0 = \hat \sigma^{-4} \sigma^2_0\)</span>. The approximation should be good as long as the <span class="math inline">\(\psi\)</span> are concentrated “near” <span class="math inline">\(x^*\)</span>.</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-5_ce43cce6880f29f2f64344d9c2583295">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="cf">function</span>(x){<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(x))}</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>sigmoid <span class="ot">&lt;-</span> <span class="cf">function</span>(x){<span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x))}</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>make_taylor <span class="ot">&lt;-</span> <span class="cf">function</span>(x0){</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  taylor <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">f</span>(x0) <span class="sc">+</span> <span class="fu">sigmoid</span>(x0)<span class="sc">*</span>(x <span class="sc">-</span> x0) <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">sigmoid</span>(x0)<span class="sc">*</span><span class="fu">sigmoid</span>(<span class="sc">-</span>x0)<span class="sc">*</span>(x <span class="sc">-</span> x0)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(taylor)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-6_b2583eda9db982982d444accd8d33688">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>plot_taylor <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">x0=</span><span class="dv">0</span>, <span class="at">width=</span><span class="dv">2</span>, ...){</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  f0 <span class="ot">&lt;-</span> <span class="fu">make_taylor</span>(x0)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  rng <span class="ot">&lt;-</span> <span class="fu">c</span>(x0<span class="sc">-</span>width, x0<span class="sc">+</span>width)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(f, <span class="at">xlim =</span> rng, ...)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(f0, <span class="at">add=</span>T, <span class="at">col=</span><span class="st">'red'</span>, <span class="at">xlim=</span> rng, <span class="at">lty=</span><span class="dv">3</span>)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_taylor</span>(<span class="dv">0</span>, <span class="at">main =</span> <span class="st">'x0 = 0'</span>)</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_taylor</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="at">main =</span> <span class="st">'x0 = -2'</span>)</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_taylor</span>(<span class="dv">2</span>, <span class="at">main =</span> <span class="st">'x0 = 2'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-7_c220ceec5808e215e2899fe3dd641315">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>compute_residual_variance <span class="ot">&lt;-</span> <span class="cf">function</span>(sim){</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  linear_fit <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family=</span><span class="st">'gaussian'</span>))</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  residual_var <span class="ot">&lt;-</span> <span class="fu">var</span>(linear_fit<span class="sc">$</span>residuals)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(residual_var)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>compute_rescaled_bf <span class="ot">&lt;-</span> <span class="cf">function</span>(sim, residual_var, sigma2){</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family =</span> <span class="st">'binomial'</span>))</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">compute_log_bf</span>(sim, fit, sigma2<span class="sc">/</span>(residual_var<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-8_5c9031103daf045dcb3331fb3297fe76">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>plot_rescaled_logistic_bfs <span class="ot">&lt;-</span> <span class="cf">function</span>(sims, <span class="at">n=</span><span class="fu">nrow</span>(sims), ...){</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  sims <span class="sc">%&gt;%</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">head</span>(n) <span class="sc">%&gt;%</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">residual_var =</span> <span class="fu">compute_residual_variance</span>(sim),</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">logistic_quad2 =</span> <span class="fu">compute_rescaled_bf</span>(sim, residual_var, <span class="dv">1</span>)</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">plot</span>(.<span class="sc">$</span>logistic_quad2, .<span class="sc">$</span>linear_wakefield, </span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">ylab =</span> <span class="st">'Linear-Wakefield, sigma2 = 1'</span>,</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlab =</span> <span class="st">'Logistic-BF, sigma2 = _'</span>,</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>           ...)</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>What we do here is take each linear regression fit, use the residual variance to infer which Taylor approximation the linear regression is approximating, and what the rescaled prior variance is.</p>
+<p>What we see is that even though Linear-Wakefield with a prior variance <span class="math inline">\(\sigma^2_0 = 1\)</span> does not do a good job approximating the Logistic-Quadrature BFs with <span class="math inline">\(\sigma^2_0=1\)</span>, it does do an OK job approximating the BFs for <em>some other setting of <span class="math inline">\(\sigma^2_0\)</span></em>. Interestingly, it appears that even though the Linear-Wakefield ABFs are much closer to the exact BFs at <span class="math inline">\(\tilde \sigma^2_0\)</span>, the relationship between the exact and approximate BFs seems less linear for some simulation settings.</p>
+<p>Also</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-9_075c147bf7d8f1906880278e542f9975">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rescaled_logistic_bfs</span>(sim1, <span class="dv">99</span>, <span class="at">main=</span><span class="st">'N(-3, 1)'</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rescaled_logistic_bfs</span>(sim2, <span class="dv">99</span>, <span class="at">main=</span><span class="st">'N(-3, 0.1^2)'</span>)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rescaled_logistic_bfs</span>(sim3, <span class="dv">99</span>, <span class="at">main=</span><span class="st">'N(0, 0.1^2)'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-10_d71a3892c737d59d5be58ccea2378260">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sim1<span class="sc">$</span>logistic_quadrature, sim1<span class="sc">$</span>linear_wakefield,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'N(-3, 1)'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sim1<span class="sc">$</span>logistic_quadrature, sim2<span class="sc">$</span>linear_wakefield,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'N(-3, 1)'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sim1<span class="sc">$</span>logistic_quadrature, sim3<span class="sc">$</span>linear_wakefield,</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'N(-3, 1)'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="ser-simulations" class="level3">
+<h3 class="anchored" data-anchor-id="ser-simulations">SER Simulations</h3>
+<div class="cell" data-hash="index_cache/html/ser-funs_d907c531573ea407af52e4d0940bdf4c">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>compute_log_bf_ser <span class="ot">&lt;-</span> <span class="cf">function</span>(ser_sim, logistic_fits, sigma2, <span class="at">n=</span><span class="dv">2</span><span class="sc">^</span><span class="dv">10</span>){</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    b0 <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(logistic_fits, <span class="sc">~</span>.x<span class="sc">$</span>coef[<span class="dv">1</span>]) <span class="co"># intercepts</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(ser_sim<span class="sc">$</span>X)</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    marginal_loglik <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>      <span class="dv">1</span><span class="sc">:</span>p, <span class="sc">~</span><span class="fu">compute_bf_quad_quite</span>(ser_sim<span class="sc">$</span>X[, .x],</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>                                  ser_sim<span class="sc">$</span>y, b0[.x],</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>                                  <span class="fu">sqrt</span>(sigma2), <span class="at">n=</span>n)<span class="sc">$</span>result)</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    ll0 <span class="ot">&lt;-</span> <span class="fu">with</span>(ser_sim, <span class="fu">sum</span>(<span class="fu">dbinom</span>(y, <span class="dv">1</span>, <span class="fu">mean</span>(y), <span class="at">log=</span>T)))</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    log_bf <span class="ot">&lt;-</span> marginal_loglik <span class="sc">-</span> ll0</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(log_bf)</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>compute_ser_bfs <span class="ot">&lt;-</span> <span class="cf">function</span>(ser_sim, sigma2){</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(ser_sim<span class="sc">$</span>X)</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>  linear_fits <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="sc">~</span><span class="fu">with</span>(</span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>    ser_sim, <span class="fu">glm</span>(y <span class="sc">~</span> X[,.x], <span class="at">family=</span><span class="st">'gaussian'</span>)))</span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>  logistic_fits <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="sc">~</span><span class="fu">with</span>(</span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>    ser_sim, <span class="fu">glm</span>(y <span class="sc">~</span> X[,.x], <span class="at">family=</span><span class="st">'binomial'</span>)))</span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a>  linear_wakefield <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(</span>
+<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>      linear_fits, <span class="sc">~</span><span class="fu">compute_log_abf</span>(.x, sigma2))</span>
+<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>  logistic_wakefield <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(</span>
+<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>      logistic_fits, <span class="sc">~</span><span class="fu">compute_log_abf</span>(.x, sigma2))</span>
+<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a>  logistic_laplace <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(</span>
+<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a>      logistic_fits, <span class="sc">~</span><span class="fu">compute_log_labf</span>(.x, sigma2))</span>
+<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a>  logistic_quadrature <span class="ot">&lt;-</span> <span class="fu">compute_log_bf_ser</span>(ser_sim, logistic_fits, <span class="fl">1.</span>)</span>
+<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb42-28"><a href="#cb42-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb42-29"><a href="#cb42-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">sim =</span> ser_sim, </span>
+<span id="cb42-30"><a href="#cb42-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma2 =</span> sigma2,</span>
+<span id="cb42-31"><a href="#cb42-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">linear_wakefield =</span> linear_wakefield,</span>
+<span id="cb42-32"><a href="#cb42-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">logistic_wakefield =</span> logistic_wakefield,</span>
+<span id="cb42-33"><a href="#cb42-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">logistic_laplace =</span> logistic_laplace,</span>
+<span id="cb42-34"><a href="#cb42-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">logistic_quadrature =</span> logistic_quadrature</span>
+<span id="cb42-35"><a href="#cb42-35" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb42-36"><a href="#cb42-36" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb42-37"><a href="#cb42-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-38"><a href="#cb42-38" aria-hidden="true" tabindex="-1"></a>plot_ser_bfs <span class="ot">&lt;-</span> <span class="cf">function</span>(ser_bfs){</span>
+<span id="cb42-39"><a href="#cb42-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(ser_bfs, {</span>
+<span id="cb42-40"><a href="#cb42-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb42-41"><a href="#cb42-41" aria-hidden="true" tabindex="-1"></a>    yrange <span class="ot">&lt;-</span> <span class="fu">range</span>(<span class="fu">c</span>(linear_wakefield, logistic_wakefield, logistic_laplace))</span>
+<span id="cb42-42"><a href="#cb42-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(logistic_quadrature, linear_wakefield, </span>
+<span id="cb42-43"><a href="#cb42-43" aria-hidden="true" tabindex="-1"></a>         <span class="at">ylim=</span>yrange, <span class="at">main=</span><span class="st">'Linear-Wakefield'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb42-44"><a href="#cb42-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(logistic_quadrature, logistic_wakefield,</span>
+<span id="cb42-45"><a href="#cb42-45" aria-hidden="true" tabindex="-1"></a>         <span class="at">ylim=</span>yrange, <span class="at">main =</span> <span class="st">'Logistic-Wakefield'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb42-46"><a href="#cb42-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(logistic_quadrature, logistic_laplace,</span>
+<span id="cb42-47"><a href="#cb42-47" aria-hidden="true" tabindex="-1"></a>         <span class="at">ylim=</span>yrange, <span class="at">main =</span> <span class="st">'Logistic-Laplace'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb42-48"><a href="#cb42-48" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb42-49"><a href="#cb42-49" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="weak-effect" class="level4">
+<h4 class="anchored" data-anchor-id="weak-effect">Weak effect</h4>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-11_671d760cc943b8362f88507ffba69c6d">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>ser_sim <span class="ot">&lt;-</span> logisticsusie<span class="sc">::</span><span class="fu">sim_ser</span>(<span class="at">n=</span><span class="dv">500</span>, <span class="at">beta=</span><span class="fl">0.1</span>, <span class="at">beta0=</span><span class="sc">-</span><span class="dv">2</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>ser_bfs <span class="ot">&lt;-</span> <span class="fu">compute_ser_bfs</span>(ser_sim, <span class="dv">1</span>)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_ser_bfs</span>(ser_bfs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="medium-effect" class="level4">
+<h4 class="anchored" data-anchor-id="medium-effect">Medium effect</h4>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-12_8b9612dbe1d423ae916ce32b6f10a0a6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>ser_sim <span class="ot">&lt;-</span> logisticsusie<span class="sc">::</span><span class="fu">sim_ser</span>(<span class="at">n=</span><span class="dv">500</span>, <span class="at">beta=</span><span class="fl">0.5</span>, <span class="at">beta0=</span><span class="sc">-</span><span class="dv">2</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>ser_bfs <span class="ot">&lt;-</span> <span class="fu">compute_ser_bfs</span>(ser_sim, <span class="dv">1</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_ser_bfs</span>(ser_bfs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="strong-effect" class="level3">
+<h3 class="anchored" data-anchor-id="strong-effect">Strong effect</h3>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-13_e9ddcaa607853735ec698ae0199d7b01">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>ser_sim <span class="ot">&lt;-</span> logisticsusie<span class="sc">::</span><span class="fu">sim_ser</span>(<span class="at">n=</span><span class="dv">500</span>, <span class="at">beta=</span><span class="dv">1</span>, <span class="at">beta0=</span><span class="sc">-</span><span class="dv">2</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>ser_bfs <span class="ot">&lt;-</span> <span class="fu">compute_ser_bfs</span>(ser_sim, <span class="at">sigma2 =</span> <span class="dv">1</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_ser_bfs</span>(ser_bfs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="fixed-residual-variance" class="level4">
+<h4 class="anchored" data-anchor-id="fixed-residual-variance">Fixed residual variance</h4>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-14_aded05ae283c97fba7ca781c280565d2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' Convert ser sim to list of (x, y) pairs</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>ser_sim2sim <span class="ot">&lt;-</span> <span class="cf">function</span>(ser_sim){</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> ser_sim<span class="sc">$</span>X</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> ser_sim<span class="sc">$</span>y</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X)</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  sim <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="sc">~</span><span class="fu">list</span>(<span class="at">x=</span>X[, .x], <span class="at">y=</span>y))</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(sim)</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>ser_sim <span class="ot">&lt;-</span> logisticsusie<span class="sc">::</span><span class="fu">sim_ser</span>(<span class="at">n=</span><span class="dv">500</span>, <span class="at">beta=</span><span class="dv">1</span>, <span class="at">beta0=</span><span class="sc">-</span><span class="dv">2</span>)</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>ser_bfs <span class="ot">&lt;-</span> <span class="fu">compute_ser_bfs</span>(ser_sim, <span class="at">sigma2 =</span> <span class="dv">1</span>)</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>ser_sim2 <span class="ot">&lt;-</span> ser_sim <span class="sc">%&gt;%</span> <span class="fu">ser_sim2sim</span>()</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(ser_sim2, <span class="sc">~</span><span class="fu">compute_wakefield2</span>(.x, <span class="fl">0.25</span>, <span class="fl">1.0</span>))</span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(ser_sim2, <span class="sc">~</span><span class="fu">compute_wakefield2</span>(.x, <span class="fl">0.1</span>, <span class="fl">1.0</span>))</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(ser_sim2, <span class="sc">~</span><span class="fu">compute_wakefield2</span>(.x, <span class="fl">0.01</span>, <span class="fl">1.0</span>))</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>))</span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ser_bfs<span class="sc">$</span>logistic_quadrature, a, <span class="at">main=</span><span class="st">'sigma2 = 0.25'</span>)</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ser_bfs<span class="sc">$</span>logistic_quadrature, b, <span class="at">main=</span><span class="st">'sigma2 = 0.1'</span>)</span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ser_bfs<span class="sc">$</span>logistic_quadrature, c, <span class="at">main=</span><span class="st">'sigma2 = 0.01'</span>)</span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ser_bfs<span class="sc">$</span>logistic_quadrature, ser_bfs<span class="sc">$</span>linear_wakefield, <span class="at">main=</span><span class="st">'estimate sigma2'</span>)</span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ser_bfs<span class="sc">$</span>logistic_wakefield, a); <span class="fu">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="comparison-of-log-likelihoods" class="level2">
+<h2 class="anchored" data-anchor-id="comparison-of-log-likelihoods">Comparison of log likelihoods</h2>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-15_3d461bd1f0a302db6a94d5ebb2335adc">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> <span class="cf">function</span>(x){ x <span class="sc">-</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(x))}</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>g1 <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">sigma2=</span><span class="dv">1</span>) { x<span class="sc">/</span>sigma2 <span class="sc">-</span><span class="fl">0.5</span> <span class="sc">*</span> x<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>sigma2}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-16_ab1a12ac1597135760c54cebb91dead3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>xrng <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(f1, <span class="at">xlim=</span>xrng)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(purrr<span class="sc">::</span><span class="fu">partial</span>(g1, <span class="at">sigma2=</span><span class="dv">3</span>), <span class="at">xlim =</span> xrng, <span class="at">add=</span>T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-17_6e3be6e66a881e46c91a80a268d254fb">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate</span>(<span class="dv">500</span>, <span class="dv">0</span>, <span class="fl">0.1</span>)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>grad_logistic_likelihood <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">sum</span>(y <span class="sc">-</span> <span class="fu">sigmoid</span>(logit)))</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>grad_linear_likelihood_partial <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">sum</span>(y <span class="sc">-</span> logit))</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>grad_linear_likelihood_partial<span class="sc">/</span>grad_logistic_likelihood</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -122.5604</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>grad_logistic_likelihood</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -2.022759</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(grad_linear_likelihood_partial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 247.91</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>sim<span class="sc">$</span>logit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1]  0.1185954678  0.0324115637  0.0599019330  0.0553310678  0.0821615419
+  [6]  0.0378933565 -0.1979378288  0.0931191589  0.0292048164 -0.0454843800
+ [11]  0.0300328756  0.0244309220 -0.1695869238 -0.0476703605  0.0426493211
+ [16] -0.0322568551 -0.0143155131 -0.0938882620 -0.0261317949 -0.0436419797
+ [21] -0.0748479154 -0.0294342382  0.0882590293  0.1012633154  0.0634579996
+ [26] -0.1371447223  0.0072761181  0.2167622333 -0.0045082993  0.1235288568
+ [31] -0.0758208443  0.3401306981  0.0285638774  0.0825090087 -0.0390305188
+ [36] -0.0409603193 -0.2193642836 -0.0874532492 -0.0121519683 -0.1465828309
+ [41]  0.0924886531 -0.0359675797  0.0938300815  0.0419481814 -0.1572696079
+ [46]  0.0711777300 -0.1059004760  0.0702596210  0.0667869455 -0.0258676384
+ [51]  0.1858089257  0.1507663238 -0.0963062505  0.2195863251 -0.1693732573
+ [56] -0.1572555722 -0.0508108726  0.0740354567 -0.0857816654  0.0925655286
+ [61] -0.0358562680 -0.0976723045  0.0251928446  0.0482739748  0.0270218185
+ [66] -0.1019607195 -0.0715312990 -0.1040731239 -0.1258280102  0.0614264372
+ [71] -0.1107795626  0.0453279041  0.1477742333 -0.0167145908  0.0162577288
+ [76]  0.2615128526 -0.0963965303  0.1585721643 -0.0427409442 -0.0361968861
+ [81]  0.0635575993 -0.0224405227 -0.0551974973 -0.0094075767  0.0562937749
+ [86]  0.0479419956 -0.0126532705 -0.1075647506  0.0485685832  0.0008744646
+ [91]  0.2290792317  0.1097005358  0.1724049749  0.0197700594 -0.1725199565
+ [96]  0.0420075398 -0.1320721580 -0.0026725910  0.0851292417 -0.1670992606
+[101] -0.0498131594  0.0173679418  0.0428983576 -0.0328146740 -0.1399226728
+[106] -0.0002270549 -0.0720176614 -0.0978844553 -0.1867709461 -0.0585288383
+[111] -0.0189185026  0.0255025641  0.0577856905  0.0479672729  0.0131290693
+[116]  0.0065784096  0.0370661780 -0.0578171444 -0.1351914743  0.0471132856
+[121]  0.0389399189 -0.1706014216 -0.0586460306  0.0690303435  0.1420587450
+[126] -0.0135791114 -0.0953390681 -0.0167783571  0.0499324175  0.0104124861
+[131]  0.1986337334  0.1165700770  0.0686596729  0.0372803993  0.0089034768
+[136]  0.1413283529  0.0335007603 -0.0036338008 -0.0463651679  0.0521671760
+[141] -0.0374389538 -0.0464689612 -0.1043617326  0.2508386757  0.0599656187
+[146]  0.0460886178  0.0837984283  0.1239490612 -0.0252205686 -0.0438821863
+[151]  0.0113586801  0.0554960318  0.1019120781  0.2448962901  0.0252772816
+[156] -0.1417704656 -0.1990907134 -0.1917868671  0.0928385841 -0.1182548421
+[161]  0.0671987090 -0.0645248069  0.0826583709  0.0031326637  0.0679237030
+[166]  0.0624994102  0.0184174444  0.1540066682 -0.1077364561  0.0121294189
+[171]  0.0891192847  0.0123585851 -0.0691189672 -0.2236970449  0.1109944447
+[176] -0.1299025361  0.0533960111  0.1077779550  0.0660488921  0.0779394683
+[181]  0.0700973025 -0.0950919493 -0.0616143717 -0.1077280621 -0.0221159511
+[186]  0.0737941051 -0.1856872557  0.0897526138 -0.0064601371  0.0395487328
+[191]  0.1826387505 -0.0856767190 -0.0250603125  0.0807017576  0.0363456563
+[196] -0.1316414179 -0.0508111320  0.0188772103  0.0593395242  0.1281832430
+[201] -0.0908113504 -0.0014365781  0.0328451762  0.1902604593 -0.0001415646
+[206]  0.0882863071 -0.0250243357  0.0336936500 -0.0107877166  0.2086635577
+[211] -0.0963154038 -0.1407570087 -0.2072910988  0.1460851167 -0.0661037904
+[216] -0.0967991638  0.2091630969 -0.1303467739  0.2077860711  0.1064370079
+[221]  0.0808479378  0.0913659584  0.0218113037  0.0194224978  0.1262097074
+[226]  0.1793555398  0.0261325352 -0.1363627636 -0.0424219997  0.0230637032
+[231] -0.0500033082  0.0675771014 -0.0869253965  0.0460994515  0.0103314455
+[236]  0.1591986445  0.0573009006  0.0124895558 -0.2638835261  0.0411236327
+[241] -0.0186783029  0.0010875155 -0.0340071319 -0.1896286011  0.0158144862
+[246]  0.1334981231 -0.1115342860  0.1403942436 -0.0544889919  0.0614106423
+[251]  0.0297929324 -0.0334780126  0.0072158746  0.1162051100  0.1360462602
+[256]  0.0567399656 -0.0438017587 -0.0148049544  0.0778009179 -0.2411446798
+[261]  0.0839681777 -0.0569165463  0.0835501959 -0.1125768646 -0.0385555115
+[266]  0.1692048327  0.0901828573  0.0191541461  0.0859678612  0.0943161462
+[271]  0.0959006560 -0.2074158972 -0.0408547751  0.0615483350  0.0379768584
+[276] -0.1122701286  0.0414160027  0.0425755519 -0.2158117775  0.1426547953
+[281]  0.1288905770 -0.0680842263 -0.0114286702  0.0023333894  0.0558009516
+[286]  0.0210527963  0.0141045281  0.2601135704  0.0617795424  0.0104999549
+[291]  0.1082220183 -0.1352589685 -0.1463369756 -0.1347676682 -0.1187824658
+[296] -0.1088573679  0.0073244422  0.0834087824 -0.1110816301 -0.0580589832
+[301] -0.1032841339  0.0112990395  0.0738154768 -0.1129688263 -0.1261172762
+[306]  0.0980765516  0.1272223726 -0.0157566084 -0.0249808081  0.1244912894
+[311]  0.0068889321 -0.0538274696  0.0864089857 -0.2149537916  0.0039892823
+[316] -0.0102670798 -0.0211598756 -0.1441830037 -0.0813217228  0.0894471119
+[321]  0.0549404971 -0.0667172247 -0.0742553193  0.0276570283  0.0497028449
+[326]  0.0498077233 -0.0669212665 -0.1119226329 -0.0035695305 -0.1093631689
+[331] -0.1052926975  0.0148969020  0.0264832492  0.2167576896  0.0399691265
+[336]  0.1210483525 -0.1956598912  0.0410277237 -0.2355202619  0.1009043022
+[341] -0.1830382490  0.0692338258 -0.0565043706 -0.1057259289  0.0507311148
+[346]  0.0942774260 -0.1555909419  0.1988321322  0.0498222127 -0.2730310727
+[351]  0.0232513281  0.0163965913  0.1027570323 -0.0247857659  0.0691008356
+[356]  0.0991655911 -0.0737562098 -0.1230262811 -0.0462186991 -0.0086051004
+[361] -0.0197736137  0.0444427444 -0.0717634636 -0.0474024862 -0.0200621503
+[366]  0.1903063086  0.0220779977  0.0521726076  0.0603271955 -0.0440137940
+[371]  0.1574400709  0.0922610236 -0.0233076668 -0.0678079154 -0.1034200866
+[376]  0.2236776394 -0.1156946969  0.0515084940  0.0960923808  0.0400433852
+[381] -0.0868583014  0.1172180420 -0.0580232439 -0.0914294030  0.1056053599
+[386] -0.0498648485  0.1223850218  0.0251299353 -0.0898474335 -0.0715992829
+[391] -0.1856319748  0.0218515611  0.0313028298 -0.0903937170 -0.1381512489
+[396]  0.0853853103 -0.1420907885 -0.1379223039  0.0434164315  0.0703356558
+[401] -0.0929535665  0.0397660709  0.0647534579  0.2903505254 -0.0612532770
+[406] -0.2238733703 -0.0421013016  0.1203932102  0.0598833310 -0.0959190119
+[411] -0.1248832940  0.0097644504 -0.0226337345  0.1507870687 -0.0639788661
+[416]  0.1419036744  0.0871108423 -0.0013628989 -0.0339780580 -0.1321285790
+[421] -0.0057804683  0.0292739103  0.0657305564  0.0742244780 -0.0322756046
+[426]  0.0456158505 -0.1557054332  0.0633745670 -0.2129016550 -0.0399319370
+[431]  0.0646079477 -0.0186501889  0.0033478728  0.0022616292 -0.0181834673
+[436]  0.0963755458 -0.1054609012 -0.0555017210  0.1377605473  0.0497089227
+[441]  0.0902849518  0.0192359989 -0.0232281731  0.0203440432  0.0412843259
+[446]  0.1320081240 -0.1279710379  0.0540026155 -0.0319580076 -0.1003884817
+[451]  0.0149375223 -0.2184558421  0.0266474330 -0.0532570762 -0.0380989402
+[456] -0.1072095214 -0.1077566086  0.0471179226 -0.0938684965 -0.1209371034
+[461]  0.0218359305 -0.0331209096  0.0270827013  0.1757296476  0.0055100361
+[466] -0.0234564412  0.0408954269  0.0727566901 -0.0581512848 -0.0156682906
+[471] -0.0735652779  0.0067387057 -0.1813401113  0.0480774795  0.1156920792
+[476]  0.0613985562 -0.0411938308 -0.1940839113  0.0859575819  0.1703971722
+[481] -0.2142498939  0.0058409346 -0.0909449864 -0.0978045790 -0.0378276674
+[486]  0.0277497643  0.0535526918 -0.1783364851 -0.2032463356 -0.0984553289
+[491]  0.0899039233 -0.0726094989 -0.0772895481  0.0474206761 -0.0292868821
+[496]  0.1293991694 -0.0794786200  0.1231380931  0.0436902334 -0.1838226992</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
