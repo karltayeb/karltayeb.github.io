@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Karl Tayeb">
+<meta name="dcterms.date" content="2023-04-25">
+<meta name="description" content="We noticed that the error in Wakefield’s ABF grows with increasing sample size. This is surprising, because at these large sample sizes asymptotic normality kicks in. The issue can be more clearly seen by considering the ABF as an integral over an approximation to the likelihood ratio. The approximation used in the ABF ensure that the approximate likelihood ratio at 0 is 1, but that the curvature and mode of the approximation are determined by the asymptotic distribution of the MLE. This leads to a gap in the approximate likelihood ratio and the exact likelihood ratio around the mode. As the normal approximation becomes more peaked, the accuracy of the ABF is increasingly determined by the quality of the likelihood ratio approximation in a small neighborhood around the mode which is off by this gap, which appears to grow with sample size.">
+
+<title>Karl’s Website - Wakefield ABF Accuracy</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Karl’s Website</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../research.html">
+ <span class="menu-text">Research Notes</span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#demonstrations" id="toc-demonstrations" class="nav-link active" data-scroll-target="#demonstrations">Demonstrations</a>
+  <ul class="collapse">
+  <li><a href="#beta-0.1-beta_0-0" id="toc-beta-0.1-beta_0-0" class="nav-link" data-scroll-target="#beta-0.1-beta_0-0"><span class="math inline">\(\beta = 0.1\)</span>, <span class="math inline">\(\beta_0 = 0\)</span></a></li>
+  <li><a href="#beta-1" id="toc-beta-1" class="nav-link" data-scroll-target="#beta-1"><span class="math inline">\(\beta = 1\)</span></a></li>
+  </ul></li>
+  <li><a href="#an-explaination" id="toc-an-explaination" class="nav-link" data-scroll-target="#an-explaination">An explaination</a>
+  <ul class="collapse">
+  <li><a href="#family-of-lr-approximations" id="toc-family-of-lr-approximations" class="nav-link" data-scroll-target="#family-of-lr-approximations">Family of LR approximations</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Wakefield ABF Accuracy</h1>
+</div>
+
+<div>
+  <div class="description">
+    We noticed that the error in Wakefield’s ABF grows with increasing sample size. This is surprising, because at these large sample sizes asymptotic normality kicks in. The issue can be more clearly seen by considering the ABF as an integral over an approximation to the likelihood ratio. The approximation used in the ABF ensure that the approximate likelihood ratio at <span class="math inline">\(0\)</span> is 1, but that the curvature and mode of the approximation are determined by the asymptotic distribution of the MLE. This leads to a gap in the approximate likelihood ratio and the exact likelihood ratio around the mode. As the normal approximation becomes more peaked, the accuracy of the ABF is increasingly determined by the quality of the likelihood ratio approximation in a small neighborhood around the mode which is off by this gap, which appears to grow with sample size.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Karl Tayeb </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 25, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell" data-hash="index_cache/html/fitting-functions_fcee9bdc459147c1da16f81a8ab71b0c">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>sigmoid <span class="ot">&lt;-</span> <span class="cf">function</span>(x){<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x))}</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>simulate <span class="ot">&lt;-</span> <span class="cf">function</span>(n, <span class="at">beta0=</span><span class="dv">0</span>, <span class="at">beta=</span><span class="dv">1</span>){</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  logit <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta<span class="sc">*</span>x</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">sigmoid</span>(logit))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">x=</span>x, <span class="at">y=</span>y, <span class="at">beta0=</span>beta0, <span class="at">beta=</span>beta))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>fit_glm_no_intercept <span class="ot">&lt;-</span> <span class="cf">function</span>(sim){</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">glm</span>(y <span class="sc">~</span> x <span class="sc">+</span> <span class="dv">0</span>, <span class="at">family =</span> <span class="st">'binomial'</span>))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  tmp <span class="ot">&lt;-</span> <span class="fu">unname</span>(<span class="fu">summary</span>(fit)<span class="sc">$</span>coef[<span class="dv">1</span>,])</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  betahat <span class="ot">&lt;-</span> tmp[<span class="dv">1</span>]</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  shat2 <span class="ot">&lt;-</span> tmp[<span class="dv">2</span>]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, (beta <span class="sc">-</span> betahat)<span class="sc">/</span><span class="fu">sqrt</span>(shat2))</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">intercept=</span><span class="dv">0</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">betahat =</span> betahat,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">shat2 =</span> shat2,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">z =</span> z</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(res)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>fit_glm <span class="ot">&lt;-</span> <span class="cf">function</span>(sim, <span class="at">prior_variance=</span><span class="dv">1</span>){</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, <span class="fu">glm</span>(y <span class="sc">~</span> x <span class="sc">+</span> <span class="dv">1</span>, <span class="at">family =</span> <span class="st">'binomial'</span>))</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  tmp <span class="ot">&lt;-</span> <span class="fu">unname</span>(<span class="fu">summary</span>(fit)<span class="sc">$</span>coef[<span class="dv">2</span>,])</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  betahat <span class="ot">&lt;-</span> tmp[<span class="dv">1</span>]</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  shat2 <span class="ot">&lt;-</span> tmp[<span class="dv">2</span>]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, (beta <span class="sc">-</span> betahat)<span class="sc">/</span><span class="fu">sqrt</span>(shat2))</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">intercept =</span> <span class="fu">unname</span>(fit<span class="sc">$</span>coefficients[<span class="dv">1</span>]),</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">betahat =</span> betahat,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">shat2 =</span> shat2,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">z =</span> z</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(res)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>compute_log_abf1 <span class="ot">&lt;-</span> <span class="cf">function</span>(betahat, shat2, prior_variance){</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  W <span class="ot">&lt;-</span> prior_variance</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  V <span class="ot">&lt;-</span> shat2</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> betahat <span class="sc">/</span> <span class="fu">sqrt</span>(shat2)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  labf <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">log</span>(V <span class="sc">/</span>(V <span class="sc">+</span> W)) <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> z<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> W <span class="sc">/</span>(V <span class="sc">+</span> W)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(labf)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>compute_log_abf2 <span class="ot">&lt;-</span> <span class="cf">function</span>(betahat, shat2, prior_variance){</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dnorm</span>(betahat, <span class="dv">0</span>, <span class="fu">sqrt</span>(shat2 <span class="sc">+</span> prior_variance), <span class="at">log =</span> T) <span class="sc">-</span> </span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dnorm</span>(betahat, <span class="dv">0</span>, <span class="fu">sqrt</span>(shat2), <span class="at">log=</span>T)</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>compute_log_abf <span class="ot">&lt;-</span> <span class="cf">function</span>(glm_summary, <span class="at">prior_variance=</span><span class="dv">1</span>){</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  labf <span class="ot">&lt;-</span> <span class="fu">with</span>(glm_summary, <span class="fu">compute_log_abf1</span>(betahat, shat2, prior_variance))</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(labf)</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>compute_exact_log_abf_no_intercept <span class="ot">&lt;-</span> <span class="cf">function</span>(sim, prior_variance){</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>  glm_fit <span class="ot">&lt;-</span> <span class="fu">fit_glm_no_intercept</span>(sim)</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="cf">function</span>(b){</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>    logits <span class="ot">&lt;-</span> sim<span class="sc">$</span>x <span class="sc">*</span> b</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(<span class="fu">dbinom</span>(<span class="at">x=</span>sim<span class="sc">$</span>y, <span class="at">size=</span><span class="dv">1</span>, <span class="at">prob=</span><span class="fu">sigmoid</span>(logits), <span class="at">log =</span> T)) <span class="sc">+</span> </span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>      <span class="fu">dnorm</span>(b, <span class="dv">0</span>, <span class="fu">sqrt</span>(prior_variance), <span class="at">log =</span> T)</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>  max <span class="ot">&lt;-</span> <span class="fu">f</span>(glm_fit<span class="sc">$</span>betahat)</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>  f2 <span class="ot">&lt;-</span> <span class="cf">function</span>(b){purrr<span class="sc">::</span><span class="fu">map_dbl</span>(b, <span class="sc">~</span><span class="fu">exp</span>(<span class="fu">f</span>(.x) <span class="sc">-</span> max))}</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>  lower <span class="ot">&lt;-</span> glm_fit<span class="sc">$</span>betahat <span class="sc">-</span> <span class="fu">sqrt</span>(glm_fit<span class="sc">$</span>shat2) <span class="sc">*</span> <span class="dv">6</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>  upper <span class="ot">&lt;-</span> glm_fit<span class="sc">$</span>betahat <span class="sc">+</span> <span class="fu">sqrt</span>(glm_fit<span class="sc">$</span>shat2) <span class="sc">*</span> <span class="dv">6</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>  quadres <span class="ot">&lt;-</span> cubature<span class="sc">::</span><span class="fu">pcubature</span>(f2, lower, upper, <span class="at">tol =</span> <span class="fl">1e-10</span>)</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>  log_bf <span class="ot">&lt;-</span> (<span class="fu">log</span>(quadres<span class="sc">$</span>integral) <span class="sc">+</span> max) <span class="sc">-</span> <span class="fu">sum</span>(<span class="fu">dbinom</span>(sim<span class="sc">$</span>y, <span class="dv">1</span>, <span class="fl">0.5</span>, <span class="at">log=</span>T))</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(log_bf)</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>compute_exact_log_bf <span class="ot">&lt;-</span> <span class="cf">function</span>(sim, prior_variance){</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>  glm_fit <span class="ot">&lt;-</span> <span class="fu">fit_glm</span>(sim)</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="cf">function</span>(b){</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>    logits <span class="ot">&lt;-</span> sim<span class="sc">$</span>x <span class="sc">*</span> b <span class="sc">+</span> glm_fit<span class="sc">$</span>intercept</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(<span class="fu">dbinom</span>(<span class="at">x=</span>sim<span class="sc">$</span>y, <span class="at">size=</span><span class="dv">1</span>, <span class="at">prob=</span><span class="fu">sigmoid</span>(logits), <span class="at">log =</span> T)) <span class="sc">+</span> </span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>      <span class="fu">dnorm</span>(b, <span class="dv">0</span>, <span class="fu">sqrt</span>(prior_variance), <span class="at">log =</span> T)</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>  max <span class="ot">&lt;-</span> <span class="fu">f</span>(glm_fit<span class="sc">$</span>betahat)</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>  f2 <span class="ot">&lt;-</span> <span class="cf">function</span>(b){purrr<span class="sc">::</span><span class="fu">map_dbl</span>(b, <span class="sc">~</span><span class="fu">exp</span>(<span class="fu">f</span>(.x) <span class="sc">-</span> max))}</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>  lower <span class="ot">&lt;-</span> glm_fit<span class="sc">$</span>betahat <span class="sc">-</span> <span class="fu">sqrt</span>(glm_fit<span class="sc">$</span>shat2) <span class="sc">*</span> <span class="dv">6</span></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>  upper <span class="ot">&lt;-</span> glm_fit<span class="sc">$</span>betahat <span class="sc">+</span> <span class="fu">sqrt</span>(glm_fit<span class="sc">$</span>shat2) <span class="sc">*</span> <span class="dv">6</span></span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>  quadres <span class="ot">&lt;-</span> cubature<span class="sc">::</span><span class="fu">pcubature</span>(f2, lower, upper, <span class="at">tol =</span> <span class="fl">1e-10</span>)</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>  log_bf <span class="ot">&lt;-</span> (<span class="fu">log</span>(quadres<span class="sc">$</span>integral) <span class="sc">+</span> max) <span class="sc">-</span> <span class="fu">sum</span>(<span class="fu">dbinom</span>(sim<span class="sc">$</span>y, <span class="dv">1</span>, <span class="fu">mean</span>(sim<span class="sc">$</span>y), <span class="at">log=</span>T))</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(log_bf)</span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>compute_vb_log_bf <span class="ot">&lt;-</span> <span class="cf">function</span>(sim, <span class="at">prior_variance=</span><span class="dv">1</span>){</span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a>  vb <span class="ot">&lt;-</span> <span class="fu">with</span>(sim, logisticsusie<span class="sc">::</span><span class="fu">fit_univariate_vb</span>(x, y, <span class="at">tau0=</span><span class="dv">1</span><span class="sc">/</span>prior_variance)) </span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>  log_vb_bf <span class="ot">&lt;-</span> <span class="fu">tail</span>(vb<span class="sc">$</span>elbos, <span class="dv">1</span>) <span class="sc">-</span> <span class="fu">sum</span>(<span class="fu">dbinom</span>(sim<span class="sc">$</span>y, <span class="dv">1</span>, <span class="fu">mean</span>(sim<span class="sc">$</span>y), <span class="at">log=</span>T))</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(log_vb_bf)</span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-hash="index_cache/html/bf-comparison-function_5c296fd9a36e0b94b528c170974a6b9f">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># compute ABF, variational BF, and exact BF via quadrature</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>bf_comparison <span class="ot">&lt;-</span> <span class="cf">function</span>(...){</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  sim <span class="ot">&lt;-</span> <span class="fu">simulate</span>(...)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span> <span class="fu">fit_glm</span>() <span class="sc">%&gt;%</span> <span class="fu">compute_log_abf</span>(<span class="at">prior_variance=</span><span class="dv">1</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span> <span class="fu">compute_vb_log_bf</span>(<span class="at">prior_variance=</span><span class="dv">1</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  c <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span> <span class="fu">compute_exact_log_bf</span>(<span class="at">prior_variance=</span><span class="dv">1</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">log_abf =</span> a, <span class="at">log_vbf =</span> b, <span class="at">log_bf =</span> c)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>bf_comparison_rep <span class="ot">&lt;-</span> <span class="cf">function</span>(reps, n, beta){</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span>reps, <span class="sc">~</span><span class="fu">bf_comparison</span>(<span class="at">n=</span>n, <span class="at">beta=</span>beta)) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">n=</span>n, <span class="at">beta=</span>beta, <span class="at">rep=</span><span class="dv">1</span><span class="sc">:</span>reps)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># scale_log2x &lt;- scale_x_continuous(trans = log2_trans(),</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#     breaks = trans_breaks("log2", function(x) 2^x),</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#     labels = trans_format("log2", math_format(2^.x)))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="demonstrations" class="level2">
+<h2 class="anchored" data-anchor-id="demonstrations">Demonstrations</h2>
+<p>Here we simulate <span class="math inline">\(x_i \sim N(0, 1)\)</span> and <span class="math inline">\(y_i \sim \text{Bernoulli}(\sigma(x_i \beta + \beta_0))\)</span></p>
+<section id="beta-0.1-beta_0-0" class="level3">
+<h3 class="anchored" data-anchor-id="beta-0.1-beta_0-0"><span class="math inline">\(\beta = 0.1\)</span>, <span class="math inline">\(\beta_0 = 0\)</span></h3>
+<p>We simulate 10 replications at each sample size <span class="math inline">\(n = 2^6, 2^7, \dots, 2^{16}\)</span>. While we see relatively good agreement between the ABF and exact BF on a log-scale, we do see the pattern that the error tends to increase with increasing samples size. Furthermore, these “small” errors on the log scale actually translate to large errors between the BF and ABF.</p>
+<div class="cell" data-hash="index_cache/html/bf-comp-01-0_dca15e80c1e3c39f3d6df4ee4dc0b452">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># range of n, 10 reps</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">^</span>(<span class="dv">6</span><span class="sc">:</span><span class="dv">15</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>bf_comparison_01 <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(n, <span class="sc">~</span><span class="fu">bf_comparison_rep</span>(<span class="dv">10</span>, .x, <span class="fl">0.1</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># "good" agreement the exact BF and ABF</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bf_comparison_01<span class="sc">$</span>log_bf,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>     bf_comparison_01<span class="sc">$</span>log_abf,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">'log BF'</span>, <span class="at">ylab =</span> <span class="st">'log ABF'</span>); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bf_comparison_01<span class="sc">$</span>log_bf,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>     bf_comparison_01<span class="sc">$</span>log_abf <span class="sc">-</span> bf_comparison_01<span class="sc">$</span>log_bf,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">'log BF'</span>, <span class="at">ylab =</span> <span class="st">'log ABF - log BF'</span>); <span class="fu">abline</span>(<span class="at">h=</span><span class="dv">0</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/bf-comp-01-0-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># bf_comparison_01 %&gt;% </span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   tidyr::pivot_longer(ends_with('bf'), names_to='method', values_to='log_bf') %&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot(aes(x=as.factor(n), y=log_bf, color=method)) +</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_boxplot()</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>bf_comparison_01 <span class="sc">%&gt;%</span> </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">abf_rel_error =</span> <span class="fu">exp</span>(log_abf <span class="sc">-</span> log_bf) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">vbf_rel_error =</span> <span class="fu">exp</span>(log_vbf <span class="sc">-</span> log_bf) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="fu">ends_with</span>(<span class="st">'error'</span>), <span class="at">names_to=</span><span class="st">'method'</span>, <span class="at">values_to=</span><span class="st">'relative_error'</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(n), <span class="at">y=</span>relative_error, <span class="at">color=</span>method)) <span class="sc">+</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/bf-comp-01-0-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Surprisingly as <span class="math inline">\(n\)</span> grows, the relative error between the BF and the ABF increases! At <span class="math inline">\(n=2^9\)</span> things look pretty good, but at <span class="math inline">\(n=2^15\)</span> the relative error is quite large! Let’s inspect the <span class="math inline">\(z\)</span>-scores at these simulation settings– do they look normally distributed?</p>
+<section id="confirming-normality" class="level4">
+<h4 class="anchored" data-anchor-id="confirming-normality">Confirming normality</h4>
+<p>Both <span class="math inline">\(n=2^9\)</span> and <span class="math inline">\(n=2^{15}\)</span> are fairly large sample sizes. We confirm that <span class="math inline">\(z = \frac{\beta - \hat\beta}{\hat s}\)</span> looks normal</p>
+<div class="cell" data-hash="index_cache/html/test-normality_9f067ebac7e54cd36c3fbff63cdcec12">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>glm_sim_reps <span class="ot">&lt;-</span> <span class="cf">function</span>(reps, n, beta){</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span>reps, <span class="sc">~</span><span class="fu">simulate</span>(n, <span class="at">beta=</span>beta) <span class="sc">%&gt;%</span> <span class="fu">fit_glm</span>() <span class="sc">%&gt;%</span> <span class="fu">data.frame</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">rep =</span> <span class="dv">1</span><span class="sc">:</span>reps)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>rep1 <span class="ot">&lt;-</span> <span class="fu">glm_sim_reps</span>(<span class="dv">1000</span>, <span class="dv">2</span><span class="sc">^</span><span class="dv">9</span>, <span class="fl">0.1</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">shapiro.test</span>(rep1<span class="sc">$</span>z)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Shapiro-Wilk normality test
+
+data:  rep1$z
+W = 0.99826, p-value = 0.4108</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ks.test</span>(rep1<span class="sc">$</span>z, pnorm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    One-sample Kolmogorov-Smirnov test
+
+data:  rep1$z
+D = 0.030303, p-value = 0.3175
+alternative hypothesis: two-sided</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>rep2 <span class="ot">&lt;-</span> <span class="fu">glm_sim_reps</span>(<span class="dv">1000</span>, <span class="dv">2</span><span class="sc">^</span><span class="dv">15</span>, <span class="fl">0.1</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">shapiro.test</span>(rep2<span class="sc">$</span>z)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Shapiro-Wilk normality test
+
+data:  rep2$z
+W = 0.99693, p-value = 0.05116</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ks.test</span>(rep2<span class="sc">$</span>z, pnorm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    One-sample Kolmogorov-Smirnov test
+
+data:  rep2$z
+D = 0.027911, p-value = 0.4172
+alternative hypothesis: two-sided</code></pre>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/plot-cdfs_0c93449e1e3f0562611a75f2f47d21d2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(rep1,<span class="fu">aes</span>(<span class="at">x=</span>z)) <span class="sc">+</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">geom_line</span>(<span class="at">stat =</span> <span class="st">"ecdf"</span>)<span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">geom_point</span>(<span class="at">stat=</span><span class="st">"ecdf"</span>,<span class="at">size=</span><span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>       <span class="fu">stat_function</span>(<span class="at">fun=</span>pnorm,<span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>       <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"eCDF and normal CDF, n = 2^9"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(rep2,<span class="fu">aes</span>(<span class="at">x=</span>z)) <span class="sc">+</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>       <span class="fu">geom_line</span>(<span class="at">stat =</span> <span class="st">"ecdf"</span>)<span class="sc">+</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>       <span class="fu">geom_point</span>(<span class="at">stat=</span><span class="st">"ecdf"</span>,<span class="at">size=</span><span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>       <span class="fu">stat_function</span>(<span class="at">fun=</span>pnorm,<span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>       <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"eCDF and normal CDF, n=2^15"</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>cowplot<span class="sc">::</span><span class="fu">plot_grid</span>(p1, p2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/plot-cdfs-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/plot-cs-for-increasing-n_d25c75219a7e327b7738ec9508fdfbdb">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>subset_sim <span class="ot">&lt;-</span> <span class="cf">function</span>(sim, m){</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  sim2 <span class="ot">&lt;-</span> sim</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  sim2<span class="sc">$</span>x <span class="ot">&lt;-</span> <span class="fu">head</span>(sim2<span class="sc">$</span>x, m)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  sim2<span class="sc">$</span>y <span class="ot">&lt;-</span> <span class="fu">head</span>(sim2<span class="sc">$</span>y, m)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(sim2)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate</span>(<span class="dv">2</span><span class="sc">^</span><span class="dv">16</span>, <span class="at">beta=</span>beta)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>titrate <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(<span class="dv">5</span><span class="sc">:</span><span class="dv">16</span>, <span class="sc">~</span>sim <span class="sc">%&gt;%</span> <span class="fu">subset_sim</span>(<span class="dv">2</span><span class="sc">^</span>.x) <span class="sc">%&gt;%</span> <span class="fu">fit_glm</span>() <span class="sc">%&gt;%</span> <span class="fu">data.frame</span>())</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>plotrix<span class="sc">::</span><span class="fu">plotCI</span>(</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">x=</span> <span class="dv">5</span><span class="sc">:</span><span class="dv">16</span>,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">y=</span> titrate<span class="sc">$</span>betahat <span class="sc">-</span> beta,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">li =</span> (titrate<span class="sc">$</span>betahat <span class="sc">-</span> beta) <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(titrate<span class="sc">$</span>shat2),</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">ui =</span> (titrate<span class="sc">$</span>betahat <span class="sc">-</span> beta) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(titrate<span class="sc">$</span>shat2)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>); <span class="fu">abline</span>(<span class="at">h=</span><span class="dv">0</span>, <span class="at">lty=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/plot-cs-for-increasing-n-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>I was wondering if <code>glm</code> applies a conservative correction to it’s estimate of the standard error. The standard errors come from the squareroot of the diagonal of the negative inverse Fisher information matrix since asymptotically.</p>
+<p><span class="math display">\[
+\hat \beta \sim N(\beta,  - \mathcal I(\beta)^{-1})
+\]</span> I think peoples use <span class="math inline">\(- \mathcal I(\hat \beta)\)</span> as an estimator for the precision matrix. Ignoring the intercept I just computed <span class="math inline">\(I = \sum_i \nabla^2_{\beta}\log p (y |x, \beta, \beta_0)\)</span>, and used <span class="math inline">\(s_2 = \sqrt{I^{-1}}\)</span> as a new estimate of the standard error. Despite some hadn waiving, it actually agrees very well with the standard errors reported by <code>glm</code>– which is to say this is not the problem.</p>
+<div class="cell" data-hash="index_cache/html/recompute-shat2_1ec6b753db7ee0d5d4b59f1b540f73b2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>recompute_shat2 <span class="ot">&lt;-</span> <span class="cf">function</span>(betahat, intercept, x){</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  logits <span class="ot">&lt;-</span> betahat <span class="sc">*</span> x <span class="sc">+</span> intercept</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="dv">1</span><span class="sc">/</span><span class="fu">sum</span>(<span class="fu">sigmoid</span>(logits) <span class="sc">*</span> <span class="fu">sigmoid</span>(<span class="sc">-</span>logits) <span class="sc">*</span> x<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>titrate <span class="ot">&lt;-</span> titrate <span class="sc">%&gt;%</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">m =</span> <span class="dv">2</span><span class="sc">^</span>(<span class="dv">5</span><span class="sc">:</span><span class="dv">16</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">shat2_recompute =</span> <span class="fu">recompute_shat2</span>(betahat, intercept, <span class="fu">head</span>(sim<span class="sc">$</span>x, m))) <span class="sc">%&gt;%</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(titrate<span class="sc">$</span>shat2, titrate<span class="sc">$</span>shat2_recompute); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/recompute-shat2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="beta-1" class="level3">
+<h3 class="anchored" data-anchor-id="beta-1"><span class="math inline">\(\beta = 1\)</span></h3>
+<p>For larger <span class="math inline">\(\beta\)</span> the discrepency between ABF and BF is much more obvious!</p>
+<div class="cell" data-hash="index_cache/html/bf-comp-1-0_998ef05fe0fd49f8dccb323b561e8f34">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">^</span>(<span class="dv">6</span><span class="sc">:</span><span class="dv">15</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>bf_comparison_1 <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(n, <span class="sc">~</span><span class="fu">bf_comparison_rep</span>(<span class="dv">10</span>, .x, <span class="dv">1</span>))</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bf_comparison_1<span class="sc">$</span>log_bf, bf_comparison_1<span class="sc">$</span>log_abf); <span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/bf-comp-1-0-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>bf_comparison_1 <span class="sc">%&gt;%</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="fu">ends_with</span>(<span class="st">'bf'</span>), <span class="at">names_to=</span><span class="st">'method'</span>, <span class="at">values_to=</span><span class="st">'log_bf'</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(n), <span class="at">y=</span>log_bf, <span class="at">color=</span>method)) <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/bf-comp-1-0-2.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>bf_comparison_1 <span class="sc">%&gt;%</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">abf_rel_error =</span> <span class="fu">exp</span>(log_abf <span class="sc">-</span> log_bf) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">vbf_rel_error =</span> <span class="fu">exp</span>(log_vbf <span class="sc">-</span> log_bf) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="fu">ends_with</span>(<span class="st">'error'</span>), <span class="at">names_to=</span><span class="st">'method'</span>, <span class="at">values_to=</span><span class="st">'error'</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(n), <span class="at">y=</span>error, <span class="at">color=</span>method)) <span class="sc">+</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/bf-comp-1-0-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-1_252126fb082eed93597d1759db1806e0">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bf_comparison_1<span class="sc">$</span>log_vbf, bf_comparison_1<span class="sc">$</span>log_abf);<span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_23e3d97dc7a218e16a67b49592bb1f32">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">^</span>(<span class="dv">6</span><span class="sc">:</span><span class="dv">15</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>bf_comparison_01 <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(n, <span class="sc">~</span><span class="fu">bf_comparison_rep</span>(<span class="dv">10</span>, .x, <span class="dv">1</span>))</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>bf_comparison_01 <span class="sc">%&gt;%</span> </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">log_abf_error =</span> (log_abf <span class="sc">-</span> log_bf), <span class="at">log_vbf_error =</span> (log_vbf <span class="sc">-</span> log_bf)) <span class="sc">%&gt;%</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="fu">ends_with</span>(<span class="st">'error'</span>), <span class="at">names_to=</span><span class="st">'method'</span>, <span class="at">values_to=</span><span class="st">'error'</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(n), <span class="at">y=</span>log_bf, <span class="at">color=</span>method)) <span class="sc">+</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="an-explaination" class="level2">
+<h2 class="anchored" data-anchor-id="an-explaination">An explaination</h2>
+<p><span class="math display">\[
+\begin{aligned}
+ABF &amp;= \int \frac{N(\hat \beta| \beta, s^2)}{N(\hat\beta | 0, s^2)} p(\beta) d\beta\\
+BF &amp;= \int \frac{p({\bf y} | {\bf x}, \beta)}{p({\bf y} | \beta = 0)} p(\beta) d\beta
+\end{aligned}
+\]</span></p>
+<p>First, here is an example where there is a large discrepancy between the log ABF and log BF– over 20 log-likelihood units! We also note that including/excluding the intercept in <code>glm</code> doesn’t really make a dent.</p>
+<div class="cell" data-hash="index_cache/html/simulate-example_5bc864ba4dd414f493a01e20dcc4438a">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate</span>(<span class="dv">1000</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">fit_glm</span>(sim, <span class="at">prior_variance=</span><span class="dv">1</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>fit_no_intercept <span class="ot">&lt;-</span> <span class="fu">fit_glm_no_intercept</span>(sim)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co"># show there is a discrepency ~20 log-likelihood unit</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fit, <span class="fu">compute_log_abf1</span>(betahat, shat2, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 71.33497</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fit_no_intercept, <span class="fu">compute_log_abf1</span>(betahat, shat2, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 71.46433</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compute_vb_log_bf</span>(sim, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 93.52508</code></pre>
+</div>
+</div>
+<p>Using this simulated example we plot the likelihood ratio and approximate log-likelihood ratio (with respect to the null model <span class="math inline">\(\beta=0\)</span>) over the range of <span class="math inline">\(\beta\)</span>. We plot the likelihood ratio in black, and plot the approximate likelihood ratio in red. We see that the likelihood ratios agree at <span class="math inline">\(\beta = 0\)</span>– this is not surprising because they should both be equal to <span class="math inline">\(1\)</span> (or <span class="math inline">\(0\)</span>, on the log scale as shown in the plot).</p>
+<p>The mode and the curvature of this likelihood ratio approximation are determined by the effect size and standard error, so the approximation is completely specified. We can see that this leaves a gap between the likelihood ratio and the approximate likelihood ratio near the mode. Assuming a flat prior on <span class="math inline">\(\beta\)</span>, this is the region that will contribute most to the integral.</p>
+<p>While the likelihood is well approximated by a Gaussian near it’s mode, the quality of the Gaussian approximation is poor in the tails. As the sample size increases, <span class="math inline">\(\beta = 0\)</span> is more “in the tail”. So we see that the approximation to the likelihood ratio used in ABF is requiring the approximate likelihood ratio to agree with the exact likelihood ratio at some point in the tail– but this is not particularly relevant for getting a good approximation of the BF, as it is the area in the body of the distribution that contributes most to the integral.</p>
+<p>In order for the ABF to perform well in large samples, the Gaussian approximation would need to improve in the tails faster than the point <span class="math inline">\(\beta=0\)</span> gets pushed into the tail. E.g. for the Gaussian approximation to be good, we’d want that the curvature estimated at the mode is also the curvature we’d estimate everywhere else (e.g.&nbsp;at <span class="math inline">\(\beta = 0\)</span>).</p>
+<div class="cell" data-hash="index_cache/html/first-lr-plot_f013a5aa96c74a1566b3049ada8aeece">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>compare_lrs <span class="ot">&lt;-</span> <span class="cf">function</span>(sim, <span class="at">prior_variance=</span><span class="dv">1</span>, <span class="at">k=</span><span class="dv">1</span>, <span class="at">plot_correction=</span>F){</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">fit_glm</span>(sim, <span class="at">prior_variance=</span><span class="dv">1</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  fit_no_intercept <span class="ot">&lt;-</span> <span class="fu">fit_glm_no_intercept</span>(sim)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># plot ll</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  ll <span class="ot">&lt;-</span> <span class="cf">function</span>(b){<span class="fu">with</span>(sim, <span class="fu">sum</span>(y<span class="sc">*</span>x<span class="sc">*</span>b <span class="sc">-</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(x<span class="sc">*</span>b))))}</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  ll_vec <span class="ot">&lt;-</span> <span class="cf">function</span>(b){purrr<span class="sc">::</span><span class="fu">map_dbl</span>(b, <span class="sc">~</span><span class="fu">ll</span>(.x))}</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  asymptotic_ll <span class="ot">&lt;-</span> <span class="cf">function</span>(b){<span class="fu">dnorm</span>(b, <span class="at">mean=</span>fit<span class="sc">$</span>betahat, <span class="at">sd=</span><span class="fu">sqrt</span>(fit<span class="sc">$</span>shat2), <span class="at">log=</span>T)}</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  ll0 <span class="ot">&lt;-</span> <span class="fu">ll</span>(<span class="dv">0</span>)</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  asymptotic_ll0 <span class="ot">&lt;-</span> <span class="fu">asymptotic_ll</span>(<span class="dv">0</span>)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  ll_mle <span class="ot">&lt;-</span> <span class="fu">ll</span>(fit<span class="sc">$</span>betahat)</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  asymptotic_ll_mle <span class="ot">&lt;-</span> <span class="fu">asymptotic_ll</span>(fit<span class="sc">$</span>betahat)</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  mle <span class="ot">=</span> fit<span class="sc">$</span>betahat</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>  xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(mle <span class="sc">-</span> k<span class="sc">*</span> <span class="fu">abs</span>(mle), mle <span class="sc">+</span> k<span class="sc">*</span> <span class="fu">abs</span>(mle), <span class="at">by=</span><span class="fl">0.1</span>)</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>  diff <span class="ot">=</span> (ll_mle <span class="sc">-</span> asymptotic_ll_mle) <span class="sc">-</span> ll0</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>  ll_xs <span class="ot">&lt;-</span> <span class="fu">ll_vec</span>(xs)</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>  asymptotic_ll_xs <span class="ot">&lt;-</span> <span class="fu">asymptotic_ll</span>(xs)</span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>  ll_prior <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(xs, <span class="dv">0</span>, <span class="at">sd =</span> <span class="fu">sqrt</span>(prior_variance), <span class="at">log =</span> T)</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>  ylim <span class="ot">&lt;-</span> <span class="fu">range</span>(asymptotic_ll_xs <span class="sc">-</span> asymptotic_ll0, ll_xs <span class="sc">-</span> ll0)</span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(xs,ll_xs <span class="sc">-</span> ll0, <span class="at">type=</span><span class="st">'l'</span>, <span class="at">ylim =</span> ylim,</span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>       <span class="at">xlab=</span> <span class="st">'beta'</span>, <span class="at">ylab=</span><span class="st">'log likelihood ratio'</span>)</span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(xs, asymptotic_ll_xs <span class="sc">-</span> asymptotic_ll0, <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(plot_correction){</span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(xs, asymptotic_ll_xs <span class="sc">-</span> asymptotic_ll_mle <span class="sc">+</span> (ll_mle <span class="sc">-</span> ll0), <span class="at">col=</span><span class="st">'blue'</span>)</span>
+<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">h=</span><span class="dv">0</span>, <span class="at">lty=</span><span class="dv">3</span>)</span>
+<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">v=</span><span class="dv">0</span>, <span class="at">lty=</span><span class="dv">3</span>)</span>
+<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">v=</span>fit<span class="sc">$</span>betahat)</span>
+<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_lrs</span>(sim, <span class="at">prior_variance =</span> <span class="dv">1</span>, <span class="at">k=</span><span class="fl">1.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/first-lr-plot-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-3_1ea35956b22d1093b69a2b18da7526bc">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_lrs</span>(sim, <span class="at">prior_variance =</span> <span class="dv">1</span>, <span class="at">k=</span><span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/increase-sample-size_e5c4d40c2b15a39c4ead83100b8af74c">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>))</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate</span>(<span class="dv">100</span>, <span class="at">beta0 =</span> <span class="fl">0.1</span>) <span class="sc">%&gt;%</span> <span class="fu">compare_lrs</span>(<span class="at">k=</span><span class="fl">1.5</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate</span>(<span class="dv">1000</span>, <span class="at">beta0 =</span> <span class="fl">0.1</span>) <span class="sc">%&gt;%</span> <span class="fu">compare_lrs</span>(<span class="at">k=</span><span class="fl">1.5</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate</span>(<span class="dv">10000</span>, <span class="at">beta0 =</span> <span class="fl">0.1</span>) <span class="sc">%&gt;%</span> <span class="fu">compare_lrs</span>(<span class="at">k=</span><span class="fl">1.5</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate</span>(<span class="dv">100000</span>, <span class="at">beta0 =</span> <span class="fl">0.1</span>) <span class="sc">%&gt;%</span> <span class="fu">compare_lrs</span>(<span class="at">k=</span><span class="fl">1.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/increase-sample-size-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="family-of-lr-approximations" class="level3">
+<h3 class="anchored" data-anchor-id="family-of-lr-approximations">Family of LR approximations</h3>
+<p>Write the likelihood ratio as <span class="math display">\[
+LR(\beta_1, \beta_2) = \frac{\mathcal {L}(\beta_1)}{\mathcal {L}(\beta_2)}
+\]</span></p>
+<p>Let <span class="math inline">\(\widehat {LR}(\beta_1, \beta_2)\)</span> be the approximate likelihood ratio under the normal approximation <span class="math inline">\(\beta \sim N(\hat \beta, s^2)\)</span>.</p>
+<p>The approximation to the likelihood ratio against the null used in ABF is simply</p>
+<p><span class="math display">\[
+\widehat{LR}_{ABF}(\beta) = \widehat{LR}(\beta, 0)
+\]</span> However if we note that</p>
+<p><span class="math display">\[
+LR(\beta, 0) = LR(\beta, \beta^*) \times LR(\beta^*, 0)
+\]</span></p>
+<p>we can derive a family of approximations for the likelihood ratio against the null</p>
+<p><span class="math display">\[
+\widehat{LR}_{\beta^*}(\beta) = \widehat{LR}(\beta, \beta^*) LR(\beta^*,0)
+\]</span> And note that <span class="math inline">\(\widehat{LR}_{ABF}\)</span> is a special case where <span class="math inline">\(\beta^*=0\)</span>. We’ve seen that this choice makes the approximation good in the tail– which isn’t very important for getting an accurate approximate BF. Perhaps the best choice would be make the approximate LR match the exact LR at the MAP estimate. But a second good choice, and one that does not require knowledge of the prior could be to set <span class="math inline">\(\beta^* = \beta_{MLE}\)</span>. This choice is shown in blue on the updated plot</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-4_acabcf333485f9271c83c55d69339250">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_lrs</span>(sim, <span class="at">prior_variance =</span> <span class="dv">1</span>, <span class="at">k=</span><span class="fl">1.5</span>, <span class="at">plot_correction=</span>T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>We can use the</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
