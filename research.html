@@ -70,9 +70,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-description',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-date','listing-title','listing-author',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author","listing-description"],
+      searchColumns: ["listing-date","listing-title","listing-author"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -160,333 +160,197 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-date-sort="1704261600000" data-listing-file-modified-sort="1704284985437" data-listing-reading-time-sort="0.635">
-<div class="body">
-<a href="./research/citations_with_quarto/index.html">
-<h3 class="no-anchor listing-title">
-Citations with quarto
-</h3>
-<div class="listing-subtitle">
+<div class="quarto-listing quarto-listing-container-table" id="listing-listing">
+<div class="listing-actions-group">
+   <div class="input-group input-group-sm quarto-listing-sort">
+     <span class="input-group-text"><i class="bi bi-sort-down"></i></span>
+     <select id="listing-listing-sort" class="form-select" aria-label="Order By" onchange="window['quarto-listings']['listing-listing'].sort(this.options[this.selectedIndex].value, { order: this.options[this.selectedIndex].getAttribute('data-direction')})">
+       <option value="" disabled="" selected="" hidden="">Order By</option>
+       <option value="index" data-direction="asc">Default</option>
+         <option value="listing-date-sort" data-direction="asc">
+          Date - Oldest
+        </option>
+         <option value="listing-date-sort" data-direction="desc">
+          Date - Newest
+        </option>
+         <option value="listing-title-sort" data-direction="asc">
+          Title
+        </option>
+         <option value="listing-author" data-direction="asc">
+          Author
+        </option>
+     </select>
+  </div>
+    <div class="input-group input-group-sm quarto-listing-filter">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="text" class="search form-control" placeholder="Filter">
+    </div>
+</div>
 
-</div>
-<div class="listing-description">
-<p>A quick demo on how I set up citations on this website</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/citations_with_quarto/index.html">
-<div class="listing-date">
+<table class="quarto-listing-table table">
+<thead>
+<tr>
+<th>
+<a class="sort" data-sort="listing-date-sort" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Date</a>
+</th>
+<th>
+<a class="sort" data-sort="listing-title-sort" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Title</a>
+</th>
+<th>
+<a class="sort" data-sort="listing-author" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Author</a>
+</th>
+</tr>
+</thead>
+<tbody class="list">
+<tr data-index="0" data-listing-date-sort="1704261600000" data-listing-file-modified-sort="1704284985437" data-listing-reading-time-sort="0.635" data-listing-title-sort="Citations with quarto" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Jan 3, 2024
-</div>
-<div class="listing-author">
+</td>
+<td class="listing-title">
+<a href="./research/citations_with_quarto/index.html" class="title">Citations with quarto</a>
+</td>
+<td class="listing-author">
 Karl Tayeb
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-listing-date-sort="1680325200000" data-listing-file-modified-sort="1681232073342" data-listing-reading-time-sort="2.135">
-<div class="body">
-<a href="./research/constrained_multinomial_stickbreaking/index.html">
-<h3 class="no-anchor listing-title">
-Constrained multinomial stick-breaking
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Multinomial stickbreaking is an easy</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/constrained_multinomial_stickbreaking/index.html">
-<div class="listing-date">
+</td>
+</tr>
+<tr data-index="1" data-listing-date-sort="1680325200000" data-listing-file-modified-sort="1681232073342" data-listing-reading-time-sort="2.135" data-listing-title-sort="Constrained multinomial stick-breaking" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Apr 1, 2023
-</div>
-<div class="listing-author">
+</td>
+<td class="listing-title">
+<a href="./research/constrained_multinomial_stickbreaking/index.html" class="title">Constrained multinomial stick-breaking</a>
+</td>
+<td class="listing-author">
 Karl Tayeb
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1678856400000" data-listing-file-modified-sort="1679532790018" data-listing-reading-time-sort="15.3">
-<div class="body">
-<a href="./research/polynomial_regression_vb/index.html">
-<h3 class="no-anchor listing-title">
-Implementation polynomial approximation VB
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Rough implementation of of approximate VB regression, where we approximate the data likelihood with a polynomial. We implement a mean field gaussian variational approximation. We demonstrate the method on Gaussian linear model (no approximation), and Bernoulli-logit (logistic regression) and Poisson-log (poisson regression) models with varying approximation degree.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/polynomial_regression_vb/index.html">
-<div class="listing-date">
+</td>
+</tr>
+<tr data-index="2" data-listing-date-sort="1678856400000" data-listing-file-modified-sort="1679532790018" data-listing-reading-time-sort="15.3" data-listing-title-sort="Implementation polynomial approximation VB" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Mar 15, 2023
-</div>
-<div class="listing-author">
+</td>
+<td class="listing-title">
+<a href="./research/polynomial_regression_vb/index.html" class="title">Implementation polynomial approximation VB</a>
+</td>
+<td class="listing-author">
 Karl Tayeb
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="3" data-listing-file-modified-sort="1707753301241" data-listing-reading-time-sort="2.515">
-<div class="body">
-<a href="./research/logistic_ser_comparisons/indx.html">
-<h3 class="no-anchor listing-title">
-Logistic SER comparison
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-Note that when <span class="math inline">\(\sigma^2 \rightarrow 0\)</span> the Laplace approximation of the BF converges to the likelihood ratio between the MLE and null model, which is <span class="math inline">\(\geq 1\)</span>.
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/logistic_ser_comparisons/indx.html"> </a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="4" data-listing-date-sort="1704780000000" data-listing-file-modified-sort="1705410028179" data-listing-reading-time-sort="4.185">
-<div class="body">
-<a href="./research/gibss_polygenic_scenario/index.html">
-<h3 class="no-anchor listing-title">
-Logistic SER coverage under polygenic model
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>We are interested in knowing if the inferences under the logistic SER are biased when phenotypes are simulated under a polygenic model. In these simulations we simulate one causal variant in the locus, and model unlinked genetic effects with a random intercept. The SER fits the ordinary/marginal regression model at each step, without accounting for this extra variability in liability. Nonetheless, we see good coverage of the credible sets.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/gibss_polygenic_scenario/index.html">
-<div class="listing-date">
+</td>
+</tr>
+<tr data-index="3" data-listing-file-modified-sort="1707753301241" data-listing-reading-time-sort="2.515" data-listing-title-sort="Logistic SER comparison" data-listing-filename-sort="indx.qmd">
+<td class="listing-date">
+</td>
+<td class="listing-title">
+<a href="./research/logistic_ser_comparisons/indx.html" class="title">Logistic SER comparison</a>
+</td>
+<td class="listing-author">
+</td>
+</tr>
+<tr data-index="4" data-listing-date-sort="1704780000000" data-listing-file-modified-sort="1705410028179" data-listing-reading-time-sort="4.185" data-listing-title-sort="Logistic SER coverage under polygenic model" data-listing-filename-sort="index.Qmd">
+<td class="listing-date">
 Jan 9, 2024
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="5" data-listing-file-modified-sort="1708520394019" data-listing-reading-time-sort="23.04">
-<div class="body">
-<a href="./research/gseasusie_working_example/index.html">
-<h3 class="no-anchor listing-title">
-Minimal working example for GSEA SuSiE
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-This was supposed to be a minimal working example, but when…
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/gseasusie_working_example/index.html"> </a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="6" data-listing-date-sort="1680325200000" data-listing-file-modified-sort="1680552551706" data-listing-reading-time-sort="5.5">
-<div class="body">
-<a href="./research/mode_matching_rss_vb/index.html">
-<h3 class="no-anchor listing-title">
-Mode seeking in mean field VB for RSS + sparse prior
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Using polynomial approximations to perform Bayesian regression</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/mode_matching_rss_vb/index.html">
-<div class="listing-date">
+</td>
+<td class="listing-title">
+<a href="./research/gibss_polygenic_scenario/index.html" class="title">Logistic SER coverage under polygenic model</a>
+</td>
+<td class="listing-author">
+</td>
+</tr>
+<tr data-index="5" data-listing-file-modified-sort="1708520394019" data-listing-reading-time-sort="23.04" data-listing-title-sort="Minimal working example for GSEA SuSiE" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
+</td>
+<td class="listing-title">
+<a href="./research/gseasusie_working_example/index.html" class="title">Minimal working example for GSEA SuSiE</a>
+</td>
+<td class="listing-author">
+</td>
+</tr>
+<tr data-index="6" data-listing-date-sort="1680325200000" data-listing-file-modified-sort="1680552551706" data-listing-reading-time-sort="5.5" data-listing-title-sort="Mode seeking in mean field VB for RSS + sparse prior" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Apr 1, 2023
-</div>
-<div class="listing-author">
+</td>
+<td class="listing-title">
+<a href="./research/mode_matching_rss_vb/index.html" class="title">Mode seeking in mean field VB for RSS + sparse prior</a>
+</td>
+<td class="listing-author">
 Karl Tayeb
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="7" data-listing-date-sort="1737439200000" data-listing-file-modified-sort="1708525057106" data-listing-reading-time-sort="4.36">
-<div class="body">
-<a href="./research/logistic_bf_comparisons/index.html">
-<h3 class="no-anchor listing-title">
-More BF comparisons
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>We take a look at Bayesian logistic regression with a fixex prior variance. We compare the performance of adaptive quadrature, Laplace approximation (with expansions around the MLE and MAP), and then Gauss-Hermite quadrature, which ought to refine the Laplace approximation.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/logistic_bf_comparisons/index.html">
-<div class="listing-date">
+</td>
+</tr>
+<tr data-index="7" data-listing-date-sort="1737439200000" data-listing-file-modified-sort="1708525057106" data-listing-reading-time-sort="4.36" data-listing-title-sort="More BF comparisons" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Jan 21, 2025
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="8" data-listing-date-sort="1679202000000" data-listing-file-modified-sort="1679315682900" data-listing-reading-time-sort="5.285">
-<div class="body">
-<a href="./research/multinomial_stickbreaking/index.html">
-<h3 class="no-anchor listing-title">
-Multinomial stick-breaking
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Exploration of multinomial stickbreaking</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/multinomial_stickbreaking/index.html">
-<div class="listing-date">
+</td>
+<td class="listing-title">
+<a href="./research/logistic_bf_comparisons/index.html" class="title">More BF comparisons</a>
+</td>
+<td class="listing-author">
+</td>
+</tr>
+<tr data-index="8" data-listing-date-sort="1679202000000" data-listing-file-modified-sort="1679315682900" data-listing-reading-time-sort="5.285" data-listing-title-sort="Multinomial stick-breaking" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Mar 19, 2023
-</div>
-<div class="listing-author">
+</td>
+<td class="listing-title">
+<a href="./research/multinomial_stickbreaking/index.html" class="title">Multinomial stick-breaking</a>
+</td>
+<td class="listing-author">
 Karl Tayeb
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="9" data-listing-date-sort="1678856400000" data-listing-file-modified-sort="1685497683953" data-listing-reading-time-sort="10.245">
-<div class="body">
-<a href="./research/polynomial_susie/index.html">
-<h3 class="no-anchor listing-title">
-Polynomial approximation SuSiE
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>We extend the sum of single effects regression to support arbitrary likelihood and link function by representing (approximately) the log likelihood of each observations as a polynomial in the linear prediction. Once this approximation is made we can treat inference in multiple likelihoods with a uniform inference procedure. Furthermore, we can make the polynomial approximation arbitrarily precise by increasing the degree of the approximation.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/polynomial_susie/index.html">
-<div class="listing-date">
+</td>
+</tr>
+<tr data-index="9" data-listing-date-sort="1678856400000" data-listing-file-modified-sort="1685497683953" data-listing-reading-time-sort="10.245" data-listing-title-sort="Polynomial approximation SuSiE" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Mar 15, 2023
-</div>
-<div class="listing-author">
+</td>
+<td class="listing-title">
+<a href="./research/polynomial_susie/index.html" class="title">Polynomial approximation SuSiE</a>
+</td>
+<td class="listing-author">
 Karl Tayeb
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="10" data-listing-date-sort="1678856400000" data-listing-file-modified-sort="1680378625105" data-listing-reading-time-sort="17.955">
-<div class="body">
-<a href="./research/polynomial_approximation/index.html">
-<h3 class="no-anchor listing-title">
-Polynomial approximation for variational Bayes
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Using polynomial approximations to perform Bayesian regression</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/polynomial_approximation/index.html">
-<div class="listing-date">
+</td>
+</tr>
+<tr data-index="10" data-listing-date-sort="1678856400000" data-listing-file-modified-sort="1680378625105" data-listing-reading-time-sort="17.955" data-listing-title-sort="Polynomial approximation for variational Bayes" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Mar 15, 2023
-</div>
-<div class="listing-author">
+</td>
+<td class="listing-title">
+<a href="./research/polynomial_approximation/index.html" class="title">Polynomial approximation for variational Bayes</a>
+</td>
+<td class="listing-author">
 Karl Tayeb
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="11" data-listing-date-sort="1703138400000" data-listing-file-modified-sort="1704822780983" data-listing-reading-time-sort="12.38">
-<div class="body">
-<a href="./research/random_intercepts/index.html">
-<h3 class="no-anchor listing-title">
-Random intercepts
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Demonstrate the behavior of fitting linear and logistic regression to data generated from a random intercept mode. OLS gives unbiased estimates for the Gaussian linear model, but the estimated effects are biased in the GLM.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/random_intercepts/index.html">
-<div class="listing-date">
+</td>
+</tr>
+<tr data-index="11" data-listing-date-sort="1703138400000" data-listing-file-modified-sort="1704822780983" data-listing-reading-time-sort="12.38" data-listing-title-sort="Random intercepts" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Dec 21, 2023
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="12" data-listing-date-sort="1682398800000" data-listing-file-modified-sort="1696346819639" data-listing-reading-time-sort="10.29">
-<div class="body">
-<a href="./research/logistic_abf_accuracy/index.html">
-<h3 class="no-anchor listing-title">
-Wakefield ABF Accuracy
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>We noticed that the error in Wakefield’s ABF grows with increasing sample size. This is surprising, because at these large sample sizes asymptotic normality kicks in. The issue can be more clearly seen by considering the ABF as an integral over an approximation to the likelihood ratio. The approximation used in the ABF ensure that the approximate likelihood ratio at <span class="math inline">\(0\)</span> is 1, but that the curvature and mode of the approximation are determined by the asymptotic distribution of the MLE. This leads to a gap in the approximate likelihood ratio and the exact likelihood ratio around the mode. As the normal approximation becomes more peaked, the accuracy of the ABF is increasingly determined by the quality of the likelihood ratio approximation in a small neighborhood around the mode which is off by this gap, which appears to grow with sample size.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/logistic_abf_accuracy/index.html">
-<div class="listing-date">
+</td>
+<td class="listing-title">
+<a href="./research/random_intercepts/index.html" class="title">Random intercepts</a>
+</td>
+<td class="listing-author">
+</td>
+</tr>
+<tr data-index="12" data-listing-date-sort="1682398800000" data-listing-file-modified-sort="1696346819639" data-listing-reading-time-sort="10.29" data-listing-title-sort="Wakefield ABF Accuracy" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Apr 25, 2023
-</div>
-<div class="listing-author">
+</td>
+<td class="listing-title">
+<a href="./research/logistic_abf_accuracy/index.html" class="title">Wakefield ABF Accuracy</a>
+</td>
+<td class="listing-author">
 Karl Tayeb
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="13" data-listing-date-sort="1705384800000" data-listing-file-modified-sort="1705415026958" data-listing-reading-time-sort="1.495">
-<div class="body">
-<a href="./research/shift_invariant_prior/index.html">
-<h3 class="no-anchor listing-title">
-X-shift invariant prior for logistic regresion
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>what prior makes the posterior invariant to shifts in the covariates?</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./research/shift_invariant_prior/index.html">
-<div class="listing-date">
+</td>
+</tr>
+<tr data-index="13" data-listing-date-sort="1705384800000" data-listing-file-modified-sort="1705415026958" data-listing-reading-time-sort="1.495" data-listing-title-sort="X-shift invariant prior for logistic regresion" data-listing-filename-sort="index.qmd">
+<td class="listing-date">
 Jan 16, 2024
-</div>
-</a>
-</div>
-</div>
-</div>
+</td>
+<td class="listing-title">
+<a href="./research/shift_invariant_prior/index.html" class="title">X-shift invariant prior for logistic regresion</a>
+</td>
+<td class="listing-author">
+</td>
+</tr>
+</tbody>
+
+</table>
 <div class="listing-no-matching d-none">
 No matching items
 </div>
